@@ -20,4 +20,4 @@ for /f "tokens=2-8 delims=.:/ " %%a in ("%date% %time%") do set stamp=%%c-%%a-%%
 set PC=%COMPUTERNAME%
 wevtutil.exe epl Security Logs\%stamp%-%PC%_Sec.evtx
 wevtutil.exe epl Application Logs\%stamp%-%PC%_App%.evtx
-wevtutil.exe epl "Junos Pulse" Logs\%stamp%-%PC%_vpn.evtx
+::wevtutil.exe epl "Junos Pulse" Logs\%stamp%-%PC%_vpn.evtx
