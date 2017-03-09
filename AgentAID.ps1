@@ -26,6 +26,9 @@ if ( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAc
 #Add-PSSnapin Quest.ActiveRoles.ADManagement -ErrorAction SilentlyContinue
 #
 #
+
+$startSleep = 0 # seconds
+
 $Title = "Agent AID"
 $version = "v 1.0"
 $agent = $env:USERNAME
@@ -47,7 +50,7 @@ mode con:cols=140 lines=55
 write-host $loadscreen -ForegroundColor Magenta
 Write-Host "
 		..Loading.." -foregroundcolor Green
-start-sleep 5
+start-sleep $startSleep
 Clear-Host
 
 
