@@ -52,6 +52,13 @@ Clear-Host
 
 
 #Functions
+function CheckConnection ($pc){
+	If(!(test-connection -Cn $Private:pc -BufferSize 16 -Count 1 -ea 0 -quiet)){
+		Write-host -NoNewline  "PC " $Private:pc  " is NOT online!!! ... Press any key  " `n
+		return $false
+	}
+	return $true
+}
 
 function UserInfo ($Id){
 
@@ -293,11 +300,7 @@ function PCInfo($pc){
 function cleanUp ($pc){
             $Private:pc = $pc
 
-            If(!(test-connection -Cn $Private:pc -BufferSize 16 -Count 1 -ea 0 -quiet)){
-
-            Write-host -NoNewline  "PC " $Private:pc  " is NOT online!!! ... Press any key  " `n
-            $x
-            } else {
+            if (CheckConnection($pc)) {
 		            Write-progress "Removing Temp Folders from "  "in Progress:"
 		            new-PSdrive IA Filesystem \\$Private:pc\C$
 
@@ -348,13 +351,9 @@ function setAVsrv ($pc){
 }
 
 function attkScan ($pc) {
-
-            $Private:pc = $pc
-            $dest = "\\$Private:pc\C$\avlog\"
-            If(!(test-connection -Cn $Private:pc -BufferSize 16 -Count 1 -ea 0 -quiet)){
-            Write-host -NoNewline  "PC " $Private:pc  " is NOT online!!! ... Press any key  " `n
-            $x
-            } else {
+            if (CheckConnection($pc))
+            {
+                  $dest = "\\$Private:pc\C$\avlog\"
 
                   if(!(Test-Path "$dest\attk_x64.exe")){
 		                 New-Item -ItemType Directory -Force -Path $dest
