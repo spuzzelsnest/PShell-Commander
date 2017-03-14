@@ -11,7 +11,7 @@
 #
 #       VERSION HISTORY:
 #       1.0     02.17.2017 	- Initial release
-#
+#       1.1     03.03.2017  - Test Connection as a function
 #==========================================================================
 #MODULES
 #Exchange
@@ -52,12 +52,12 @@ Clear-Host
 
 
 #Functions
-function CheckConnection ($pc){
-	If(!(test-connection -Cn $Private:pc -BufferSize 16 -Count 1 -ea 0 -quiet)){
-		Write-host -NoNewline  "PC " $Private:pc  " is NOT online!!! ... Press any key  " `n
-		return $false
+function CC ($pc){
+	If(!(test-connection -Cn $pc -BufferSize 16 -Count 1 -ea 0 -quiet)){
+		Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key  " `n
+		return $False
 	}
-	return $true
+	return $True
 }
 
 function UserInfo ($Id){
@@ -300,7 +300,7 @@ function PCInfo($pc){
 function cleanUp ($pc){
             $Private:pc = $pc
 
-            if (CheckConnection($pc)) {
+            if (CC($pc)) {
 		            Write-progress "Removing Temp Folders from "  "in Progress:"
 		            new-PSdrive IA Filesystem \\$Private:pc\C$
 
@@ -339,10 +339,8 @@ function cleanUp ($pc){
 function setAVsrv ($pc){
 
             $Private:pc = $pc
-            If(!(test-connection -Cn $Private:pc -BufferSize 16 -Count 1 -ea 0 -quiet)){
-            Write-host -NoNewline  "PC " $Private:pc  " is NOT online!!! ... Press any key  " `n
-            $x
-            } else {
+            If(CC($pc)){
+            
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Listener" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Firewall" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Proxy Service" auto -accepteula
@@ -351,7 +349,7 @@ function setAVsrv ($pc){
 }
 
 function attkScan ($pc) {
-            if (CheckConnection($pc))
+            if (CC($pc))
             {
                   $dest = "\\$Private:pc\C$\avlog\"
 
@@ -427,10 +425,7 @@ function AVmenu {
 
 function remoteCMD($pc){
              $Private:pc = $pc
-             if(!(test-connection -Cn $Private:pc -BufferSize 16 -Count 1 -ea 0 -quiet)){
-             Write-host -NoNewline  "PC " $Private:pc  " is NOT online!!! ... Press any key  " `n
-                $x
-             }else{
+             if(CC($pc)){
 
               .\bin\PSTools\PsExec.exe -accepteula -s \\$Private:pc cmd
             }
@@ -448,7 +443,7 @@ function dumpIt ($pc){
 
           $fileName = Read-Host "What filename will you sent"
 
-          If(!(test-connection -Cn $Private:pc -BufferSize 16 -Count 1 -ea 0 -quiet)){
+          if (CC($pc)){
 		       Write-host -NoNewline  "PC " $Private:pc  " is NOT online!!! ... Press any key  " `n
 		       $x
           }else{
