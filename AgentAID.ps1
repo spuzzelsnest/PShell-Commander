@@ -65,7 +65,10 @@ function CC ($pc){
     }
 }
 function x{
-$x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    write-host "Press any key to go back to the main menu"
+    $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    clear
+    mainMenu
 }
 
 function UserInfo ($Id){
@@ -415,7 +418,7 @@ function AVmenu {
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     attkScan $pc
-                                    $x
+                                    x
                                 }
                                 2{clear
                                     Write-Host "################################################################"
@@ -426,7 +429,7 @@ function AVmenu {
                                     setAVsrv $pc
                                     cleanup $pc
                                     attkScan $pc
-                                    $x
+                                    x
                                 }
                                 3{mainMenu}
                          }
@@ -496,7 +499,7 @@ function ATmenu {
                                     $pc = Read-Host "What is the PC name or the IP-address "
 
                                     remoteCMD $pc
-                                    $x
+                                    x
                         }
                         1{clear
                                     Write-Host "################################################################"
@@ -505,7 +508,7 @@ function ATmenu {
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     dumpIt $pc
-                                    $x
+                                    x
                         }
                         2{mainMenu}
 
