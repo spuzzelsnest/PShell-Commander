@@ -14,13 +14,22 @@
 #       1.1     03.03.2017  - Test Connection as a function
 #==========================================================================
 #MODULES
+#-------
+#Remove all
+Get-Module | Remove-Module
 #Exchange
 #installed in %ExchangeInstallPath%\bin
 #
-if ( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null )
-      {
+if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null )
+	{
         Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010
-      }
+	}
+#Active Directory
+#
+if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
+	{
+		Import-Module -Name ActiveDirectory
+	}
 #
 #if (!(Get-PSSnapin Quest.ActiveRoles.ADManagement -registered -ErrorAction SilentlyContinue)) { Plugin needed }
 #Add-PSSnapin Quest.ActiveRoles.ADManagement -ErrorAction SilentlyContinue
@@ -28,6 +37,7 @@ if ( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAc
 #
 $Title = "Agent AID"
 $version = "v 1.1"
+$workDir = "D:\_Packages\_Tools\AgentAid\"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\"
 $dump = "bin\_dumpFiles\"
@@ -42,15 +52,17 @@ $c = $h.UI.RawUI
 $c.BackgroundColor = ($bckgrnd = 'black')
 #$c.WindowPosition.X = -350
 #$c.WindowPosition.Y = 0
-$loadscreen = get-content bin/visuals/loadscreen | Out-String
+$loadscreen = get-content bin\visuals\loadscreen | Out-String
 mode con:cols=140 lines=55
-
+cd $workDir
+$loadedModules = get-module
 write-host $loadscreen -ForegroundColor Magenta
+Write-host "              The following Powershell Modules Are loaded
+" -ForegroundColor Yellow 
+write-Host $loadedModules -ForegroundColor Green
 
-Write-host "the following Powershell Modules Are loaded" -ForegroundColor Green 
-get-module
 Write-Host "
-		..Loading.." -foregroundcolor Green
+		... Just a second, script is loading ..." -foregroundcolor Green
 start-sleep 5
 Clear-Host
 
@@ -511,9 +523,7 @@ function ATmenu {
                                     x
                         }
                         2{mainMenu}
-
                 }
-
 }
 
 function mainMenu {
@@ -532,7 +542,7 @@ Welcome  $agent  to Agent AID         version   $version
 
         $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 UserInfo", "&2 PCInfo", "&3 AVTools", "&4 ATools", "&Quit")
         [int]$defaultchoice = 4
-        $choice =  $h.UI.PromptForChoice($Title , $Menu , $mainMenu, $defaultchoice)
+        $choice =  $h.UI.PromptForChoice($Title, $Menu, $mainMenu, $defaultchoice)
 
              switch ($choice){
                    '0'
@@ -558,8 +568,8 @@ Welcome  $agent  to Agent AID         version   $version
                    '3' {clear
                             ATmenu
                    }
-                   'q' {clear
-                        return
+                   'q' {
+                        exit
                    }
              }
 
