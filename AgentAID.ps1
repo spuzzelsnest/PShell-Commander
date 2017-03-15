@@ -528,8 +528,11 @@ function ATmenu {
 
 function mainMenu {
         clear
+		$LengthName = $agent.length
+		$line = "************************************************" + "*"* $LengthName
         $Menu = "
 Welcome  $agent  to Agent AID         version   $version
+$line
 
           What you want to do:
 
