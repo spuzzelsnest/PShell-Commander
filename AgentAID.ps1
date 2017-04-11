@@ -37,9 +37,9 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #
 $Title = "Agent AID"
 $version = "v 1.1"
-$workDir = "D:\_Packages\_Tools\AgentAid\"
+$workDir = "D:\_Tools\AgentAid\"
 $agent = $env:USERNAME
-$log = "$env:USERPROFILE\Desktop\"
+$log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles\"
 $dest = "\\$Private:pc\C$\temp"
 
@@ -121,9 +121,9 @@ function UserInfo ($Id){
    			#----------------------------------------------
             $mng = Get-ADUser $Private:Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} | Format-Table -HideTableHeaders |Out-String
             $mng = $mng.Trim()
-            $userLog. 'Manager' = Get-ADUser -filter {displayName -like $mng} -properties * | Select displayName, EmailAddress, mobile | Format-List
+            $userLog.'Manager' = Get-ADUser -filter {displayName -like $mng} -properties * | Select displayName, EmailAddress, mobile | Format-List
    			#----------------------------------------------
-            $userLog. 'Email Info '= Get-Recipient -Identity $Private:Id | Select Name -ExpandProperty EmailAddresses |  Format-Table Name,  SmtpAddress
+            $userLog.'Email Info '= Get-Recipient -Identity $Private:Id | Select Name -ExpandProperty EmailAddresses |  Format-Table Name,  SmtpAddress
 
             $userLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
             $userLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:Id Information"
@@ -138,8 +138,8 @@ function PCInfo($pc){
         $Private:pc = $pc
         'Processing ' + $Private:pc + '...'
         $PCLog = @{}
-        $PCLog. 'PC-Name' = $Private:pc
-        $PCLog. ''
+        $PCLog.'PC-Name' = $Private:pc
+        $PCLog.''
         # Try an ICMP ping the only way Powershell knows how...
         $Private:ping = Test-Connection -quiet -count 1 $Private:pc
         $PCLog.Ping = $(if ($Private:ping) { 'Yes' } else { 'No' })
@@ -337,8 +337,6 @@ function cleanUp ($pc){
 				            }else{
 				            Write-Output "no Windows.old Folder found"
 				            }
-		            remove-item IA:\temp\* -recurse -force -verbose
-		            Write-output "Cleaned up C:\temp\"
 
 		            remove-item IA:\Windows\Temp\* -recurse -force -verbose
 		            write-output "Cleaned up C:\Windows\Temp"
@@ -575,7 +573,6 @@ $line
                         exit
                    }
              }
-
 }
 
 mainMenu
