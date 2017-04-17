@@ -12,6 +12,7 @@
 #       VERSION HISTORY:
 #       1.0     02.17.2017 	- Initial release
 #       1.1     03.03.2017  - Test Connection as a function
+#		1.2		04.17.2017  - Changed dump function
 #==========================================================================
 #MODULES
 #-------
@@ -37,11 +38,11 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #
 $Title = "Agent AID"
 $version = "v 1.1"
-$workDir = "D:\_Tools\AgentAid\"
+$workDir = "D:\_Packages\_Tools\AgentAid\"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles\"
-$dest = "\\$Private:pc\C$\temp"
+$dest = "\\$pc\C$\temp"
 
 
 #Main window
@@ -67,7 +68,7 @@ start-sleep 5
 Clear-Host
 
 
-#Functions
+#Global Functions
 function CC ($pc){
 	If(!(test-connection -Cn $pc -BufferSize 16 -Count 1 -ea 0 -quiet)){
 		Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key  " `n
@@ -82,14 +83,16 @@ function x{
     clear
     mainMenu
 }
-
+#Program
 function UserInfo ($Id){
 
         $Private:Id = $Id
 		if (!(Get-ADUser -Filter {SamAccountName -eq $Id} ))	{
              Write-Host "ID not found " -ForegroundColor Red
 		}else{
-
+		
+		$userLog = @{}
+		
         'Processing ' + $Private:Id + '...'
         Write-Host User info -ForegroundColor Green
 
@@ -125,7 +128,7 @@ function UserInfo ($Id){
    			#----------------------------------------------
             $userLog.'Email Info '= Get-Recipient -Identity $Private:Id | Select Name -ExpandProperty EmailAddresses |  Format-Table Name,  SmtpAddress
 
-            $userLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
+            #$userLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
             $userLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:Id Information"
 		
         }
@@ -341,7 +344,7 @@ function cleanUp ($pc){
 		            remove-item IA:\Windows\Temp\* -recurse -force -verbose
 		            write-output "Cleaned up C:\Windows\Temp"
 
-	            $UserFolders = get-childItem IA:\Users\ -Directory
+	            	$UserFolders = get-childItem IA:\Users\ -Directory
 
 		            foreach ($folder in $UserFolders){
 
@@ -353,9 +356,6 @@ function cleanUp ($pc){
             net use /delete \\$Private:pc\C$
 
             }
-
-
-
 }
 
 function setAVsrv ($pc){
@@ -398,6 +398,86 @@ function attkScan ($pc) {
                 robocopy "\\$Private:pc\C$\avlog\TrendMicro AntiThreat Toolkit\Output" $log * /Z
 
             }
+}
+
+function remoteCMD($pc){
+             $Private:pc = $pc
+             if(CC($pc)){
+
+              .\bin\PSTools\PsExec.exe -accepteula -s \\$Private:pc cmd
+            }
+}
+
+function dumpIt ($pc){
+
+$dest = "\\$pc\C$\temp"
+
+          write-host "You can choose from the following Files:
+ *For now only Copy pasting the name or rewrite it in the box workx*"
+          $files = Get-ChildItem $dump | select Name
+                   for ([int]$i = 1; $i -le $files.length; $i++){
+                        write-host $i $files[$i-1].name
+                   }
+
+          $fileName = Read-Host "What filename will you sent"
+
+          if (CC($pc)){
+	         if(!(Test-Path $dest\Logs)){
+				New-Item -ItemType Directory -Force -Path $dest\Logs
+			}else{
+                write-host The $dest\Logs directory exsists -foregroundColor green
+			}
+		        robocopy $dump $dest $filename
+                Write-Host $filename copied to $dest -ForegroundColor green
+		        .\bin\PSTools\PsExec.exe -accepteula -s \\$pc powershell C:\Temp\$filename
+
+                 Remove-Item $dest\$filename -Verbose
+
+                 if(!(Test-path $log)){
+				          Write-Host $log is not available -Foreground "magenta"
+				          new-Item $log -type directory -Force
+			               }else{
+				               Write-Host Logs will be written to $log -Foreground "green"
+
+                            }
+
+                        Write-Host Files removed from $pc -Foreground "green"
+                 }
+}
+
+#Menu's
+function ATmenu {
+                $Title = "Administrator Tools"
+                $Menu = "
+                      (1)   Remote CMD
+                      (2)   Dump File To PC
+                      (3)   Back
+                      "
+                $ATchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 Dump","&3 Back")
+                [int]$defchoice = 2
+                $subAT = $h.UI.PromptForChoice($Title, $Menu, $ATchoice,$defchoice)
+                switch($subAT){
+                        0{clear
+                                    Write-Host "################################################################"
+                                    Write-Host "                     Remote CMD" -ForegroundColor Red
+                                    Write-Host "################################################################
+                                    "
+                                    $pc = Read-Host "What is the PC name or the IP-address "
+
+                                    remoteCMD $pc
+                                    x
+                        }
+                        1{clear
+                                    Write-Host "################################################################"
+                                    Write-Host "                     Remote CMD" -ForegroundColor Red
+                                    Write-Host "################################################################
+                                    "
+                                    $pc = Read-Host "What is the PC name or the IP-address "
+                                    dumpIt $pc
+                                    x
+                        }
+                        2{mainMenu}
+                }
 }
 
 function AVmenu {
@@ -443,85 +523,6 @@ function AVmenu {
                                 }
                                 3{mainMenu}
                          }
-}
-
-function remoteCMD($pc){
-             $Private:pc = $pc
-             if(CC($pc)){
-
-              .\bin\PSTools\PsExec.exe -accepteula -s \\$Private:pc cmd
-            }
-}
-
-function dumpIt ($pc){
-
-          $Private:pc = $pc
-          write-host "You can choose from the following Files:
- *For now only Copy pasting the name or rewrite it in the box workx*"
-          $files = Get-ChildItem $dump | select Name
-                   for ([int]$i = 1; $i -le $files.length; $i++){
-                        write-host $i $files[$i-1].name
-                   }
-
-          $fileName = Read-Host "What filename will you sent"
-
-          if (CC($pc)){
-	         if(!(Test-Path $dest\Logs)){
-				New-Item -ItemType Directory -Force -Path $dest\Logs
-			}else{
-                write-host The $dest\Logs directory exsists -foregroundColor green
-		        robocopy $dump $dest $filename
-                Write-Host $filename copied to $dest -ForegroundColor green
-		        .\bin\PSTools\PsExec.exe -accepteula -s \\$Private:pc powershell C:\Temp\$filename
-
-                 Remove-Item $dest\$filename -Verbose
-
-                 if(!(Test-path $log)){
-				          Write-Host $log is not available -Foreground "magenta"
-				          new-Item $log -type directory -Force
-			               }else{
-				               Write-Host Logs will be written to $log -Foreground "green"
-
-                            }
-
-                        Write-Host Files removed from $Private:pc -Foreground "green"
-                 }
-           }
-
-}
-
-function ATmenu {
-                $Title = "Administrator Tools"
-                $Menu = "
-                      (1)   Remote CMD
-                      (2)   Dump File To PC
-                      (3)   Back
-                      "
-                $ATchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 Dump","&3 Back")
-                [int]$defchoice = 2
-                $subAT = $h.UI.PromptForChoice($Title, $Menu, $ATchoice,$defchoice)
-                switch($subAT){
-                        0{clear
-                                    Write-Host "################################################################"
-                                    Write-Host "                     Remote CMD" -ForegroundColor Red
-                                    Write-Host "################################################################
-                                    "
-                                    $pc = Read-Host "What is the PC name or the IP-address "
-
-                                    remoteCMD $pc
-                                    x
-                        }
-                        1{clear
-                                    Write-Host "################################################################"
-                                    Write-Host "                     Remote CMD" -ForegroundColor Red
-                                    Write-Host "################################################################
-                                    "
-                                    $pc = Read-Host "What is the PC name or the IP-address "
-                                    dumpIt $pc
-                                    x
-                        }
-                        2{mainMenu}
-                }
 }
 
 function mainMenu {
