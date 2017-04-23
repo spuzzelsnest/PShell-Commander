@@ -38,7 +38,7 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #
 $Title = "Agent AID"
 $version = "v 1.1"
-$workDir = "D:\_Packages\_Tools\AgentAid\"
+$workDir = "C:\_dev\Agent-Aid\"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles\"
@@ -53,9 +53,9 @@ $c = $h.UI.RawUI
 $c.BackgroundColor = ($bckgrnd = 'black')
 #$c.WindowPosition.X = -350
 #$c.WindowPosition.Y = 0
-$loadscreen = get-content bin\visuals\loadscreen | Out-String
 mode con:cols=140 lines=55
 cd $workDir
+$loadscreen = get-content bin\visuals\loadscreen | Out-String
 $loadedModules = get-module
 write-host $loadscreen -ForegroundColor Magenta
 Write-host "              The following Powershell Modules Are loaded
@@ -87,50 +87,27 @@ function x{
 function UserInfo ($Id){
 
         $Private:Id = $Id
-		if (!(Get-ADUser -Filter {SamAccountName -eq $Id} ))	{
+		if (!(Get-ADUser -Filter {SamAccountName -eq $Id} )){
              Write-Host "ID not found " -ForegroundColor Red
 		}else{
 		
-		$userLog = @{}
+		$userLog = [ordered]@{}
 		
         'Processing ' + $Private:Id + '...'
-        Write-Host User info -ForegroundColor Green
 
-			Get-ADUser -Identity $Id -ErrorAction SilentlyContinue -properties * | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
-
-			#----------------------------------------------
-
-			Write-Host Groups -ForegroundColor Green
-			get-ADPrincipalGroupMembership $Id | select name |Format-Table -HideTableHeaders
-
-			#----------------------------------------------
-
-			Write-Host Manager -ForegroundColor Green
+			$genInfo = Get-ADUser -Identity $Id -ErrorAction SilentlyContinue -properties * | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
+			$genInfo.psobject.Properties | foreach{ $userLog[$_.name]= $_.value}
+            #------------GROUPS-----------------------------
+			$groupInfo = get-ADPrincipalGroupMembership $Private:Id | select name | Format-Table -HideTableHeaders
+            #-----------MANAGER----------------------------
 			$manager = Get-ADUser $Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} | Format-Table -HideTableHeaders |Out-String
 			$manager = $manager.Trim()
-
-			get-aduser -filter {displayName -like $manager} -properties * | Select displayName, EmailAddress, mobile | Format-List
-
-			#----------------------------------------------
-
-			Write-Host Email info -ForegroundColor Green
-
-			$migAttr = get-aduser -identity $Id -Properties *  -ErrorAction SilentlyContinue | select-object msExchRecipientTypeDetails
-			Write-Output "Migrations status: " $migAttr
-			Get-Recipient -Identity $Id | Select Name -ExpandProperty EmailAddresses |  Format-Table Name,  SmtpAddress
-
-	    	#----------------------------------------------
-        	$userGroups = Get-ADPrincipalGroupMembership $Private:Id | select name |Format-Table -HideTableHeaders
-   			#----------------------------------------------
-            $mng = Get-ADUser $Private:Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} | Format-Table -HideTableHeaders |Out-String
-            $mng = $mng.Trim()
-            $userLog.'Manager' = Get-ADUser -filter {displayName -like $mng} -properties * | Select displayName, EmailAddress, mobile | Format-List
-   			#----------------------------------------------
+			$manInfo = get-aduser -filter {displayName -like $manager} -properties * | Select displayName, EmailAddress, mobile | Format-List
+			#-----------EMAIL-----------------------------
             $userLog.'Email Info '= Get-Recipient -Identity $Private:Id | Select Name -ExpandProperty EmailAddresses |  Format-Table Name,  SmtpAddress
 
-            #$userLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
-            $userLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:Id Information"
-		
+            foreach ($item in $hash.GetEnumerator()| Format-Table -AutoSize ){$item}
+            $userLog.GetEnumerator() | Out-GridView -Title "$Private:Id Information"
         }
 
 mainMenu
