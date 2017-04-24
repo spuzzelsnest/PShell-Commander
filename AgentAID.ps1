@@ -96,7 +96,7 @@ function UserInfo ($Id){
         'Processing ' + $Private:Id + '...'
         Write-Host User info -ForegroundColor Green
 	#--------------GENERAL USER INFO---------------
-	$geInfo = Get-ADUser -Identity $Id -properties * -ErrorAction SilentlyContinue | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
+	$genInfo = Get-ADUser -Identity $Id -properties * -ErrorAction SilentlyContinue | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
 	#--------------GROUPS--------------------------
 	$groupInfo = get-ADPrincipalGroupMembership $Id | select name |Format-Table -HideTableHeaders
 	#--------------MANAGER-------------------------
@@ -107,10 +107,10 @@ function UserInfo ($Id){
 	$migAttr = get-aduser -identity $Id -Properties *  -ErrorAction SilentlyContinue | select-object msExchRecipientTypeDetails
 	$mailInfo = Get-Recipient -Identity $Id | Select Name -ExpandProperty EmailAddresses |  Format-Table Name,  SmtpAddress
 	#--------------BUILD LIST------------------------
-	$getInfo.psobject.Properties | foreach{ $userLog[$_.name]=$_.value}
+	$genInfo.psobject.Properties | foreach{ $userLog[$_.name]=$_.value}
             
 	foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
-	$userLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Id Information"
+	$userLog.GetEnumerator() | Sort key | Out-GridView -Title "$Id Information"
 		
         }
 mainMenu
