@@ -89,6 +89,7 @@ function UserInfo ($Id){
 
 	if (!(Get-ADUser -Filter {SamAccountName -eq $Id} ))	{
              Write-Host "ID not found " -ForegroundColor Red
+             x
 		}else{
 
 	$userLog = [ordered]@{}
@@ -98,19 +99,20 @@ function UserInfo ($Id){
 	#--------------GENERAL USER INFO---------------
 	$genInfo = Get-ADUser -Identity $Id -properties * -ErrorAction SilentlyContinue | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
 	#--------------GROUPS--------------------------
-	$groupInfo = get-ADPrincipalGroupMembership $Id | select name |Format-Table -HideTableHeaders|out-string
+	$groupInfo = get-ADPrincipalGroupMembership $Id | select -ExpandProperty name |out-string
 	#--------------MANAGER-------------------------
-	$manager = Get-ADUser $Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} | Format-Table -HideTableHeaders |Out-String
+	$manager = Get-ADUser $Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} |  Format-Table -HideTableHeaders |Out-String
 	$manager = $manager.Trim()
-	$manInfo = get-aduser -filter {displayName -like $manager} -properties * | Select displayName, EmailAddress, mobile | Format-table -hidetableheaders |out-string
+	$manInfo = get-aduser -filter {displayName -like $manager} -properties * | Select displayName, EmailAddress, mobile | Format-Table -HideTableHeaders | out-string
 	#--------------EMAIL----------------------------
 	$migAttr = get-aduser -identity $Id -Properties *  -ErrorAction SilentlyContinue | select-object msExchRecipientTypeDetails
-	$mailInfo = Get-Recipient -Identity $Id | Select Name -ExpandProperty EmailAddresses |  Format-Table SmtpAddress
+	$mailInfo = Get-Recipient -Identity $Id | Select Name -ExpandProperty EmailAddresses |  select SmtpAddress
 	#--------------BUILD LIST------------------------
-	$genInfo.psobject.Properties | foreach{ $userLog[$_.name]=$_.value}
-    $userLog.add('Groups', $groupInfo)
-	$userLog.add('Manager Info', $manInfo)
+    $genInfo.psobject.Properties | foreach{ $userLog[$_.name]=$_.value}
+    $userLog.add('Manager Info', $manInfo)
+	$userLog.add('Groups', $groupInfo)
 	$userLog.add('Email Addresses', $mailInfo)
+	
     
     foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
 	$userLog.GetEnumerator() | Out-GridView -Title "$Id Information"
