@@ -1,17 +1,41 @@
-sc config winmgmt start= disabled
-net stop winmgmt
+::sccmRebuild.bat
+::Rebuild sccm 
+::
+::Created by Spuzzelsnest
+::
+::Change Log
+::-----------
 
-Winmgmt /salvagerepository %windir%\System32\wbem
+::V1.0 Initial release 30-08-2016
+::############################################
 
-Winmgmt /resetrepository %windir%\System32\wbem
+@echo off
+
+set %Wdir%="C:\windows\System32\wbem"
 
 
+net pause Winmgmt
 
-cd /d %windir%\system32\wbem
+winmgmt /verifyrepository %wdir%
+
+Winmgmt /salvagerepository %wdir%
+
+winmgmt /resetrepository %wdir%
+
 for %i in (*.dll) do RegSvr32 -s %i
-for %i in (*.exe) do %i /RegServer
 
+for %i in (*.exe) do %i /RegServer
 
 cd /d %windir%\sysWOW64\wbem
+
 for %i in (*.dll) do RegSvr32 -s %i
+
 for %i in (*.exe) do %i /RegServer
+
+net continue winmgmt
+
+cd C:\windows\ccmsetup\
+ccmsetup.exe
+
+
+exit

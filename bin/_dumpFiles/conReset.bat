@@ -1,19 +1,11 @@
 ::conReset.bat
-
 ::Reset Network Connections 
-
 ::
-
 ::Created by Spuzzelsnest
-
 ::
-
 ::Change Log
-
 ::-----------
-
 ::V1.0 Initial release 24-08-2016
-
 ::############################################
 
 @echo off
@@ -35,3 +27,5 @@ netsh winsock reset catalog
 netsh int ipv4 reset resetlog.log
 
 netsh int reset all
+
+Exit

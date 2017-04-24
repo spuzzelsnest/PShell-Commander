@@ -17,4 +17,4 @@ rd /s /q %userprofile%\appdata\local\microsoft\communicator lync.old
 rd /s /q %userprofile%\appdata\local\microsoft\office\15.0\lync 
 Reg delete HKEY_CURRENT_USER\Software\Microsoft\Communicator /f
 reg delete HKEY_CURRENT_USER\Software\Microsoft\Office\15.0\lync /f
-
+exit

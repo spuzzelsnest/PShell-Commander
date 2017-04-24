@@ -93,8 +93,8 @@ function UserInfo ($Id){
 
 	$userLog = [ordered]@{}
 
-        'Processing ' + $Private:Id + '...'
-        Write-Host User info -ForegroundColor Green
+      'Processing ' + $Private:Id + '...'
+ 
 	#--------------GENERAL USER INFO---------------
 	$genInfo = Get-ADUser -Identity $Id -properties * -ErrorAction SilentlyContinue | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
 	#--------------GROUPS--------------------------
@@ -110,7 +110,7 @@ function UserInfo ($Id){
 	$genInfo.psobject.Properties | foreach{ $userLog[$_.name]=$_.value}
             
 	foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
-	$userLog.GetEnumerator() | Sort key | Out-GridView -Title "$Id Information"
+	$userLog.GetEnumerator() | Out-GridView -Title "$Id Information"
 		
         }
 mainMenu
