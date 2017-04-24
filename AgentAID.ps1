@@ -86,53 +86,32 @@ function x{
 #Program
 function UserInfo ($Id){
 
-        $Private:Id = $Id
-		if (!(Get-ADUser -Filter {SamAccountName -eq $Id} ))	{
+	if (!(Get-ADUser -Filter {SamAccountName -eq $Id} ))	{
              Write-Host "ID not found " -ForegroundColor Red
 		}else{
-		
-		$userLog = @{}
-		
+
+	$userLog = [ordered]@{}
+
         'Processing ' + $Private:Id + '...'
         Write-Host User info -ForegroundColor Green
-
-			Get-ADUser -Identity $Id -ErrorAction SilentlyContinue -properties * | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
-
-			#----------------------------------------------
-
-			Write-Host Groups -ForegroundColor Green
-			get-ADPrincipalGroupMembership $Id | select name |Format-Table -HideTableHeaders
-
-			#----------------------------------------------
-
-			Write-Host Manager -ForegroundColor Green
-			$manager = Get-ADUser $Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} | Format-Table -HideTableHeaders |Out-String
-			$manager = $manager.Trim()
-
-			get-aduser -filter {displayName -like $manager} -properties * | Select displayName, EmailAddress, mobile | Format-List
-
-			#----------------------------------------------
-
-			Write-Host Email info -ForegroundColor Green
-
-			$migAttr = get-aduser -identity $Id -Properties *  -ErrorAction SilentlyContinue | select-object msExchRecipientTypeDetails
-			Write-Output "Migrations status: " $migAttr
-			Get-Recipient -Identity $Id | Select Name -ExpandProperty EmailAddresses |  Format-Table Name,  SmtpAddress
-
-	    	#----------------------------------------------
-        	$userGroups = Get-ADPrincipalGroupMembership $Private:Id | select name |Format-Table -HideTableHeaders
-   			#----------------------------------------------
-            $mng = Get-ADUser $Private:Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} | Format-Table -HideTableHeaders |Out-String
-            $mng = $mng.Trim()
-            $userLog.'Manager' = Get-ADUser -filter {displayName -like $mng} -properties * | Select displayName, EmailAddress, mobile | Format-List
-   			#----------------------------------------------
-            $userLog.'Email Info '= Get-Recipient -Identity $Private:Id | Select Name -ExpandProperty EmailAddresses |  Format-Table Name,  SmtpAddress
-
-            #$userLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
-            $userLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:Id Information"
+	#--------------GENERAL USER INFO---------------
+	$geInfo = Get-ADUser -Identity $Id -properties * -ErrorAction SilentlyContinue | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
+	#--------------GROUPS--------------------------
+	$groupInfo = get-ADPrincipalGroupMembership $Id | select name |Format-Table -HideTableHeaders
+	#--------------MANAGER-------------------------
+	$manager = Get-ADUser $Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} | Format-Table -HideTableHeaders |Out-String
+	$manager = $manager.Trim()
+	$manInfo = get-aduser -filter {displayName -like $manager} -properties * | Select displayName, EmailAddress, mobile | Format-List
+	#--------------EMAIL----------------------------
+	$migAttr = get-aduser -identity $Id -Properties *  -ErrorAction SilentlyContinue | select-object msExchRecipientTypeDetails
+	$mailInfo = Get-Recipient -Identity $Id | Select Name -ExpandProperty EmailAddresses |  Format-Table Name,  SmtpAddress
+	#--------------BUILD LIST------------------------
+	$getInfo.psobject.Properties | foreach{ $userLog[$_.name]=$_.value}
+            
+	foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
+	$userLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Id Information"
 		
         }
-
 mainMenu
 }
 
