@@ -53,9 +53,10 @@ $c = $h.UI.RawUI
 $c.BackgroundColor = ($bckgrnd = 'black')
 #$c.WindowPosition.X = -350
 #$c.WindowPosition.Y = 0
+
+cd $workDir
 $loadscreen = get-content bin\visuals\loadscreen | Out-String
 mode con:cols=140 lines=55
-cd $workDir
 $loadedModules = get-module
 write-host $loadscreen -ForegroundColor Magenta
 Write-host "              The following Powershell Modules Are loaded
