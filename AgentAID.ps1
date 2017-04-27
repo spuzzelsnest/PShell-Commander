@@ -13,6 +13,7 @@
 #       1.0     02.17.2017 	- Initial release
 #       1.1     03.03.2017  - Test Connection as a function
 #		1.2		04.17.2017  - Changed dump function
+#       1.2     04.24.2017  - Changed User popup
 #==========================================================================
 #MODULES
 #-------
@@ -53,9 +54,15 @@ $c = $h.UI.RawUI
 $c.BackgroundColor = ($bckgrnd = 'black')
 #$c.WindowPosition.X = -350
 #$c.WindowPosition.Y = 0
+<<<<<<< HEAD
 mode con:cols=140 lines=55
 cd $workDir
 $loadscreen = get-content bin\visuals\loadscreen | Out-String
+=======
+
+cd $workDir
+$loadscreen = get-content bin\visuals\loadscreen | Out-String
+mode con:cols=140 lines=55
 $loadedModules = get-module
 write-host $loadscreen -ForegroundColor Magenta
 Write-host "              The following Powershell Modules Are loaded
@@ -86,31 +93,45 @@ function x{
 #Program
 function UserInfo ($Id){
 
+
         $Private:Id = $Id
 		if (!(Get-ADUser -Filter {SamAccountName -eq $Id} )){
+
+	if (!(Get-ADUser -Filter {SamAccountName -eq $Id} ))	{
+
              Write-Host "ID not found " -ForegroundColor Red
+             x
 		}else{
+
+
+	$userLog = [ordered]@{}
+
+      'Processing ' + $Private:Id + '...'
+ 
+	#--------------GENERAL USER INFO---------------
+	$genInfo = Get-ADUser -Identity $Id -properties * -ErrorAction SilentlyContinue | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
+	#--------------GROUPS--------------------------
+	$groupInfo = get-ADPrincipalGroupMembership $Id | select -ExpandProperty name |out-string
+	#--------------MANAGER-------------------------
+	$manager = Get-ADUser $Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} |  Format-Table -HideTableHeaders |Out-String
+	$manager = $manager.Trim()
+	$manInfo = get-aduser -filter {displayName -like $manager} -properties * | Select displayName, EmailAddress, mobile | Format-Table -HideTableHeaders | out-string
+	#--------------EMAIL----------------------------
+	$migAttr = get-aduser -identity $Id -Properties *  -ErrorAction SilentlyContinue | select-object msExchRecipientTypeDetails
+	$mailInfo = Get-Recipient -Identity $Id | Select Name -ExpandProperty EmailAddresses |  select SmtpAddress
+	#--------------BUILD LIST------------------------
+    $genInfo.psobject.Properties | foreach{ $userLog[$_.name]=$_.value}
+    $userLog.add('Manager Info', $manInfo)
+	$userLog.add('Groups', $groupInfo)
+	$userLog.add('Email Addresses', $mailInfo)
+	
+    
+    foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
+	$userLog.GetEnumerator() | Out-GridView -Title "$Id Information"
 		
-		$userLog = [ordered]@{}
-		
-        'Processing ' + $Private:Id + '...'
+    }
 
-			$genInfo = Get-ADUser -Identity $Id -ErrorAction SilentlyContinue -properties * | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
-			$genInfo.psobject.Properties | foreach{ $userLog[$_.name]= $_.value}
-            #------------GROUPS-----------------------------
-			$groupInfo = get-ADPrincipalGroupMembership $Private:Id | select name | Format-Table -HideTableHeaders
-            #-----------MANAGER----------------------------
-			$manager = Get-ADUser $Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} | Format-Table -HideTableHeaders |Out-String
-			$manager = $manager.Trim()
-			$manInfo = get-aduser -filter {displayName -like $manager} -properties * | Select displayName, EmailAddress, mobile | Format-List
-			#-----------EMAIL-----------------------------
-            $userLog.'Email Info '= Get-Recipient -Identity $Private:Id | Select Name -ExpandProperty EmailAddresses |  Format-Table Name,  SmtpAddress
-
-            foreach ($item in $hash.GetEnumerator()| Format-Table -AutoSize ){$item}
-            $userLog.GetEnumerator() | Out-GridView -Title "$Private:Id Information"
-        }
-
-mainMenu
+x
 }
 
 function PCInfo($pc){
@@ -298,7 +319,7 @@ function PCInfo($pc){
 
         $PCLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
         $PCLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:pc Information"
-		mainMenu
+	x
 }
 
 function cleanUp ($pc){
@@ -333,6 +354,7 @@ function cleanUp ($pc){
             net use /delete \\$Private:pc\C$
 
             }
+x
 }
 
 function setAVsrv ($pc){
@@ -375,6 +397,7 @@ function attkScan ($pc) {
                 robocopy "\\$Private:pc\C$\avlog\TrendMicro AntiThreat Toolkit\Output" $log * /Z
 
             }
+x
 }
 
 function remoteCMD($pc){
@@ -420,6 +443,7 @@ $dest = "\\$pc\C$\temp"
 
                         Write-Host Files removed from $pc -Foreground "green"
                  }
+x
 }
 
 #Menu's
@@ -434,7 +458,8 @@ function ATmenu {
                 [int]$defchoice = 2
                 $subAT = $h.UI.PromptForChoice($Title, $Menu, $ATchoice,$defchoice)
                 switch($subAT){
-                        0{clear
+                        0{
+                        clear
                                     Write-Host "################################################################"
                                     Write-Host "                     Remote CMD" -ForegroundColor Red
                                     Write-Host "################################################################
@@ -444,7 +469,8 @@ function ATmenu {
                                     remoteCMD $pc
                                     x
                         }
-                        1{clear
+                        1{
+                        clear
                                     Write-Host "################################################################"
                                     Write-Host "                     Remote CMD" -ForegroundColor Red
                                     Write-Host "################################################################
@@ -525,7 +551,8 @@ $line
 
              switch ($choice){
                    '0'
-                   { clear
+                   {
+                   clear
                           write-host "################################################################"
                           write-host "                          USERINFO INFO" -ForegroundColor Green
                           write-host "################################################################
@@ -533,7 +560,8 @@ $line
                           $Id =  read-host "           What is the userID "
                           userInfo $Id
                    }
-                   '1' {clear
+                   '1' {
+                   clear
                             Write-Host "###############################################################"
                             Write-Host "                           PCINFO INFO" -ForegroundColor Green
                             Write-Host "###############################################################
@@ -541,10 +569,12 @@ $line
                             $pc =  Read-Host "   What is the PC-Name or IP address "
                             PCInfo $pc
                    }
-                   '2' {clear
+                   '2' {
+                   clear
                             AVmenu
                    }
-                   '3' {clear
+                   '3' {
+                   clear
                             ATmenu
                    }
                    'q' {
