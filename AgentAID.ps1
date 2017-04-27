@@ -12,8 +12,8 @@
 #       VERSION HISTORY:
 #       1.0     02.17.2017 	- Initial release
 #       1.1     03.03.2017  - Test Connection as a function
-#		1.2		04.17.2017  - Changed dump function
-#       1.2     04.24.2017  - Changed User popup
+#       1.2		04.17.2017  - Changed dump function
+#       1.3     04.24.2017  - Changed User popup
 #==========================================================================
 #MODULES
 #-------
@@ -87,7 +87,7 @@ function CC ($pc){
 function x{
     write-host "Press any key to go back to the main menu"
     $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    clear
+    clear-host
     mainMenu
 }
 #Program
@@ -529,7 +529,7 @@ function AVmenu {
 }
 
 function mainMenu {
-        clear
+        clear-host
 		$LengthName = $agent.length
 		$line = "************************************************" + "*"* $LengthName
         $Menu = "
@@ -552,7 +552,7 @@ $line
              switch ($choice){
                    '0'
                    {
-                   clear
+                   clear-host
                           write-host "################################################################"
                           write-host "                          USERINFO INFO" -ForegroundColor Green
                           write-host "################################################################
@@ -561,7 +561,7 @@ $line
                           userInfo $Id
                    }
                    '1' {
-                   clear
+                   clear-host
                             Write-Host "###############################################################"
                             Write-Host "                           PCINFO INFO" -ForegroundColor Green
                             Write-Host "###############################################################
@@ -570,11 +570,11 @@ $line
                             PCInfo $pc
                    }
                    '2' {
-                   clear
+                   clear-host
                             AVmenu
                    }
                    '3' {
-                   clear
+                   clear-host
                             ATmenu
                    }
                    'q' {
