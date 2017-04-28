@@ -12,9 +12,14 @@
 #       VERSION HISTORY:
 #       1.0     02.17.2017 	- Initial release
 #       1.1     03.03.2017  - Test Connection as a function
+<<<<<<< HEAD
 #		1.2		04.17.2017  - Changed dump function
 #       1.3     04.24.2017  - Changed userinfo layout
 #       1.4     04.28.2017  - Return of the scrollbar
+=======
+#       1.2		04.17.2017  - Changed dump function
+#       1.3     04.24.2017  - Changed User popup
+>>>>>>> 89b69e0b87b5e0641917a04cbf6a061563b10c19
 #==========================================================================
 #MODULES
 #-------
@@ -39,8 +44,13 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #
 #
 $Title = "Agent AID"
+<<<<<<< HEAD
 $version = "v 1.4"
 $workDir = "D:\_Packages\_Tools\AgentAid\"
+=======
+$version = "v 1.1"
+$workDir = "C:\_dev\Agent-Aid\"
+>>>>>>> 89b69e0b87b5e0641917a04cbf6a061563b10c19
 $agent = $env:USERNAME
 
 
@@ -50,6 +60,7 @@ $h = get-host
 $g = $h.UI
 $c = $h.UI.RawUI
 $c.BackgroundColor = ($bckgrnd = 'black')
+<<<<<<< HEAD
 
 $p = $c.WindowPosition
 $p.x = 0
@@ -66,6 +77,15 @@ $w.Width = 140
 $w.Height = 46
 $c.WindowSize = $w
 
+=======
+#$c.WindowPosition.X = -350
+#$c.WindowPosition.Y = 0
+<<<<<<< HEAD
+mode con:cols=140 lines=55
+cd $workDir
+$loadscreen = get-content bin\visuals\loadscreen | Out-String
+=======
+>>>>>>> 89b69e0b87b5e0641917a04cbf6a061563b10c19
 
 cd $workDir
 $loadscreen = get-content bin\visuals\loadscreen | Out-String
@@ -93,16 +113,22 @@ function CC ($pc){
 function x{
     write-host "Press any key to go back to the main menu"
     $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    clear
+    clear-host
     mainMenu
 }
 #Program
 function UserInfo ($Id){
 
+
+        $Private:Id = $Id
+		if (!(Get-ADUser -Filter {SamAccountName -eq $Id} )){
+
 	if (!(Get-ADUser -Filter {SamAccountName -eq $Id} ))	{
+
              Write-Host "ID not found " -ForegroundColor Red
              x
 		}else{
+
 
 	$userLog = [ordered]@{}
 
@@ -132,6 +158,10 @@ function UserInfo ($Id){
     $userLog.GetEnumerator() | Out-GridView -Title "$Id Information"
 		
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 89b69e0b87b5e0641917a04cbf6a061563b10c19
 x
 }
 
@@ -320,7 +350,11 @@ function PCInfo($pc){
 
         $PCLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
         $PCLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:pc Information"
+<<<<<<< HEAD
     x
+=======
+	x
+>>>>>>> 89b69e0b87b5e0641917a04cbf6a061563b10c19
 }
 
 function cleanUp ($pc){
@@ -464,7 +498,8 @@ function ATmenu {
                 [int]$defchoice = 2
                 $subAT = $h.UI.PromptForChoice($Title, $Menu, $ATchoice,$defchoice)
                 switch($subAT){
-                        0{clear
+                        0{
+                        clear
                                     Write-Host "################################################################"
                                     Write-Host "                     Remote CMD" -ForegroundColor Red
                                     Write-Host "################################################################
@@ -474,7 +509,8 @@ function ATmenu {
                                     remoteCMD $pc
                                     x
                         }
-                        1{clear
+                        1{
+                        clear
                                     Write-Host "################################################################"
                                     Write-Host "                     Remote CMD" -ForegroundColor Red
                                     Write-Host "################################################################
@@ -533,7 +569,7 @@ function AVmenu {
 }
 
 function mainMenu {
-        clear
+        clear-host
 		$LengthName = $agent.length
 		$line = "************************************************" + "*"* $LengthName
         $Menu = "
@@ -555,7 +591,8 @@ $line
 
              switch ($choice){
                    '0'
-                   { clear
+                   {
+                   clear-host
                           write-host "################################################################"
                           write-host "                          USERINFO INFO" -ForegroundColor Green
                           write-host "################################################################
@@ -563,7 +600,8 @@ $line
                           $Id =  read-host "           What is the userID "
                           userInfo $Id
                    }
-                   '1' {clear
+                   '1' {
+                   clear-host
                             Write-Host "###############################################################"
                             Write-Host "                           PCINFO INFO" -ForegroundColor Green
                             Write-Host "###############################################################
@@ -571,10 +609,12 @@ $line
                             $pc =  Read-Host "   What is the PC-Name or IP address "
                             PCInfo $pc
                    }
-                   '2' {clear
+                   '2' {
+                   clear-host
                             AVmenu
                    }
-                   '3' {clear
+                   '3' {
+                   clear-host
                             ATmenu
                    }
                    'q' {
