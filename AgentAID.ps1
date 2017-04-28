@@ -13,6 +13,8 @@
 #       1.0     02.17.2017 	- Initial release
 #       1.1     03.03.2017  - Test Connection as a function
 #		1.2		04.17.2017  - Changed dump function
+#       1.3     04.24.2017  - Changed userinfo layout
+#       1.4     04.28.2017  - Return of the scrollbar
 #==========================================================================
 #MODULES
 #-------
@@ -37,12 +39,9 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #
 #
 $Title = "Agent AID"
-$version = "v 1.1"
+$version = "v 1.4"
 $workDir = "D:\_Packages\_Tools\AgentAid\"
 $agent = $env:USERNAME
-$log = "$env:USERPROFILE\Desktop\$pc"
-$dump = "bin\_dumpFiles\"
-$dest = "\\$pc\C$\temp"
 
 
 #Main window
@@ -51,12 +50,25 @@ $h = get-host
 $g = $h.UI
 $c = $h.UI.RawUI
 $c.BackgroundColor = ($bckgrnd = 'black')
-#$c.WindowPosition.X = -350
-#$c.WindowPosition.Y = 0
+
+$p = $c.WindowPosition
+$p.x = 0
+$p.y = 0
+$c.WindowPosition = $p
+
+$s = $c.BufferSize
+$s.Width = 140
+$s.Height = 1000
+$c.BufferSize = $s
+
+$w = $c.WindowSize
+$w.Width = 140
+$w.Height = 46
+$c.WindowSize = $w
+
 
 cd $workDir
 $loadscreen = get-content bin\visuals\loadscreen | Out-String
-mode con:cols=140 lines=55
 $loadedModules = get-module
 write-host $loadscreen -ForegroundColor Magenta
 Write-host "              The following Powershell Modules Are loaded
@@ -114,11 +126,13 @@ function UserInfo ($Id){
 	$userLog.add('Email Addresses', $mailInfo)
 	
     
-    foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
-	$userLog.GetEnumerator() | Out-GridView -Title "$Id Information"
+    #foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
+	$userLog.getenumerator()| Ft -AutoSize -wrap | out-string
+
+    $userLog.GetEnumerator() | Out-GridView -Title "$Id Information"
 		
     }
-mainMenu
+x
 }
 
 function PCInfo($pc){
@@ -306,7 +320,7 @@ function PCInfo($pc){
 
         $PCLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
         $PCLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:pc Information"
-		mainMenu
+    x
 }
 
 function cleanUp ($pc){
@@ -341,6 +355,7 @@ function cleanUp ($pc){
             net use /delete \\$Private:pc\C$
 
             }
+x
 }
 
 function setAVsrv ($pc){
@@ -353,6 +368,7 @@ function setAVsrv ($pc){
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Proxy Service" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT RealTime Scan" auto -accepteula
             }
+x
 }
 
 function attkScan ($pc) {
@@ -383,6 +399,7 @@ function attkScan ($pc) {
                 robocopy "\\$Private:pc\C$\avlog\TrendMicro AntiThreat Toolkit\Output" $log * /Z
 
             }
+x
 }
 
 function remoteCMD($pc){
@@ -391,11 +408,15 @@ function remoteCMD($pc){
 
               .\bin\PSTools\PsExec.exe -accepteula -s \\$Private:pc cmd
             }
+x
 }
 
 function dumpIt ($pc){
 
 $dest = "\\$pc\C$\temp"
+$log = "$env:USERPROFILE\Desktop\$pc"
+$dump = "bin\_dumpFiles\"
+
 
           write-host "You can choose from the following Files:
  *For now only Copy pasting the name or rewrite it in the box workx*"
@@ -412,22 +433,23 @@ $dest = "\\$pc\C$\temp"
 			}else{
                 write-host The $dest\Logs directory exsists -foregroundColor green
 			}
-		        robocopy $dump $dest $filename
+		        robocopy $script:dump $dest $filename
                 Write-Host $filename copied to $dest -ForegroundColor green
 		        .\bin\PSTools\PsExec.exe -accepteula -s \\$pc powershell C:\Temp\$filename
 
                  Remove-Item $dest\$filename -Verbose
 
-                 if(!(Test-path $log)){
-				          Write-Host $log is not available -Foreground "magenta"
-				          new-Item $log -type directory -Force
+                 if(!(Test-path $script:log)){
+				          Write-Host $script:log is not available -Foreground "magenta"
+				          new-Item $script:log -type directory -Force
 			               }else{
-				               Write-Host Logs will be written to $log -Foreground "green"
+				               Write-Host Logs will be written to $script:log -Foreground "green"
 
                             }
 
                         Write-Host Files removed from $pc -Foreground "green"
                  }
+x
 }
 
 #Menu's
@@ -560,5 +582,4 @@ $line
                    }
              }
 }
-
 mainMenu
