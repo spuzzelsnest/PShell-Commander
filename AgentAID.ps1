@@ -41,9 +41,8 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #
 $Title = "Agent AID"
 $version = "v 1.4"
-$workDir = "C:\_dev\Agent-Aid\"
+$workDir = "C:\_dev\AgentAID"
 $agent = $env:USERNAME
-$dump = "\\$pc\C$\Temp"
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
 
@@ -289,13 +288,9 @@ function PCInfo($pc){
                             $Private:socket.Close()
 
                         }else {
-
                             $PCLog."Port $($ports.$service) ($service)" = 'Closed or filtered'
-
                         }
-
                     $Private:socket = $null
-
                 }
 
             }else {
@@ -399,10 +394,9 @@ x
 }
 
 function dumpIt ($pc){
-$dump = $script:dump
-$log = $script:log
-$dest = $script:dest
 
+$dest = "\\$pc\C$\Temp"
+$log = "$env:USERPROFILE\Desktop\$pc"
 
     if (CC($pc)){
 	        
@@ -417,23 +411,27 @@ $dest = $script:dest
           
 
             if(!(Test-Path $dest\Logs)){
+                Write-host Createing $dest\Logs -ForgroundColor "magenta"
 				New-Item -ItemType Directory -Force -Path $dest\Logs
 			}else{
                 write-host The $dest\Logs directory exsists -foregroundColor green
 			}
 
-		    robocopy $dump $dest $filename
+		    Copy-Item $dump\$filename $dest
             Write-Host $filename copied to $dest -ForegroundColor green
+
 		    .\bin\PSTools\PsExec.exe -accepteula -s \\$pc powershell C:\Temp\$filename
+            
             if(!(Test-path $log)){
 				Write-Host $log is not available -Foreground "magenta"
 				new-Item $log -type directory -Force
 			}else{
 		        Write-Host Logs will be written to $log -Foreground "green"
-                robocopy $log $dest Logs
             }
-            Write-Host Files removed from $pc -Foreground "green"
+            robocopy $dest\Logs $log *.* /move
             Remove-Item $dest\$filename -Verbose
+            Write-Host Files removed from $pc -Foreground "green"
+            
     }
 x
 }
