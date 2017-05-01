@@ -411,7 +411,7 @@ $log = "$env:USERPROFILE\Desktop\$pc"
           
 
             if(!(Test-Path $dest\Logs)){
-                Write-host Createing $dest\Logs -ForgroundColor "magenta"
+                Write-host Creating $dest\Logs -ForegroundColor magenta
 				New-Item -ItemType Directory -Force -Path $dest\Logs
 			}else{
                 write-host The $dest\Logs directory exsists -foregroundColor green
@@ -423,10 +423,10 @@ $log = "$env:USERPROFILE\Desktop\$pc"
 		    .\bin\PSTools\PsExec.exe -accepteula -s \\$pc powershell C:\Temp\$filename
             
             if(!(Test-path $log)){
-				Write-Host $log is not available -Foreground "magenta"
+				Write-Host $log is not available -Foreground magenta
 				new-Item $log -type directory -Force
 			}else{
-		        Write-Host Logs will be written to $log -Foreground "green"
+		        Write-Host Logs will be written to $log -Foreground green
             }
             robocopy $dest\Logs $log *.* /move
             Remove-Item $dest\$filename -Verbose
