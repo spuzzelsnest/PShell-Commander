@@ -12,14 +12,10 @@
 #       VERSION HISTORY:
 #       1.0     02.17.2017 	- Initial release
 #       1.1     03.03.2017  - Test Connection as a function
-<<<<<<< HEAD
 #		1.2		04.17.2017  - Changed dump function
 #       1.3     04.24.2017  - Changed userinfo layout
 #       1.4     04.28.2017  - Return of the scrollbar
-=======
-#       1.2		04.17.2017  - Changed dump function
-#       1.3     04.24.2017  - Changed User popup
->>>>>>> 89b69e0b87b5e0641917a04cbf6a061563b10c19
+#
 #==========================================================================
 #MODULES
 #-------
@@ -44,15 +40,12 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #
 #
 $Title = "Agent AID"
-<<<<<<< HEAD
 $version = "v 1.4"
-$workDir = "D:\_Packages\_Tools\AgentAid\"
-=======
-$version = "v 1.1"
 $workDir = "C:\_dev\Agent-Aid\"
->>>>>>> 89b69e0b87b5e0641917a04cbf6a061563b10c19
 $agent = $env:USERNAME
-
+$dump = "\\$pc\C$\Temp"
+$log = "$env:USERPROFILE\Desktop\$pc"
+$dump = "bin\_dumpFiles"
 
 #Main window
 
@@ -60,7 +53,6 @@ $h = get-host
 $g = $h.UI
 $c = $h.UI.RawUI
 $c.BackgroundColor = ($bckgrnd = 'black')
-<<<<<<< HEAD
 
 $p = $c.WindowPosition
 $p.x = 0
@@ -77,16 +69,6 @@ $w.Width = 140
 $w.Height = 46
 $c.WindowSize = $w
 
-=======
-#$c.WindowPosition.X = -350
-#$c.WindowPosition.Y = 0
-<<<<<<< HEAD
-mode con:cols=140 lines=55
-cd $workDir
-$loadscreen = get-content bin\visuals\loadscreen | Out-String
-=======
->>>>>>> 89b69e0b87b5e0641917a04cbf6a061563b10c19
-
 cd $workDir
 $loadscreen = get-content bin\visuals\loadscreen | Out-String
 $loadedModules = get-module
@@ -98,7 +80,7 @@ write-Host $loadedModules -ForegroundColor Green
 Write-Host "
 		... Just a second, script is loading ..." -foregroundcolor Green
 start-sleep 5
-Clear-Host
+cls
 
 
 #Global Functions
@@ -113,21 +95,17 @@ function CC ($pc){
 function x{
     write-host "Press any key to go back to the main menu"
     $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    clear-host
+    cls
     mainMenu
 }
 #Program
 function UserInfo ($Id){
+    $Private:Id = $Id
 
-
-        $Private:Id = $Id
-		if (!(Get-ADUser -Filter {SamAccountName -eq $Id} )){
-
-	if (!(Get-ADUser -Filter {SamAccountName -eq $Id} ))	{
-
+	if (!(Get-ADUser -Filter {SamAccountName -eq $Id} )){
              Write-Host "ID not found " -ForegroundColor Red
              x
-		}else{
+	}else{
 
 
 	$userLog = [ordered]@{}
@@ -154,14 +132,9 @@ function UserInfo ($Id){
     
     #foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
 	$userLog.getenumerator()| Ft -AutoSize -wrap | out-string
-
     $userLog.GetEnumerator() | Out-GridView -Title "$Id Information"
 		
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> 89b69e0b87b5e0641917a04cbf6a061563b10c19
 x
 }
 
@@ -346,28 +319,18 @@ function PCInfo($pc){
                     $PCLog.'AD Computer Object Info Collected' = 'No'
 
                 }
-
-
         $PCLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
         $PCLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:pc Information"
-<<<<<<< HEAD
-    x
-=======
+
 	x
->>>>>>> 89b69e0b87b5e0641917a04cbf6a061563b10c19
 }
 
 function cleanUp ($pc){
-            $Private:pc = $pc
-
             if (CC($pc)) {
 		            Write-progress "Removing Temp Folders from "  "in Progress:"
-		            new-PSdrive IA Filesystem \\$Private:pc\C$
-
+		            new-PSdrive IA Filesystem \\$pc\C$
 		            remove-item IA:\"$"Recycle.Bin\* -recurse -force -verbose
 		            Write-Output "Cleaned up Recycle.Bin"
-
-
 		            if (Test-Path IA:\Windows.old){
 				            Remove-Item IA:\Windows.old\ -Recurse -Force -Verbose
 				            }else{
@@ -378,7 +341,6 @@ function cleanUp ($pc){
 		            write-output "Cleaned up C:\Windows\Temp"
 
 	            	$UserFolders = get-childItem IA:\Users\ -Directory
-
 		            foreach ($folder in $UserFolders){
 
 					            $path = "IA:\Users\"+$folder
@@ -386,23 +348,19 @@ function cleanUp ($pc){
 					            remove-item $path\AppData\Local\Microsoft\Windows\"Temporary Internet Files"\* -recurse -force -verbose -ErrorAction SilentlyContinue
 					            Write-Output "Cleaned up Temp Items for "$folder.Name
 		            }
-            net use /delete \\$Private:pc\C$
+            net use /delete \\$pc\C$
 
             }
-x
+
 }
 
 function setAVsrv ($pc){
-
-            $Private:pc = $pc
             If(CC($pc)){
-            
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Listener" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Firewall" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Proxy Service" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT RealTime Scan" auto -accepteula
             }
-x
 }
 
 function attkScan ($pc) {
@@ -427,62 +385,56 @@ function attkScan ($pc) {
                             - Log directory available
                            " -ForegroundColor Green
                         }
-
                 .\bin\PSTools\PsExec.exe \\$Private:pc cmd /s /k  "cd C:\avlog && attk_x64.exe && exit" -accepteula
-
                 robocopy "\\$Private:pc\C$\avlog\TrendMicro AntiThreat Toolkit\Output" $log * /Z
-
             }
-x
 }
 
 function remoteCMD($pc){
              $Private:pc = $pc
              if(CC($pc)){
-
               .\bin\PSTools\PsExec.exe -accepteula -s \\$Private:pc cmd
             }
 x
 }
 
 function dumpIt ($pc){
+$dump = $script:dump
+$log = $script:log
+$dest = $script:dest
 
-$dest = "\\$pc\C$\temp"
-$log = "$env:USERPROFILE\Desktop\$pc"
-$dump = "bin\_dumpFiles\"
 
-
+    if (CC($pc)){
+	        
           write-host "You can choose from the following Files:
- *For now only Copy pasting the name or rewrite it in the box workx*"
+ *For now only Copy pasting the name or rewrite it in the box works*"
           $files = Get-ChildItem $dump | select Name
-                   for ([int]$i = 1; $i -le $files.length; $i++){
+          
+            for ([int]$i = 1; $i -le $files.length; $i++){
                         write-host $i $files[$i-1].name
                    }
+            $fileName = Read-Host "What File do you want to send"
+          
 
-          $fileName = Read-Host "What filename will you sent"
-
-          if (CC($pc)){
-	         if(!(Test-Path $dest\Logs)){
+            if(!(Test-Path $dest\Logs)){
 				New-Item -ItemType Directory -Force -Path $dest\Logs
 			}else{
                 write-host The $dest\Logs directory exsists -foregroundColor green
 			}
-		        robocopy $script:dump $dest $filename
-                Write-Host $filename copied to $dest -ForegroundColor green
-		        .\bin\PSTools\PsExec.exe -accepteula -s \\$pc powershell C:\Temp\$filename
 
-                 Remove-Item $dest\$filename -Verbose
-
-                 if(!(Test-path $script:log)){
-				          Write-Host $script:log is not available -Foreground "magenta"
-				          new-Item $script:log -type directory -Force
-			               }else{
-				               Write-Host Logs will be written to $script:log -Foreground "green"
-
-                            }
-
-                        Write-Host Files removed from $pc -Foreground "green"
-                 }
+		    robocopy $dump $dest $filename
+            Write-Host $filename copied to $dest -ForegroundColor green
+		    .\bin\PSTools\PsExec.exe -accepteula -s \\$pc powershell C:\Temp\$filename
+            if(!(Test-path $log)){
+				Write-Host $log is not available -Foreground "magenta"
+				new-Item $log -type directory -Force
+			}else{
+		        Write-Host Logs will be written to $log -Foreground "green"
+                robocopy $log $dest Logs
+            }
+            Write-Host Files removed from $pc -Foreground "green"
+            Remove-Item $dest\$filename -Verbose
+    }
 x
 }
 
@@ -499,25 +451,21 @@ function ATmenu {
                 $subAT = $h.UI.PromptForChoice($Title, $Menu, $ATchoice,$defchoice)
                 switch($subAT){
                         0{
-                        clear
+                        cls
                                     Write-Host "################################################################"
                                     Write-Host "                     Remote CMD" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address "
-
                                     remoteCMD $pc
-                                    x
-                        }
-                        1{
-                        clear
+                        }1{
+                        cls
                                     Write-Host "################################################################"
-                                    Write-Host "                     Remote CMD" -ForegroundColor Red
+                                    Write-Host "                     Dump file to PC" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     dumpIt $pc
-                                    x
                         }
                         2{mainMenu}
                 }
@@ -535,7 +483,8 @@ function AVmenu {
                 [int]$defchoice = 3
                 $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
                 switch($subAV){
-                                0{clear
+                                0{
+                                cls
                                     Write-Host "################################################################"
                                     Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
                                     Write-Host "################################################################
@@ -543,8 +492,8 @@ function AVmenu {
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     cleanUp $pc
                                     x
-                                }
-                                1{clear
+                                }1{
+                                cls
                                     Write-Host "################################################################"
                                     Write-Host "                          ATTK Scan" -ForegroundColor Red
                                     Write-Host "################################################################
@@ -552,8 +501,8 @@ function AVmenu {
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     attkScan $pc
                                     x
-                                }
-                                2{clear
+                                }2{
+                                cls
                                     Write-Host "################################################################"
                                     Write-Host "                          Full Clearnup" -ForegroundColor Red
                                     Write-Host "################################################################
@@ -563,13 +512,12 @@ function AVmenu {
                                     cleanup $pc
                                     attkScan $pc
                                     x
-                                }
-                                3{mainMenu}
+                                }3{mainMenu}
                          }
 }
 
 function mainMenu {
-        clear-host
+        cls
 		$LengthName = $agent.length
 		$line = "************************************************" + "*"* $LengthName
         $Menu = "
@@ -590,35 +538,31 @@ $line
         $choice =  $h.UI.PromptForChoice($Title, $Menu, $mainMenu, $defaultchoice)
 
              switch ($choice){
-                   '0'
-                   {
-                   clear-host
+                   0{
+                   cls
                           write-host "################################################################"
                           write-host "                          USERINFO INFO" -ForegroundColor Green
                           write-host "################################################################
                                      "
                           $Id =  read-host "           What is the userID "
                           userInfo $Id
-                   }
-                   '1' {
-                   clear-host
+                   }1{
+                   cls
                             Write-Host "###############################################################"
                             Write-Host "                           PCINFO INFO" -ForegroundColor Green
                             Write-Host "###############################################################
                                         "
                             $pc =  Read-Host "   What is the PC-Name or IP address "
                             PCInfo $pc
-                   }
-                   '2' {
-                   clear-host
+                   }2{
+                   cls
                             AVmenu
-                   }
-                   '3' {
-                   clear-host
+                   }3{
+                   cls
                             ATmenu
-                   }
-                   'q' {
-                        exit
+                   }q{
+                   cls
+                        $h.ExitNestedPrompt()
                    }
              }
 }
