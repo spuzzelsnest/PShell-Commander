@@ -8,34 +8,26 @@
 
 ::V1.0 Initial release 30-08-2016
 ::############################################
-
 @echo off
 
 set %Wdir%="C:\windows\System32\wbem"
 
-
-net pause Winmgmt
-
-winmgmt /verifyrepository %wdir%
-
+net stop Winmgmt
 Winmgmt /salvagerepository %wdir%
 
-winmgmt /resetrepository %wdir%
-
 for %i in (*.dll) do RegSvr32 -s %i
-
 for %i in (*.exe) do %i /RegServer
 
 cd /d %windir%\sysWOW64\wbem
 
 for %i in (*.dll) do RegSvr32 -s %i
-
 for %i in (*.exe) do %i /RegServer
 
-net continue winmgmt
+net start winmgmt
+
+gpupdate /force
 
 cd C:\windows\ccmsetup\
 ccmsetup.exe
 
-
-exit
+exit /b

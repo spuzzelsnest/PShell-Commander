@@ -15,6 +15,7 @@
 #		1.2		04.17.2017  - Changed dump function
 #       1.3     04.24.2017  - Changed userinfo layout
 #       1.4     04.28.2017  - Return of the scrollbar
+#       1.5     05.04.2017  - Loggedon module
 #
 #==========================================================================
 #MODULES
@@ -40,8 +41,8 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #
 #
 $Title = "Agent AID"
-$version = "v 1.4"
-$workDir = "C:\_dev\AgentAID"
+$version = "v 1.5"
+$workDir = "C:\_Dev\AgentAID"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
@@ -121,7 +122,7 @@ function UserInfo ($Id){
 	$manInfo = get-aduser -filter {displayName -like $manager} -properties * | Select displayName, EmailAddress, mobile | Format-Table -HideTableHeaders | out-string
 	#--------------EMAIL----------------------------
 	$migAttr = get-aduser -identity $Id -Properties *  -ErrorAction SilentlyContinue | select-object msExchRecipientTypeDetails
-	$mailInfo = Get-Recipient -Identity $Id | Select Name -ExpandProperty EmailAddresses |  select SmtpAddress
+	$mailInfo = Get-Recipient -Identity $Id | Select Name -ExpandProperty EmailAddresses |  select SmtpAddress |Out-String
 	#--------------BUILD LIST------------------------
     $genInfo.psobject.Properties | foreach{ $userLog[$_.name]=$_.value}
     $userLog.add('Manager Info', $manInfo)
@@ -393,6 +394,17 @@ function remoteCMD($pc){
 x
 }
 
+function loggedon($pc){
+
+    if(CC($pc)){
+        .\bin\PSTools\PsLoggedon.exe /l \\$pc -accepteula
+        Write-Host Other USERID´s in this PC.
+        Get-ChildItem  \\$pc\C$\Users\
+
+    }
+x
+}
+
 function dumpIt ($pc){
 
 $dest = "\\$pc\C$\Temp"
@@ -442,10 +454,11 @@ function ATmenu {
                 $Menu = "
                       (1)   Remote CMD
                       (2)   Dump File To PC
-                      (3)   Back
+                      (3)   Find user logged on to PC
+                      (4)   Back
                       "
-                $ATchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 Dump","&3 Back")
-                [int]$defchoice = 2
+                $ATchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 Dump","&3 Loggedon","&4 Back")
+                [int]$defchoice = 3
                 $subAT = $h.UI.PromptForChoice($Title, $Menu, $ATchoice,$defchoice)
                 switch($subAT){
                         0{
@@ -464,8 +477,15 @@ function ATmenu {
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     dumpIt $pc
-                        }
-                        2{mainMenu}
+                        }2{
+                        cls
+                                    Write-Host "################################################################"
+                                    Write-Host "         Find user who is logged on to PC" -ForegroundColor Red
+                                    Write-Host "################################################################
+                                    "
+                                    $pc = Read-Host "What is the PC name or the IP-address "
+                                    loggedOn $pc
+                        }3{mainMenu}
                 }
 }
 
