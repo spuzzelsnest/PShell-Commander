@@ -42,7 +42,7 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #
 $Title = "Agent AID"
 $version = "v 1.5"
-$workDir = "C:\_Dev\AgentAID"
+$workDir = "D:\_Tools\AgentAID"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
@@ -362,7 +362,9 @@ function setAVsrv ($pc){
 function attkScan ($pc) {
             if (CC($pc))
             {
-                  $dest = "\\$Private:pc\C$\avlog\"
+                  $dest = "\\$pc\C$\avlog"
+                  $log = "$env:USERPROFILE\Desktop\$pc"
+
 
                   if(!(Test-Path "$dest\attk_x64.exe")){
 		                 New-Item -ItemType Directory -Force -Path $dest
@@ -389,7 +391,7 @@ function attkScan ($pc) {
 function remoteCMD($pc){
              $Private:pc = $pc
              if(CC($pc)){
-              .\bin\PSTools\PsExec.exe -accepteula -s \\$Private:pc cmd
+              .\bin\PSTools\PsExec.exe -accepteula -s \\$pc cmd
             }
 x
 }
