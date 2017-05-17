@@ -401,7 +401,7 @@ function loggedon($pc){
     if(CC($pc)){
         .\bin\PSTools\PsLoggedon.exe /l \\$pc -accepteula
         Write-Host Other USERID´s in this PC.
-        Get-ChildItem  \\$pc\C$\Users\
+        Get-ChildItem  \\$pc\C$\Users\ |select name
 
     }
 x

@@ -12,7 +12,7 @@
 
 set %Wdir%="C:\windows\System32\wbem"
 
-net stop Winmgmt
+net pause Winmgmt
 Winmgmt /salvagerepository %wdir%
 
 for %i in (*.dll) do RegSvr32 -s %i
@@ -23,7 +23,7 @@ cd /d %windir%\sysWOW64\wbem
 for %i in (*.dll) do RegSvr32 -s %i
 for %i in (*.exe) do %i /RegServer
 
-net start winmgmt
+net continue winmgmt
 
 gpupdate /force
 

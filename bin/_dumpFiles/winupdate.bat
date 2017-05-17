@@ -10,6 +10,10 @@
 ::############################################
 @echo off
 net stop wuauserv
-ren C:\Windows\SoftwareDistribution C:\Windows\SoftwareDistribution.old
+move C:\Windows\SoftwareDistribution C:\Windows\SoftwareDistribution.old
 net start wuauserv
+
+control /name Microsoft.WindowsUpdate
+
+
 exit /b
