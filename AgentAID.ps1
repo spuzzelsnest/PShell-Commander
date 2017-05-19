@@ -25,7 +25,7 @@ Get-Module | Remove-Module
 #Exchange
 #installed in %ExchangeInstallPath%\bin
 #
-if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null )
+if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null)
 	{
         Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010
 	}
@@ -42,7 +42,7 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #
 $Title = "Agent AID"
 $version = "v 1.5"
-$workDir = "D:\_Tools\AgentAID"
+$workDir = "" #put here the directory where the program is installed
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
@@ -322,7 +322,8 @@ function PCInfo($pc){
 }
 
 function cleanUp ($pc){
-            if (CC($pc)) {
+            if (CC($pc)){
+
 		            Write-progress "Removing Temp Folders from "  "in Progress:"
 		            new-PSdrive IA Filesystem \\$pc\C$
 		            remove-item IA:\"$"Recycle.Bin\* -recurse -force -verbose
@@ -360,11 +361,10 @@ function setAVsrv ($pc){
 }
 
 function attkScan ($pc) {
-            if (CC($pc))
-            {
+            if (CC($pc)){
+
                   $dest = "\\$pc\C$\avlog"
                   $log = "$env:USERPROFILE\Desktop\$pc"
-
 
                   if(!(Test-Path "$dest\attk_x64.exe")){
 		                 New-Item -ItemType Directory -Force -Path $dest
@@ -383,21 +383,29 @@ function attkScan ($pc) {
                             - Log directory available
                            " -ForegroundColor Green
                         }
-                .\bin\PSTools\PsExec.exe \\$Private:pc cmd /s /k  "cd C:\avlog && attk_x64.exe && exit" -accepteula
-                robocopy "\\$Private:pc\C$\avlog\TrendMicro AntiThreat Toolkit\Output" $log * /Z
+                .\bin\PSTools\PsExec.exe -s  \\$pc cmd /s /k  "cd C:\avlog && attk_x64.exe && exit" -accepteula
+                robocopy "\\$pc\C$\avlog\TrendMicro AntiThreat Toolkit\Output" $log *
             }
 }
 
 function remoteCMD($pc){
-             $Private:pc = $pc
-             if(CC($pc)){
+    
+    if(CC($pc)){
+
               .\bin\PSTools\PsExec.exe -accepteula -s \\$pc cmd
             }
 x
 }
 
-function loggedon($pc){
+function interactiveCMD($pc){
 
+    if(CC($pc)){
+              .\bin\PSTools\PsExec.exe -accepteula -s -i \\$pc cmd
+            }
+x
+}
+
+function loggedon($pc){
     if(CC($pc)){
         .\bin\PSTools\PsLoggedon.exe /l \\$pc -accepteula
         Write-Host Other USERID´s in this PC.
@@ -455,11 +463,12 @@ function ATmenu {
                 $Title = "Administrator Tools"
                 $Menu = "
                       (1)   Remote CMD
-                      (2)   Dump File To PC
-                      (3)   Find user logged on to PC
-                      (4)   Back
+                      (2)   Interactive CMD
+                      (3)   Dump File To PC
+                      (4)   Find user logged on to PC
+                      (5)   Back
                       "
-                $ATchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 Dump","&3 Loggedon","&4 Back")
+                $ATchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 iCMD","&3 Dump","&4 Loggedon","&5 Back")
                 [int]$defchoice = 3
                 $subAT = $h.UI.PromptForChoice($Title, $Menu, $ATchoice,$defchoice)
                 switch($subAT){
@@ -471,7 +480,17 @@ function ATmenu {
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     remoteCMD $pc
+                        
                         }1{
+                        cls
+                                    Write-Host "################################################################"
+                                    Write-Host "                     InterActive CMD" -ForegroundColor Red
+                                    Write-Host "################################################################
+                                    "
+                                    $pc = Read-Host "What is the PC name or the IP-address "
+                                    interactiveCMD $pc                      
+                        
+                        }2{
                         cls
                                     Write-Host "################################################################"
                                     Write-Host "                     Dump file to PC" -ForegroundColor Red
@@ -479,7 +498,7 @@ function ATmenu {
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     dumpIt $pc
-                        }2{
+                        }3{
                         cls
                                     Write-Host "################################################################"
                                     Write-Host "         Find user who is logged on to PC" -ForegroundColor Red
@@ -487,7 +506,7 @@ function ATmenu {
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     loggedOn $pc
-                        }3{mainMenu}
+                        }4{mainMenu}
                 }
 }
 
