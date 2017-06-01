@@ -9,4 +9,11 @@
 ::############################################
 @echo off
 
+echo "Remove the fucking flag"
+
 REG ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /f /v HideSCAHealth /t REG_SZ /d 1
+
+echo "Make Sure the user reboots after this!"
+
+
+exit /b
