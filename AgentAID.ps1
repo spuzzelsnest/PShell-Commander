@@ -352,10 +352,11 @@ function cleanUp ($pc){
 }
 
 function setAVsrv ($pc){
+
             If(CC($pc)){
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Listener" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Firewall" auto -accepteula
-                .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Proxy Service" auto -accepteula
+                .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan Common Client Solution Framework" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT RealTime Scan" auto -accepteula
             }
 }
