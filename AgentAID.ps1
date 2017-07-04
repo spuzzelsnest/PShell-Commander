@@ -39,10 +39,15 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #if (!(Get-PSSnapin Quest.ActiveRoles.ADManagement -registered -ErrorAction SilentlyContinue)) { Plugin needed }
 #Add-PSSnapin Quest.ActiveRoles.ADManagement -ErrorAction SilentlyContinue
 #
+#load Module PSRemoteRegistry
 #
+Import-Module psremoteregistry
+
+
+
 $Title = "Agent AID"
 $version = "v 1.5"
-$workDir = "" #put here the directory where the program is installed
+$workDir = "D:\_Tools\AgentAID"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
@@ -92,12 +97,14 @@ function CC ($pc){
 	return $True
     }
 }
+
 function x{
     write-host "Press any key to go back to the main menu"
     $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     cls
     mainMenu
 }
+
 #Program
 function UserInfo ($Id){
     $Private:Id = $Id
@@ -352,8 +359,22 @@ function cleanUp ($pc){
 }
 
 function setAVsrv ($pc){
+          if(CC($pc)){
 
-            If(CC($pc)){
+               $remService = (Get-Service -CN $pc -name RemoteRegistry)
+               if (!($remService -eq "running")){
+                                write-host checking to start service on $pc
+                                get-service -CN $pc -name RemoteRegistry|Start-Service
+                } 
+
+                $hive = [Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey('LocalMachine',$pc)
+                $pattern = $hive.OpenSubKey('Software\Wow6432Node\TrendMicro\PC-cillinNTCorp\currentVersion\Misc.')
+                if($pattern -eq $null){
+                    write-host Key not found for $pc -ForegroundColor red -Background white
+                }else{
+                    write-host $pc has pattern $pattern.getValue('InternalPatternVer') -foreground Green
+                }
+                
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Listener" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Firewall" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan Common Client Solution Framework" auto -accepteula
@@ -515,11 +536,12 @@ function AVmenu {
                 $Title = "Anti Virus and Cleaning Tool"
                 $Menu = "
                       (1)   Clean TEMP files
-                      (2)   ATTK-Scan
-                      (3)   Full-Scan
-                      (4)   Back
+                      (2)   Remote Update Trend
+                      (3)   ATTK-Scan
+                      (4)   Full-Scan
+                      (5)   Back
                       "
-                $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup", "&2 ATTK", "&3 Full", "&4 Back")
+                $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup", "&2 Update", "&3 ATTK", "&4 Full", "&5 Back")
                 [int]$defchoice = 3
                 $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
                 switch($subAV){
@@ -535,13 +557,22 @@ function AVmenu {
                                 }1{
                                 cls
                                     Write-Host "################################################################"
+                                    Write-Host "                      Remote update Trend" -ForegroundColor Red
+                                    Write-Host "################################################################
+                                    "
+                                    $pc = Read-Host "What is the PC name or the IP-address "
+                                    setAVsrv $pc
+                                    x
+                                }2{
+                                cls
+                                    Write-Host "################################################################"
                                     Write-Host "                          ATTK Scan" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     attkScan $pc
                                     x
-                                }2{
+                                }3{
                                 cls
                                     Write-Host "################################################################"
                                     Write-Host "                          Full Clearnup" -ForegroundColor Red
@@ -552,7 +583,7 @@ function AVmenu {
                                     cleanup $pc
                                     attkScan $pc
                                     x
-                                }3{mainMenu}
+                                }4{mainMenu}
                          }
 }
 
@@ -606,4 +637,5 @@ $line
                    }
              }
 }
+
 mainMenu
