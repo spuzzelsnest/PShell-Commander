@@ -51,6 +51,7 @@ $workDir = "D:\_Tools\AgentAID"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
+$latesVirusPattern = "1351100"
 
 #Main window
 
@@ -159,7 +160,6 @@ function PCInfo($pc){
                 if ( $Private:ips = [System.Net.Dns]::GetHostAddresses($Private:pc) | foreach { $_.IPAddressToString } ) {
 
                     $PCLog.'IP Address(es) from DNS' = ($Private:ips -join ', ')
-
                 }
 
                 else {
@@ -182,7 +182,6 @@ function PCInfo($pc){
                         $PCLog.'Computer Hardware Model'        = $Private:wmi.Model
                         $PCLog.'Physical Memory in MB'          = ($Private:wmi.TotalPhysicalMemory/1MB).ToString('N')
                         $PCLog.'Logged On User'                 = $Private:wmi.Username
-
                     }
 
                     $Private:wmi = $null
@@ -250,7 +249,6 @@ function PCInfo($pc){
                 $PCLog.'BIOS Manufacturer' = $Private:wmi.Manufacturer
                 $PCLog.'BIOS Name'         = $Private:wmi.Name
                 $PCLog.'BIOS Version'      = $Private:wmi.Version
-
             }
 
          $Private:wmi = $null
@@ -267,11 +265,12 @@ function PCInfo($pc){
                         $PCLog.'OS Name'          = $Private:wmi.Caption
                         $PCLog.'OS Install Date'  = $Private:wmi.ConvertToDateTime($Private:wmi.InstallDate)
                         $PCLog.'OS Service Pack'  = [string]$Private:wmi.ServicePackMajorVersion + '.' + $Private:wmi.ServicePackMinorVersion
-
                  }
 
             # Scan for open ports
                     $ports = @{
+                            'http'            = '80'  ;
+                            'https'           = '443' ;
                             'File shares/RPC' = '139' ;
                             'File shares'     = '445' ;
                             'RDP'             = '3389';
@@ -368,13 +367,24 @@ function setAVsrv ($pc){
                 if($pattern -eq $null){
                     write-host Key not found for $pc -ForegroundColor red -Background white
                 }else{
-                    write-host $pc has pattern $pattern.getValue('InternalPatternVer') -foreground Green
+                    
+                    If (!( $pattern.getValue('InternalPatternVer'-lt $latesVirusPattern))){
+                    
+                    write-host $pc has the latest pattern: $pattern.getValue('InternalPatternVer') -foreground Green
+                    }else{
+                    write-host $pc has an outdated pattern: $pattern.getValue('InternalPatternVer') -foreground red
+                     }
                 }
                 
                 .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan NT Listener" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan NT Firewall" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan Common Client Solution Framework" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan NT RealTime Scan" auto -accepteula
+                
+                Get-Service -Name "OfficeScan NT Listener" -CN $pc | Set-Service -Status Running
+                Get-Service -Name "OfficeScan NT Firewall" -CN $pc | Set-Service -Status Running
+                Get-Service -Name "OfficeScan Common Client Solution Framework" -CN $pc | Set-Service -Status Running
+                Get-Service -Name "OfficeScan NT RealTime Scan" -CN $pc | Set-Service -Status Running
             }
 }
 
