@@ -329,41 +329,37 @@ function PCInfo($pc){
 }
 
 function cleanUp ($pc){
-            if (CC($pc)){
+    if (CC($pc)){
 
-		            Write-progress "Removing Temp Folders from "  "in Progress:"
-		            new-PSdrive IA Filesystem \\$pc\C$
-		            remove-item IA:\"$"Recycle.Bin\* -recurse -force -verbose
-		            Write-Output "Cleaned up Recycle.Bin"
-		            if (Test-Path IA:\Windows.old){
-				            Remove-Item IA:\Windows.old\ -Recurse -Force -Verbose
-				            }else{
-				            Write-Output "no Windows.old Folder found"
-				            }
+        Write-progress "Removing Temp Folders from "  "in Progress:"
+		new-PSdrive IA Filesystem \\$pc\C$
+		remove-item IA:\"$"Recycle.Bin\* -recurse -force -verbose
+		Write-Output "Cleaned up Recycle.Bin"
+		if (Test-Path IA:\Windows.old){
+            Remove-Item IA:\Windows.old\ -Recurse -Force -Verbose
+		}else{
+		    Write-Output "no Windows.old Folder found"
+		}
+        remove-item IA:\Windows\Temp\* -recurse -force -verbose
+        write-output "Cleaned up C:\Windows\Temp"
+      	$UserFolders = get-childItem IA:\Users\ -Directory
 
-		            remove-item IA:\Windows\Temp\* -recurse -force -verbose
-		            write-output "Cleaned up C:\Windows\Temp"
-
-	            	$UserFolders = get-childItem IA:\Users\ -Directory
-		            foreach ($folder in $UserFolders){
-
-					            $path = "IA:\Users\"+$folder
-					            remove-item $path\AppData\Local\Temp\* -recurse -force -verbose -ErrorAction SilentlyContinue
-					            remove-item $path\AppData\Local\Microsoft\Windows\"Temporary Internet Files"\* -recurse -force -verbose -ErrorAction SilentlyContinue
-					            Write-Output "Cleaned up Temp Items for "$folder.Name
-		            }
-            net use /delete \\$pc\C$
-
-            }
-
+        foreach ($folder in $UserFolders){
+                $path = "IA:\Users\"+$folder
+				remove-item $path\AppData\Local\Temp\* -recurse -force -verbose -ErrorAction SilentlyContinue
+				remove-item $path\AppData\Local\Microsoft\Windows\"Temporary Internet Files"\* -recurse -force -verbose -ErrorAction SilentlyContinue
+				 Write-Output "Cleaned up Temp Items for "$folder.Name
+        }
+        net use /delete \\$pc\C$
+    }
 }
 
 function setAVsrv ($pc){
-          if(CC($pc)){
+    if(CC($pc)){
 
                $remService = (Get-Service -CN $pc -name RemoteRegistry)
                if (!($remService -eq "running")){
-                                write-host checking to start service on $pc
+                                write-host checking to start service on $pc -foreground Cyan
                                 get-service -CN $pc -name RemoteRegistry|Start-Service
                 } 
 
@@ -375,18 +371,17 @@ function setAVsrv ($pc){
                     write-host $pc has pattern $pattern.getValue('InternalPatternVer') -foreground Green
                 }
                 
-                .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Listener" auto -accepteula
-                .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT Firewall" auto -accepteula
-                .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan Common Client Solution Framework" auto -accepteula
-                .\bin\PSTools\PsService.exe \\$Private:pc setconfig "OfficeScan NT RealTime Scan" auto -accepteula
+                .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan NT Listener" auto -accepteula
+                .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan NT Firewall" auto -accepteula
+                .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan Common Client Solution Framework" auto -accepteula
+                .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan NT RealTime Scan" auto -accepteula
             }
 }
 
 function attkScan ($pc) {
-            if (CC($pc)){
-
-                  $dest = "\\$pc\C$\avlog"
-                  $log = "$env:USERPROFILE\Desktop\$pc"
+    if (CC($pc)){
+         $dest = "\\$pc\C$\avlog"
+         $log = "$env:USERPROFILE\Desktop\$pc"
 
                   if(!(Test-Path "$dest\attk_x64.exe")){
 		                 New-Item -ItemType Directory -Force -Path $dest
@@ -411,7 +406,6 @@ function attkScan ($pc) {
 }
 
 function remoteCMD($pc){
-    
     if(CC($pc)){
 
               .\bin\PSTools\PsExec.exe -accepteula -s \\$pc cmd
@@ -420,7 +414,6 @@ x
 }
 
 function interactiveCMD($pc){
-
     if(CC($pc)){
               .\bin\PSTools\PsExec.exe -accepteula -s -i \\$pc cmd
             }
