@@ -396,7 +396,7 @@ function setAVsrv ($pc){
                 Get-Service -Name "OfficeScan NT Firewall" -CN $pc | Set-Service -Status Running
                 Get-Service -Name "OfficeScan Common Client Solution Framework" -CN $pc | Set-Service -Status Running
                 Get-Service -Name "OfficeScan NT RealTime Scan" -CN $pc | Set-Service -Status Running
-                Get-Service -Name "Trend Micro Unauthorized Change Prevention Service" -CN $pc | Set-Service -Status Runnin
+                Get-Service -Name "Trend Micro Unauthorized Change Prevention Service" -CN $pc | Set-Service -Status Running
             }
 }
 
