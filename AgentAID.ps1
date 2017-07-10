@@ -16,12 +16,19 @@
 #       1.3     04.24.2017  - Changed userinfo layout
 #       1.4     04.28.2017  - Return of the scrollbar
 #       1.5     05.04.2017  - Loggedon module
+#       1.6     07.06.2017  - Anti Virus update
 #
 #==========================================================================
 #MODULES
 #-------
 #Remove all
 Get-Module | Remove-Module
+
+$p = [Environment]::GetEnvironmentVariable("PSModulePath")
+$p += ";D:\_Tools\AgentAID\bin\Modules"
+[Environment]::SetEnvironmentVariable("PSModulePath",$p)
+
+
 #Exchange
 #installed in %ExchangeInstallPath%\bin
 #
@@ -40,14 +47,17 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 #Add-PSSnapin Quest.ActiveRoles.ADManagement -ErrorAction SilentlyContinue
 #
 #load Module PSRemoteRegistry
-#
-Import-Module psremoteregistry
+
+if( (Get-Module -Name PSRemoteRegistry -ErrorAction SilentlyContinue) -eq $null)
+    {
+        Import-Module -Name PSRemoteRegistry
+    }
 
 
 
 $Title = "Agent AID"
-$version = "v 1.5"
-$workDir = "D:\_Tools\AgentAID"
+$version = "v 1.6"
+$workDir = "C:\_dev\AgentAID"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
@@ -380,11 +390,13 @@ function setAVsrv ($pc){
                 .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan NT Firewall" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan Common Client Solution Framework" auto -accepteula
                 .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan NT RealTime Scan" auto -accepteula
+                .\bin\PSTools\PsService.exe \\$pc setconfig "Trend Micro Unauthorized Change Prevention Service" auto -accepteula
                 
                 Get-Service -Name "OfficeScan NT Listener" -CN $pc | Set-Service -Status Running
                 Get-Service -Name "OfficeScan NT Firewall" -CN $pc | Set-Service -Status Running
                 Get-Service -Name "OfficeScan Common Client Solution Framework" -CN $pc | Set-Service -Status Running
                 Get-Service -Name "OfficeScan NT RealTime Scan" -CN $pc | Set-Service -Status Running
+                Get-Service -Name "Trend Micro Unauthorized Change Prevention Service" -CN $pc | Set-Service -Status Runnin
             }
 }
 
