@@ -3,9 +3,10 @@ $Complete = @{}
 
 Do {
   $pcs = Get-Content $env:USERPROFILE\Desktop\PC-list.txt
+  
   $pcs | %{
-    $status = (!(Test-Connection -CN $_ -BufferSize 16 -Count 1 -ea 0 -quiet))
-    If (!$Complete.ContainsValue($_)){
+    $status = (Test-Connection -CN $_ -BufferSize 16 -Count 1 -ea 0 -quiet)
+    If (!$Complete.Containskey($_)){
        If ($status -eq  $True){
        $Complete.Add($_,$status)
       }
