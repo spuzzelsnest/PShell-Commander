@@ -17,13 +17,44 @@
 #       1.4     04.28.2017  - Return of the scrollbar
 #       1.5     05.04.2017  - Loggedon module
 #       1.6     07.06.2017  - Anti Virus update
+#       1.7     07.11.2017  - Alive Service
 #
 #==========================================================================
+#START VARS
+#-----------
+
+$Title = "Agent AID"
+$version = "v 1.7"
+$workDir = "C:\_dev\AgentAID"
+$agent = $env:USERNAME
+$log = "$env:USERPROFILE\Desktop\$pc"
+$dump = "bin\_dumpFiles"
+
+#PRELOADING
+#----------
+#Starting Alive Service
+# 
+write-host "                 Alive service starting ..." -foreground Green
+Write-host "         checking for existance of a Pc-list File" -Foreground Yellow
+if((test-path $env:USERPROFILE\Desktop\PC-list.txt) -eq  $False){
+    new-item $env:USERPROFILE\Desktop\PC-list.txt -type file
+    Write-host creating new PC-list file -foreground Magenta
+}else{
+    write-host PC-list file exists -Foreground Green
+}
+
+if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
+    new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir\bin\Alive.ps1" -DisplayName "Pc alive Service for Agent AID" -StartupType Manual
+}else {
+    start-service AgentAid-Alive
+}
+
 #MODULES
 #-------
-#Remove all
-Get-Module | Remove-Module
 
+#Remove all and add local path
+
+Get-Module | Remove-Module
 $p = [Environment]::GetEnvironmentVariable("PSModulePath")
 $p += ";D:\_Tools\AgentAID\bin\Modules"
 [Environment]::SetEnvironmentVariable("PSModulePath",$p)
@@ -52,16 +83,6 @@ if( (Get-Module -Name PSRemoteRegistry -ErrorAction SilentlyContinue) -eq $null)
     {
         Import-Module -Name PSRemoteRegistry
     }
-
-
-
-$Title = "Agent AID"
-$version = "v 1.6"
-$workDir = "C:\_dev\AgentAID"
-$agent = $env:USERNAME
-$log = "$env:USERPROFILE\Desktop\$pc"
-$dump = "bin\_dumpFiles"
-$latesVirusPattern = "1351100"
 
 #Main window
 
