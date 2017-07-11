@@ -46,7 +46,7 @@ if((test-path $env:USERPROFILE\Desktop\PC-list.txt) -eq  $False){
 if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
     new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir\bin\Alive.ps1" -DisplayName "Pc alive Service for Agent AID" -StartupType Manual
 }else {
-    start-service AgentAid-Alive
+    start-service AgentAid-Alive -ErrorAction SilentlyContinue
 }
 
 #MODULES
@@ -65,7 +65,7 @@ $p += ";D:\_Tools\AgentAID\bin\Modules"
 #
 if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null)
 	{
-        Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010
+        Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue
 	}
 #Active Directory
 #

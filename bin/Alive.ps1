@@ -1,7 +1,8 @@
-$pcs = Get-Content $env:USERPROFILE\Desktop\PC-list.txt
+
 $Complete = @{}
 
 Do {
+  $pcs = Get-Content $env:USERPROFILE\Desktop\PC-list.txt
   $pcs | %{
     $status = (!(Test-Connection -CN $_ -BufferSize 16 -Count 1 -ea 0 -quiet))
     If (!$Complete.ContainsValue($_)){
