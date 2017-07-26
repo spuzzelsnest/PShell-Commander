@@ -46,8 +46,9 @@ if((test-path $env:USERPROFILE\Desktop\PC-list.txt) -eq  $False){
 if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
     new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir\bin\Alive.ps1" -DisplayName "Pc alive Service for Agent AID" -StartupType Manual
 }else {
-    start-service AgentAid-Alive -ErrorAction SilentlyContinue
+    restart-service AgentAid-Alive -ErrorAction SilentlyContinue
 }
+invoke-item "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
 
 #MODULES
 #-------
@@ -112,10 +113,13 @@ $loadedModules = get-module
 write-host $loadscreen -ForegroundColor Magenta
 Write-host "              The following Powershell Modules Are loaded
 " -ForegroundColor Yellow 
-write-Host $loadedModules -ForegroundColor Green
+
+$loadedModules | %{
+    Write-Host "            - $_"-Foreground green
+}
 
 Write-Host "
-		... Just a second, script is loading ..." -foregroundcolor Green
+       ... Just a second, script is loading ..." -foregroundcolor Green
 start-sleep 5
 cls
 
@@ -358,6 +362,16 @@ function PCInfo($pc){
 	x
 }
 
+function alterName($pc){
+
+    $alterNames = netdom computername $pc /enum
+    $alterNames | %{
+        write-host $_ "`n" -ForegroundColor Yellow
+    }
+     
+    x
+}
+
 function cleanUp ($pc){
     if (CC($pc)){
 
@@ -468,7 +482,6 @@ function loggedon($pc){
         .\bin\PSTools\PsLoggedon.exe /l \\$pc -accepteula
         Write-Host Other USERID´s in this PC.
         Get-ChildItem  \\$pc\C$\Users\ |select name
-
     }
 x
 }
@@ -523,10 +536,11 @@ function ATmenu {
                       (1)   Remote CMD
                       (2)   Interactive CMD
                       (3)   Dump File To PC
-                      (4)   Find user logged on to PC
-                      (5)   Back
+                      (4)   Find Alternative Server Names
+                      (5)   Find user logged on to PC
+                      (6)   Back
                       "
-                $ATchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 iCMD","&3 Dump","&4 Loggedon","&5 Back")
+                $ATchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 iCMD","&3 Dump","&4 alternateName","&5 Loggedon","&6 Back")
                 [int]$defchoice = 3
                 $subAT = $h.UI.PromptForChoice($Title, $Menu, $ATchoice,$defchoice)
                 switch($subAT){
@@ -559,12 +573,20 @@ function ATmenu {
                         }3{
                         cls
                                     Write-Host "################################################################"
+                                    Write-Host "                 Find Alternative Server Name" -ForegroundColor Red
+                                    Write-Host "################################################################
+                                    "
+                                    $pc = Read-Host "What is the Name of the server "
+                                    alterName $pc
+                        }4{
+                        cls
+                                    Write-Host "################################################################"
                                     Write-Host "         Find user who is logged on to PC" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     loggedOn $pc
-                        }4{mainMenu}
+                        }5{mainMenu}
                 }
 }
 
