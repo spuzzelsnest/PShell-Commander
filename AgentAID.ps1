@@ -26,9 +26,12 @@
 $Title = "Agent AID"
 $version = "v 1.7"
 $workDir = "C:\_dev\AgentAID"
+$modules = "C:\_dev\AgentAID\bin\Modules"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
+$latesVirusPattern = (Get-Item "HKLM:\Software\Wow6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.").getValue('InternalPatternVer')
+
 
 #PRELOADING
 #----------
@@ -57,7 +60,7 @@ invoke-item "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Progr
 
 Get-Module | Remove-Module
 $p = [Environment]::GetEnvironmentVariable("PSModulePath")
-$p += ";D:\_Tools\AgentAID\bin\Modules"
+$p += ";$modues"
 [Environment]::SetEnvironmentVariable("PSModulePath",$p)
 
 
