@@ -516,7 +516,7 @@ $log = "$env:USERPROFILE\Desktop\$pc"
 		    Copy-Item $dump\$filename $dest
             Write-Host $filename copied to $dest -ForegroundColor green
 
-		    .\bin\PSTools\PsExec.exe -accepteula -s \\$pc powershell C:\Temp\$filename
+		    .\bin\PSTools\PsExec.exe -accepteula -s \\$pc cmd /C C:\Temp\$filename
             
             if(!(Test-path $log)){
 				Write-Host $log is not available -Foreground magenta
