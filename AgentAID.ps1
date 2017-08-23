@@ -381,21 +381,21 @@ function cleanUp ($pc){
         Write-progress "Removing Temp Folders from "  "in Progress:"
 		new-PSdrive IA Filesystem \\$pc\C$
 		remove-item IA:\"$"Recycle.Bin\* -recurse -force -verbose
-		Write-Output "Cleaned up Recycle.Bin"
+		Write-host "Cleaned up Recycle.Bin" -foreground Green
 		if (Test-Path IA:\Windows.old){
             Remove-Item IA:\Windows.old\ -Recurse -Force -Verbose
 		}else{
-		    Write-Output "no Windows.old Folder found"
+		    Write-host "no Windows.old Folder found" -foreground green
 		}
         remove-item IA:\Windows\Temp\* -recurse -force -verbose
-        write-output "Cleaned up C:\Windows\Temp"
+        write-host "Cleaned up C:\Windows\Temp" -foreground Green
       	$UserFolders = get-childItem IA:\Users\ -Directory
 
         foreach ($folder in $UserFolders){
                 $path = "IA:\Users\"+$folder
 				remove-item $path\AppData\Local\Temp\* -recurse -force -verbose -ErrorAction SilentlyContinue
 				remove-item $path\AppData\Local\Microsoft\Windows\"Temporary Internet Files"\* -recurse -force -verbose -ErrorAction SilentlyContinue
-				 Write-Output "Cleaned up Temp Items for "$folder.Name
+				Write-host "Cleaned up Temp Items for "$folder.Name -foreground Green
         }
         net use /delete \\$pc\C$
     }
