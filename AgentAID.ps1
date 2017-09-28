@@ -60,7 +60,7 @@ invoke-item "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Progr
 
 Get-Module | Remove-Module
 $p = [Environment]::GetEnvironmentVariable("PSModulePath")
-$p += ";$modues"
+$p += ";$modules"
 [Environment]::SetEnvironmentVariable("PSModulePath",$p)
 
 
