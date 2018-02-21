@@ -1,6 +1,9 @@
-﻿# Agent-AID By Spuzzelsnest
+﻿# pShell-Commander By Spuzzelsnest
 
-As a reworked version of AD-Aid, which is an Active Directory info tool. This set of tools is build around Get-ADUser and Get-ADComputer cmdlets.
+As a revised version of AD-Aid, a tool for Active Directory info. This set of tools is built around Get-ADUser and Get-ADComputer cmdlets.
+Expanded with network capabilities by using the PSExec Tool set.
+Include some network forensics tools.
 
+Runs on Powershell version 5 and will be expanded with more tools and package updates through Chocolate package, git and PS module import and install.
 
 
