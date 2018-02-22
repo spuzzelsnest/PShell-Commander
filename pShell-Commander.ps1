@@ -431,15 +431,16 @@ function attkScan ($pc) {
 
 function remoteCMD($pc){
     if(CC($pc)){
-
-                .\bin\PSTools\PsExec.exe -accepteula -s \\$pc cmd
+                $args = '-accepteula -s \\$pc -u ./Administrator powershell'
+                Start-Process psexec -ArgumentList $args
             }
 x
 }
 
 function interactiveCMD($pc){
     if(CC($pc)){
-              .\bin\PSTools\PsExec.exe -accepteula -s -i \\$pc cmd
+                $args = '-accepteula -s -i \\$pc -u Administrator powershell'
+                Start-Process psexec -ArgumentList $args
             }
 x
 }
@@ -447,7 +448,7 @@ x
 function loggedon($pc){
     if(CC($pc)){
         .\bin\PSTools\PsLoggedon.exe /l \\$pc -accepteula
-        Write-Host Other USERIDÂ´s in this PC.
+        Write-Host Other USERID´s in this PC.
         Get-ChildItem  \\$pc\C$\Users\ |select name
     }
 x
@@ -516,7 +517,11 @@ function ADmenu{
                           write-host "                          USERINFO INFO" -ForegroundColor Green
                           write-host "################################################################
                                      "
-                          $Id =  read-host "           What is the userID "
+                          $Id =''
+                          if(!$id){
+                                Write-Host "Please typ in a User ID"
+                                $Id =  read-host "What is the userID "
+                          }
                           userInfo $Id
                        }1{
                        cls
@@ -524,24 +529,36 @@ function ADmenu{
                          Write-Host "                           PCINFO INFO" -ForegroundColor Green
                          Write-Host "###############################################################
                                     "
-                                $pc =  Read-Host "   What is the PC-Name or IP address "
-                                PCInfo $pc
+                            $pc =''
+                                if(!$pc){
+                                write-host "Please type in a PC Name or IP address "
+                                $pc = Read-Host "What is the PC name or the IP-address "
+                                }
+                          PCInfo $pc
                        }2{
                        cls
-                         Write-Host "################################################################"
-                         Write-Host "                 Find Alternative Server Name" -ForegroundColor Red
-                         Write-Host "################################################################
-                                    "
-                         $pc = Read-Host "What is the Name of the server "
-                         alterName $pc
+                                 Write-Host "################################################################"
+                                 Write-Host "                 Find Alternative Server Name" -ForegroundColor Red
+                                 Write-Host "################################################################
+                                            "
+                                 $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
+                                    $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
+                                alterName $pc
                        }3{
                        cls
-                         Write-Host "################################################################"
-                         Write-Host "         Find user who is logged on to PC" -ForegroundColor Red
-                         Write-Host "################################################################
+                            Write-Host "################################################################"
+                            Write-Host "         Find user who is logged on to PC" -ForegroundColor Red
+                            Write-Host "################################################################
                                     "
-                         $pc = Read-Host "What is the PC name or the IP-address "
-                         loggedOn $pc
+                            $pc =''
+                            if(!$pc){
+                            write-host "Please type in a PC Name or IP address "
+                            $pc = Read-Host "What is the PC name or the IP-address "
+                            }
+                            loggedOn $pc
                         }4{mainMenu}
                 }
 }
@@ -565,7 +582,11 @@ function NTmenu {
                                     Write-Host "                     Remote CMD" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
+                                    $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
                                     $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     remoteCMD $pc
                         
                         }1{
@@ -574,7 +595,11 @@ function NTmenu {
                                     Write-Host "                     InterActive CMD" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
+                                    $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
                                     $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     interactiveCMD $pc                      
                         
                         }2{
@@ -583,7 +608,11 @@ function NTmenu {
                                     Write-Host "                     Dump file to PC" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
+                                    $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
                                     $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     dumpIt $pc
                         }3{mainMenu}
                 }
@@ -607,7 +636,11 @@ function AVmenu {
                                     Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
+                                    $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
                                     $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     cleanUp $pc
                                     x
                                 }1{
@@ -616,7 +649,11 @@ function AVmenu {
                                     Write-Host "                          ATTK Scan" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
+                                    $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
                                     $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     attkScan $pc
                                     x
                                 }2{
@@ -625,7 +662,11 @@ function AVmenu {
                                     Write-Host "                          Full Clearnup" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
-                                    $pc = Read-Host "What is the PC name or the IP-address: "
+                                   $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
+                                    $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     cleanup $pc
                                     attkScan $pc
                                     x
@@ -653,7 +694,7 @@ function mainMenu {
 		$LengthName = $agent.length
 		$line = "************************************************" + "*"* $LengthName
         $Menu = "
-Welcome  $agent  to pShell Commander         version   $version
+Welcome $agent  to pShell Commander         version   $version
 $line
 
           What you want to do:
