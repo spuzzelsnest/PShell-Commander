@@ -1,6 +1,6 @@
 #==========================================================================
 #
-# NAME:		PShell-Commander.ps1
+# NAME:		pShell-Commander.ps1
 #
 # AUTHOR:	Spuzzelsnest
 # EMAIL:	jan.mpdesmet@gmail.com
@@ -24,14 +24,13 @@
 #START VARS
 #-----------
 
-$Title = "Agent AID"
+$Title = "pShell Commander"
 $version = "v 2.0"
 $workDir = "C:\_dev\PShell-Commander"
-$modules = "C:\_dev\AgentAID\bin\Modules"
+$modules = "C:\_dev\PShell-Commander\bin\Modules"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
-$latesVirusPattern = (Get-Item "HKLM:\Software\Wow6432Node\TrendMicro\PC-cillinNTCorp\CurrentVersion\Misc.").getValue('InternalPatternVer')
 
 
 #PRELOADING
@@ -64,6 +63,7 @@ $p = [Environment]::GetEnvironmentVariable("PSModulePath")
 $p += ";$modules"
 [Environment]::SetEnvironmentVariable("PSModulePath",$p)
 
+<#
 
 #Exchange
 #installed in %ExchangeInstallPath%\bin
@@ -78,7 +78,8 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 	{
 		Import-Module -Name ActiveDirectory
 	}
-#
+#>
+
 #if (!(Get-PSSnapin Quest.ActiveRoles.ADManagement -registered -ErrorAction SilentlyContinue)) { Plugin needed }
 #Add-PSSnapin Quest.ActiveRoles.ADManagement -ErrorAction SilentlyContinue
 #
@@ -126,7 +127,6 @@ Write-Host "
        ... Just a second, script is loading ..." -foregroundcolor Green
 start-sleep 5
 cls
-
 
 #Global Functions
 function CC ($pc){
@@ -402,43 +402,6 @@ function cleanUp ($pc){
     }
 }
 
-function setAVsrv ($pc){
-    if(CC($pc)){
-
-               $remService = (Get-Service -CN $pc -name RemoteRegistry)
-               if (!($remService -eq "running")){
-                                write-host checking to start service on $pc -foreground Cyan
-                                get-service -CN $pc -name RemoteRegistry|Start-Service
-                } 
-
-                $hive = [Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey('LocalMachine',$pc)
-                $pattern = $hive.OpenSubKey('Software\Wow6432Node\TrendMicro\PC-cillinNTCorp\currentVersion\Misc.')
-                if($pattern -eq $null){
-                    write-host Key not found for $pc -ForegroundColor red -Background white
-                }else{
-                    
-                    If (!( $pattern.getValue('InternalPatternVer'-lt $latesVirusPattern))){
-                    
-                    write-host $pc has the latest pattern: $pattern.getValue('InternalPatternVer') -foreground Green
-                    }else{
-                    write-host $pc has an outdated pattern: $pattern.getValue('InternalPatternVer') -foreground red
-                     }
-                }
-                
-                .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan NT Listener" auto -accepteula
-                .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan NT Firewall" auto -accepteula
-                .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan Common Client Solution Framework" auto -accepteula
-                .\bin\PSTools\PsService.exe \\$pc setconfig "OfficeScan NT RealTime Scan" auto -accepteula
-                .\bin\PSTools\PsService.exe \\$pc setconfig "Trend Micro Unauthorized Change Prevention Service" auto -accepteula
-                
-                Get-Service -Name "OfficeScan NT Listener" -CN $pc | Set-Service -Status Running
-                Get-Service -Name "OfficeScan NT Firewall" -CN $pc | Set-Service -Status Running
-                Get-Service -Name "OfficeScan Common Client Solution Framework" -CN $pc | Set-Service -Status Running
-                Get-Service -Name "OfficeScan NT RealTime Scan" -CN $pc | Set-Service -Status Running
-                Get-Service -Name "Trend Micro Unauthorized Change Prevention Service" -CN $pc | Set-Service -Status Running
-            }
-}
-
 function attkScan ($pc) {
     if (CC($pc)){
          $dest = "\\$pc\C$\avlog"
@@ -469,7 +432,7 @@ function attkScan ($pc) {
 function remoteCMD($pc){
     if(CC($pc)){
 
-              .\bin\PSTools\PsExec.exe -accepteula -s \\$pc cmd
+                .\bin\PSTools\PsExec.exe -accepteula -s \\$pc cmd
             }
 x
 }
@@ -534,7 +497,7 @@ x
 }
 
 #Menu's
-function adTools{
+function ADmenu{
                 $Tile = "AD Tools"
                 $Menu = "
                         (1)  AD-User Info
@@ -544,7 +507,7 @@ function adTools{
                         (5)  Back
                         "
                 $ADchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADUser","&2 ADServ","&3 alternateName","&4 Loggedon","&5 Back")
-                [int]$defchoice = 6
+                [int]$defchoice = 4
                 $subAD =  $h.UI.PromptForChoice($Title, $Menu, $ADchoice,$defchoice)
                 switch($subAD){
                         0{
@@ -590,12 +553,10 @@ function NTmenu {
                       (1)   Remote CMD
                       (2)   Interactive CMD
                       (3)   Dump File To PC
-                      (4)   Find Alternative Server Names
-                      (5)   Find user logged on to PC
-                      (6)   Back
+                      (4)   Back
                       "
                 $NTchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 iCMD","&3 Dump","&4 Back")
-                [int]$defchoice = 4
+                [int]$defchoice = 3
                 $subNT = $h.UI.PromptForChoice($Title, $Menu, $NTchoice,$defchoice)
                 switch($subNT){
                         0{
@@ -632,12 +593,11 @@ function AVmenu {
                 $Title = "Anti Virus and Cleaning Tool"
                 $Menu = "
                       (1)   Clean TEMP files
-                      (2)   Remote Update Trend
-                      (3)   ATTK-Scan
-                      (4)   Full-Scan
-                      (5)   Back
+                      (2)   ATTK-Scan
+                      (3)   Full-Scan
+                      (4)   Back
                       "
-                $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup", "&2 Update", "&3 ATTK", "&4 Full", "&5 Back")
+                $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup", "&2 ATTK", "&3 Full", "&4 Back")
                 [int]$defchoice = 3
                 $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
                 switch($subAV){
@@ -653,34 +613,39 @@ function AVmenu {
                                 }1{
                                 cls
                                     Write-Host "################################################################"
-                                    Write-Host "                      Remote update Trend" -ForegroundColor Red
-                                    Write-Host "################################################################
-                                    "
-                                    $pc = Read-Host "What is the PC name or the IP-address "
-                                    setAVsrv $pc
-                                    x
-                                }2{
-                                cls
-                                    Write-Host "################################################################"
                                     Write-Host "                          ATTK Scan" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address "
                                     attkScan $pc
                                     x
-                                }3{
+                                }2{
                                 cls
                                     Write-Host "################################################################"
                                     Write-Host "                          Full Clearnup" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
                                     $pc = Read-Host "What is the PC name or the IP-address: "
-                                    setAVsrv $pc
                                     cleanup $pc
                                     attkScan $pc
                                     x
-                                }4{mainMenu}
+                                }3{mainMenu}
                          }
+}
+
+function ADVmenu{
+                $Title = "Advanced Tools"
+                $Menu = "
+                      (1)   Back
+                      "
+                $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Back")
+                [int]$defchoice = 0
+                $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
+                switch($subAV){ 
+
+                        0{mainMenu}
+
+                }
 }
 
 function mainMenu {
@@ -693,40 +658,30 @@ $line
 
           What you want to do:
 
-                           (1)   User info
-                           (2)   PC info
+                           (1)   AD-Tools
+                           (2)   Network Tools
                            (3)   Antivirus Tools
-                           (4)   Admin Tools
+                           (4)   Advanced Tools
                            (Q)   Exit
                            "
 
-        $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 UserInfo", "&2 PCInfo", "&3 AVTools", "&4 ATools", "&Quit")
+        $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADTools", "&2 NTTools", "&3 AVTools", "&4 ADVTools", "&Quit")
         [int]$defaultchoice = 4
         $choice =  $h.UI.PromptForChoice($Title, $Menu, $mainMenu, $defaultchoice)
 
              switch ($choice){
                    0{
                    cls
-                          write-host "################################################################"
-                          write-host "                          USERINFO INFO" -ForegroundColor Green
-                          write-host "################################################################
-                                     "
-                          $Id =  read-host "           What is the userID "
-                          userInfo $Id
+                            ADmenu
                    }1{
                    cls
-                            Write-Host "###############################################################"
-                            Write-Host "                           PCINFO INFO" -ForegroundColor Green
-                            Write-Host "###############################################################
-                                        "
-                            $pc =  Read-Host "   What is the PC-Name or IP address "
-                            PCInfo $pc
+                            NTmenu
                    }2{
                    cls
                             AVmenu
                    }3{
                    cls
-                            ATmenu
+                            ADVmenu
                    }q{
                    cls
                         $h.ExitNestedPrompt()
