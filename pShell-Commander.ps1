@@ -19,6 +19,8 @@
 #       1.6     07.06.2017  - Anti Virus update
 #       1.7     07.11.2017  - Alive Service
 #       2.0     02.21.2018  - Reorder structure
+#                           - Added external popup for remote
+#                           - Checking Domain or Workgroup
 #
 #==========================================================================
 #START VARS
@@ -31,6 +33,17 @@ $modules = "C:\_dev\PShell-Commander\bin\Modules"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
+
+
+if ((Get-WmiObject -Class win32_computersystem).PartofDomain){ 
+    $dom=  (Get-WmiObject Win32_ComputerSystem).Domain
+    $warning = "You are working from Domain $dom"
+    $AUser = $env:USERNAME
+}else{
+    $dom = (Get-WmiObject -Class Win32_ComputerSystem).Workgroup
+    $warning = "Running from WorkGroup $dom NO AD Connection possible."
+    $AUser = Get-LocalUser |select Name | findstr Admin*
+}
 
 
 #PRELOADING
@@ -431,7 +444,7 @@ function attkScan ($pc) {
 
 function remoteCMD($pc){
     if(CC($pc)){
-                $args = '-accepteula -s \\$pc -u ./Administrator powershell'
+                $args = "-accepteula -s \\$pc -u Administrador powershell"
                 Start-Process psexec -ArgumentList $args
             }
 x
@@ -439,7 +452,7 @@ x
 
 function interactiveCMD($pc){
     if(CC($pc)){
-                $args = '-accepteula -s -i \\$pc -u Administrator powershell'
+                $args = "-accepteula -s -i \\$pc -u $dom\$AUser powershell"
                 Start-Process psexec -ArgumentList $args
             }
 x
@@ -499,7 +512,7 @@ x
 
 #Menu's
 function ADmenu{
-                $Tile = "AD Tools"
+                $Tile = "AD Tools --   $warning"
                 $Menu = "
                         (1)  AD-User Info
                         (2)  AD-Server Info
@@ -699,7 +712,7 @@ $line
 
           What you want to do:
 
-                           (1)   AD-Tools
+                           (1)   AD-Tools  ---  $warning
                            (2)   Network Tools
                            (3)   Antivirus Tools
                            (4)   Advanced Tools
