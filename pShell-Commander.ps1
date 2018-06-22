@@ -28,8 +28,10 @@
 
 $Title = "pShell Commander"
 $version = "v 2.0"
+$psVersion = get-host | select -expandproperty version
 $workDir = "C:\_dev\PShell-Commander"
 $modules = "C:\_dev\PShell-Commander\bin\Modules"
+$hostn = $env:COMPUTERNAME
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
@@ -129,6 +131,17 @@ cd $workDir
 $loadscreen = get-content bin\visuals\loadscreen | Out-String
 $loadedModules = get-module
 write-host $loadscreen -ForegroundColor Magenta
+
+if ($PSVersionTable.PSVersion.Major -gt 2)
+{
+    Write-Output "Yay Powershell has version "
+}
+else
+{
+    Write-Output "Boo, you are running an older version of powershell " -foregroundcolor red
+}
+
+
 Write-host "              The following Powershell Modules Are loaded
 " -ForegroundColor Yellow 
 
@@ -140,6 +153,7 @@ Write-Host "
        ... Just a second, script is loading ..." -foregroundcolor Green
 start-sleep 5
 cls
+
 
 #Global Functions
 function CC ($pc){
@@ -708,6 +722,7 @@ function mainMenu {
 		$line = "************************************************" + "*"* $LengthName
         $Menu = "
 Welcome $agent  to pShell Commander         version   $version
+Runnig from $hostn on $dom
 $line
 
           What you want to do:
