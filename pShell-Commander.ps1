@@ -1,6 +1,6 @@
 #==========================================================================
 #
-# NAME:		PShell-Commander.ps1
+# NAME:		pShell-Commander.ps1
 #
 # AUTHOR:	Spuzzelsnest
 # EMAIL:	jan.mpdesmet@gmail.com
@@ -19,6 +19,8 @@
 #       1.6     07.06.2017  - Anti Virus update
 #       1.7     07.11.2017  - Alive Service
 #       2.0     02.21.2018  - Reorder structure
+#                           - Added external popup for remote
+#                           - Checking Domain or Workgroup
 #
 #==========================================================================
 #START VARS
@@ -26,11 +28,22 @@
 
 $Title = "pShell Commander"
 $version = "v 2.0"
+$psver = get-host | foreach {$_.Version}
 $workDir = "C:\_dev\PShell-Commander"
 $modules = "C:\_dev\PShell-Commander\bin\Modules"
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
+
+if ((Get-WmiObject -Class win32_computersystem).PartofDomain){ 
+    $dom=  (Get-WmiObject Win32_ComputerSystem).Domain
+    $warning = "You are working from Domain $dom"
+    $AUser = $env:USERNAME
+}else{
+    $dom = (Get-WmiObject -Class Win32_ComputerSystem).Workgroup
+    $warning = "Running from WorkGroup $dom NO AD Connection possible."
+    $AUser = Get-LocalUser |select Name | findstr Admin*
+}
 
 #PRELOADING
 #----------
@@ -46,11 +59,11 @@ if((test-path $env:USERPROFILE\Desktop\PC-list.txt) -eq  $False){
 }
 
 if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
-    new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir\bin\Alive.ps1" -DisplayName "Pc alive Service for Agent AID" -StartupType Manual
+    new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir\bin\Alive.ps1" -DisplayName "PC alive Service for PShell Commander" -StartupType Manual
 }else {
     restart-service AgentAid-Alive -ErrorAction SilentlyContinue
 }
-invoke-item "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
+#invoke-item "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
 
 #MODULES
 #-------
@@ -62,32 +75,32 @@ $p = [Environment]::GetEnvironmentVariable("PSModulePath")
 $p += ";$modules"
 [Environment]::SetEnvironmentVariable("PSModulePath",$p)
 
-<#
+
 #Exchange
 #installed in %ExchangeInstallPath%\bin
-
+#
 if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null)
 	{
         Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue
 	}
 #Active Directory
-
+#
 if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 	{
 		Import-Module -Name ActiveDirectory
 	}
 
+
 if (!(Get-PSSnapin Quest.ActiveRoles.ADManagement -registered -ErrorAction SilentlyContinue)) { Plugin needed }
 Add-PSSnapin Quest.ActiveRoles.ADManagement -ErrorAction SilentlyContinue
 
-#>
-
-#load Module PSRemoteRegistry
+#Load Module PSRemoteRegistry
 
 if( (Get-Module -Name PSRemoteRegistry -ErrorAction SilentlyContinue) -eq $null)
     {
         Import-Module -Name PSRemoteRegistry
     }
+
 #Main window
 
 $h = get-host
@@ -125,7 +138,6 @@ Write-Host "
        ... Just a second, script is loading ..." -foregroundcolor Green
 start-sleep 5
 cls
-
 
 #Global Functions
 function CC ($pc){
@@ -175,6 +187,7 @@ function UserInfo ($Id){
 	$userLog.add('Groups', $groupInfo)
 	$userLog.add('Email Addresses', $mailInfo)
 	
+    
     #foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
 	$userLog.getenumerator()| Ft -AutoSize -wrap | out-string
     $userLog.GetEnumerator() | Out-GridView -Title "$Id Information"
@@ -429,15 +442,16 @@ function attkScan ($pc) {
 
 function remoteCMD($pc){
     if(CC($pc)){
-
-              .\bin\PSTools\PsExec.exe -accepteula -s \\$pc cmd
+                $args = "-accepteula -s \\$pc -u Administrador powershell"
+                Start-Process psexec -ArgumentList $args
             }
 x
 }
 
 function interactiveCMD($pc){
     if(CC($pc)){
-              .\bin\PSTools\PsExec.exe -accepteula -s -i \\$pc cmd
+                $args = "-accepteula -s -i \\$pc -u $dom\$AUser powershell"
+                Start-Process psexec -ArgumentList $args
             }
 x
 }
@@ -445,7 +459,7 @@ x
 function loggedon($pc){
     if(CC($pc)){
         .\bin\PSTools\PsLoggedon.exe /l \\$pc -accepteula
-        Write-Host Other USERIDÂ´s in this PC.
+        Write-Host Other USERID´s in this PC.
         Get-ChildItem  \\$pc\C$\Users\ |select name
     }
 x
@@ -496,7 +510,7 @@ x
 
 #Menu's
 function ADmenu{
-                $Tile = "AD Tools"
+                $Tile = "AD Tools --   $warning"
                 $Menu = "
                         (1)  AD-User Info
                         (2)  AD-Server Info
@@ -505,7 +519,7 @@ function ADmenu{
                         (5)  Back
                         "
                 $ADchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADUser","&2 ADServ","&3 alternateName","&4 Loggedon","&5 Back")
-                [int]$defchoice = 6
+                [int]$defchoice = 4
                 $subAD =  $h.UI.PromptForChoice($Title, $Menu, $ADchoice,$defchoice)
                 switch($subAD){
                         0{
@@ -514,7 +528,11 @@ function ADmenu{
                           write-host "                          USERINFO INFO" -ForegroundColor Green
                           write-host "################################################################
                                      "
-                          $Id =  read-host "           What is the userID "
+                          $Id =''
+                          if(!$id){
+                                Write-Host "Please typ in a User ID"
+                                $Id =  read-host "What is the userID "
+                          }
                           userInfo $Id
                        }1{
                        cls
@@ -522,24 +540,36 @@ function ADmenu{
                          Write-Host "                           PCINFO INFO" -ForegroundColor Green
                          Write-Host "###############################################################
                                     "
-                                $pc =  Read-Host "   What is the PC-Name or IP address "
-                                PCInfo $pc
+                            $pc =''
+                                if(!$pc){
+                                write-host "Please type in a PC Name or IP address "
+                                $pc = Read-Host "What is the PC name or the IP-address "
+                                }
+                          PCInfo $pc
                        }2{
                        cls
-                         Write-Host "################################################################"
-                         Write-Host "                 Find Alternative Server Name" -ForegroundColor Red
-                         Write-Host "################################################################
-                                    "
-                         $pc = Read-Host "What is the Name of the server "
-                         alterName $pc
+                                 Write-Host "################################################################"
+                                 Write-Host "                 Find Alternative Server Name" -ForegroundColor Red
+                                 Write-Host "################################################################
+                                            "
+                                 $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
+                                    $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
+                                alterName $pc
                        }3{
                        cls
-                         Write-Host "################################################################"
-                         Write-Host "         Find user who is logged on to PC" -ForegroundColor Red
-                         Write-Host "################################################################
+                            Write-Host "################################################################"
+                            Write-Host "         Find user who is logged on to PC" -ForegroundColor Red
+                            Write-Host "################################################################
                                     "
-                         $pc = Read-Host "What is the PC name or the IP-address "
-                         loggedOn $pc
+                            $pc =''
+                            if(!$pc){
+                            write-host "Please type in a PC Name or IP address "
+                            $pc = Read-Host "What is the PC name or the IP-address "
+                            }
+                            loggedOn $pc
                         }4{mainMenu}
                 }
 }
@@ -551,12 +581,10 @@ function NTmenu {
                       (1)   Remote CMD
                       (2)   Interactive CMD
                       (3)   Dump File To PC
-                      (4)   Find Alternative Server Names
-                      (5)   Find user logged on to PC
-                      (6)   Back
+                      (4)   Back
                       "
                 $NTchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 iCMD","&3 Dump","&4 Back")
-                [int]$defchoice = 4
+                [int]$defchoice = 3
                 $subNT = $h.UI.PromptForChoice($Title, $Menu, $NTchoice,$defchoice)
                 switch($subNT){
                         0{
@@ -565,7 +593,11 @@ function NTmenu {
                                     Write-Host "                     Remote CMD" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
+                                    $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
                                     $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     remoteCMD $pc
                         
                         }1{
@@ -574,7 +606,11 @@ function NTmenu {
                                     Write-Host "                     InterActive CMD" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
+                                    $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
                                     $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     interactiveCMD $pc                      
                         
                         }2{
@@ -583,7 +619,11 @@ function NTmenu {
                                     Write-Host "                     Dump file to PC" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
+                                    $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
                                     $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     dumpIt $pc
                         }3{mainMenu}
                 }
@@ -607,7 +647,11 @@ function AVmenu {
                                     Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
+                                    $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
                                     $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     cleanUp $pc
                                     x
                                 }1{
@@ -616,7 +660,11 @@ function AVmenu {
                                     Write-Host "                          ATTK Scan" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
+                                    $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
                                     $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     attkScan $pc
                                     x
                                 }2{
@@ -625,8 +673,11 @@ function AVmenu {
                                     Write-Host "                          Full Clearnup" -ForegroundColor Red
                                     Write-Host "################################################################
                                     "
-                                    $pc = Read-Host "What is the PC name or the IP-address: "
-                                    setAVsrv $pc
+                                   $pc =''
+                                    if(!$pc){
+                                    write-host "Please type in a PC Name or IP address "
+                                    $pc = Read-Host "What is the PC name or the IP-address "
+                                    }
                                     cleanup $pc
                                     attkScan $pc
                                     x
@@ -635,43 +686,48 @@ function AVmenu {
 }
 
 function ADVmenu{
-                $Title = "Other tools and script can be h"
+                $Title = "Advanced Tools"
                 $Menu = "
-                      (1)   TEST
-                      (2)   Back
+                      (1)   Back
                       "
-                $ADVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 others", "&2 Back")
-                [int]$defchoice = 2
-                $subAV =  $h.UI.PromptForChoice($Title , $Menu , $ADVchoice, $defchoice)
-                switch($subAV){
-                
-                                0{ 
-                                cls
-                                    TEST
-                                }1{mainMenu}
-                
-                        
+                $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Back")
+                [int]$defchoice = 0
+                $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
+                switch($subAV){ 
+
+                        0{mainMenu}
+
                 }
 }
 
 function mainMenu {
         cls
 		$LengthName = $agent.length
-		$line = "*******************************************************" + "*"* $LengthName
+		$line = "**********************************************************************************" + "*"* $LengthName
         $Menu = "
-Welcome, $agent      to pShell Commander   version: $version
+Welcome $agent  to pShell Commander
+
+                                                        version   $version on powershell v: $psver
+
+$warning
+
 $line
 
-          What you want to do:
+    What do you want to do:
+----------------------------
+                                               (1)   AD-Tools
 
-                           (1)   AD Tools
-                           (2)   Anti Virus Tools
-                           (3)   Network Tools
-                           (4)   Other Tools
-                           (Q)   Exit
+                                               (2)   Network Tools
+
+                                               (3)   Antivirus Tools
+
+                                               (4)   Advanced Tools
+
+                                               (Q)   EXIT
+    
                            "
 
-        $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADTools", "&2 AVTools", "&3 NTTools", "&4 others", "&Quit")
+        $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADTools", "&2 NTTools", "&3 AVTools", "&4 ADVTools", "&Quit")
         [int]$defaultchoice = 4
         $choice =  $h.UI.PromptForChoice($Title, $Menu, $mainMenu, $defaultchoice)
 
@@ -681,13 +737,13 @@ $line
                             ADmenu
                    }1{
                    cls
-                            AVmenu
+                            NTmenu
                    }2{
                    cls
-                            NTmenu
+                            AVmenu
                    }3{
                    cls
-                            ADVMenu
+                            ADVmenu
                    }q{
                    cls
                         $h.ExitNestedPrompt()
