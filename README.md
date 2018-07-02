@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿# pShell-Commander By Spuzzelsnest
+=======
+﻿# pShell Commander By Spuzzelsnest
+>>>>>>> 96cce15ba20317b9afd95046e335f8071b937e1c
 
 As a revised version of AD-Aid, a tool for Active Directory info. This set of tools is built around Get-ADUser and Get-ADComputer cmdlets.
 Expanded with network capabilities by using the PSExec Tool set.
