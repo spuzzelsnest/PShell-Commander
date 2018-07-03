@@ -21,6 +21,8 @@
 #       2.0     02.21.2018  - Reorder structure
 #                           - Added external popup for remote
 #                           - Checking Domain or Workgroup
+#       2.1     06.26.2018  - Adding Mac OSX options
+#
 #
 #==========================================================================
 #START VARS
@@ -29,6 +31,8 @@
 $Title = "pShell Commander"
 $version = "v 2.0"
 $psver = get-host | foreach {$_.Version}
+$platform = ($PSVersionTable).Platform
+$os = ($PSVersionTable).OS
 $workDir = "C:\_dev\PShell-Commander"
 $modules = "C:\_dev\PShell-Commander\bin\Modules"
 $agent = $env:USERNAME
@@ -127,6 +131,16 @@ cd $workDir
 $loadscreen = get-content bin\visuals\loadscreen | Out-String
 $loadedModules = get-module
 write-host $loadscreen -ForegroundColor Magenta
+
+if ($PSVersionTable.PSVersion.Major -gt 2)
+{
+    Write-Output "Yay Powershell has version $psVersion"
+}
+else
+{
+    Write-Output "Boo, you are running an older version of powershell " -foregroundcolor red
+}
+
 Write-host "              The following Powershell Modules Are loaded
 " -ForegroundColor Yellow 
 
@@ -459,7 +473,7 @@ x
 function loggedon($pc){
     if(CC($pc)){
         .\bin\PSTools\PsLoggedon.exe /l \\$pc -accepteula
-        Write-Host Other USERID´s in this PC.
+        Write-Host Other USERIDÂ´s in this PC.
         Get-ChildItem  \\$pc\C$\Users\ |select name
     }
 x
