@@ -99,8 +99,6 @@ if ($platform -eq 'Unix'){
                 {
                     Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue
                 }
-
-
 }
 
 #STARTING ALIVE SERVICE
@@ -119,14 +117,9 @@ function Alive{
         }else {
             restart-service AgentAid-Alive -ErrorAction SilentlyContinue
         }
-        
-        
         invoke-item "$root/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/pc-report.html"
-
 }
-
 #alive
-
 
 # START PROGRAM
     cd $workDir
@@ -143,8 +136,6 @@ function Alive{
     {
         Write-Output "Boo, you are running an older version of powershell $psver" -foregroundcolor red
     }
-
-
     Write-host "              The following Powershell Modules Are loaded
     " -ForegroundColor Yellow 
 
@@ -156,8 +147,6 @@ function Alive{
            ... Just a second, script is loading ..." -foregroundcolor Green
     start-sleep 5
     cls
-
-
 #Global Functions
 function CC ($pc){
 
@@ -260,51 +249,44 @@ function PCInfo($pc){
                     $Private:wmi = $null
 
 # Get IP addresses from all local network adapters through WMI
-                    if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue) {
+        if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue) {
 
-                        $Private:Ips = @{}
+                $Private:Ips = @{}
 
-                        $Private:wmi | Where { $_.IPAddress -match '\S+' } | Foreach { $Private:Ips.$($_.IPAddress -join ', ') = $_.MACAddress }
+                $Private:wmi | Where { $_.IPAddress -match '\S+' } | Foreach { $Private:Ips.$($_.IPAddress -join ', ') = $_.MACAddress }
 
-                        $Private:counter = 0
-                        $Private:Ips.GetEnumerator() | Foreach {
+                $Private:counter = 0
+                $Private:Ips.GetEnumerator() | Foreach {
 
-                        $Private:counter++; $PCLog."IP Address $Private:counter" = '' + $_.Name + ' (MAC: ' + $_.Value + ')'
+                $Private:counter++; $PCLog."IP Address $Private:counter" = '' + $_.Name + ' (MAC: ' + $_.Value + ')'
+                }
+        }
 
-                        }
-
-                    }
-
-                    $Private:wmi = $null
+            $Private:wmi = $null
 
 # Get CPU information with WMI
     if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_Processor -ErrorAction SilentlyContinue) {
 
         $Private:wmi | Foreach {
-
-            $Private:maxClockSpeed     =  $_.MaxClockSpeed
-            $Private:numberOfCores     += $_.NumberOfCores
-            $Private:description       =  $_.Description
-            $Private:numberOfLogProc   += $_.NumberOfLogicalProcessors
-            $Private:socketDesignation =  $_.SocketDesignation
-            $Private:status            =  $_.Status
-            $Private:manufacturer      =  $_.Manufacturer
-            $Private:name              =  $_.Name
-
+                $Private:maxClockSpeed     =  $_.MaxClockSpeed
+                $Private:numberOfCores     += $_.NumberOfCores
+                $Private:description       =  $_.Description
+                $Private:numberOfLogProc   += $_.NumberOfLogicalProcessors
+                $Private:socketDesignation =  $_.SocketDesignation
+                $Private:status            =  $_.Status
+                $Private:manufacturer      =  $_.Manufacturer
+                $Private:name              =  $_.Name
             }
-
-            $PCLog.'CPU Clock Speed'        = $Private:maxClockSpeed
-            $PCLog.'CPU Cores'              = $Private:numberOfCores
-            $PCLog.'CPU Description'        = $Private:description
-            $PCLog.'CPU Logical Processors' = $Private:numberOfLogProc
-            $PCLog.'CPU Socket'             = $Private:socketDesignation
-            $PCLog.'CPU Status'             = $Private:status
-            $PCLog.'CPU Manufacturer'       = $Private:manufacturer
-            $PCLog.'CPU Name'               = $Private:name -replace '\s+', ' '
-
+                $PCLog.'CPU Clock Speed'        = $Private:maxClockSpeed
+                $PCLog.'CPU Cores'              = $Private:numberOfCores
+                $PCLog.'CPU Description'        = $Private:description
+                $PCLog.'CPU Logical Processors' = $Private:numberOfLogProc
+                $PCLog.'CPU Socket'             = $Private:socketDesignation
+                $PCLog.'CPU Status'             = $Private:status
+                $PCLog.'CPU Manufacturer'       = $Private:manufacturer
+                $PCLog.'CPU Name'               = $Private:name -replace '\s+', ' '
             }
-
-            $Private:wmi = $null
+                $Private:wmi = $null
 
 # Get BIOS info from WMI
             if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_Bios -ErrorAction SilentlyContinue) {
@@ -319,16 +301,16 @@ function PCInfo($pc){
 # Get operating system info from WMI
                 if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_OperatingSystem -ErrorAction SilentlyContinue) {
 
-                        $PCLog.'OS Boot Time'     = $Private:wmi.ConvertToDateTime($Private:wmi.LastBootUpTime)
-                        $PCLog.'OS System Drive'  = $Private:wmi.SystemDrive
-                        $PCLog.'OS System Device' = $Private:wmi.SystemDevice
-                        $PCLog.'OS Language     ' = $Private:wmi.OSLanguage
-                        $PCLog.'OS Version'       = $Private:wmi.Version
-                        $PCLog.'OS Windows dir'   = $Private:wmi.WindowsDirectory
-                        $PCLog.'OS Name'          = $Private:wmi.Caption
-                        $PCLog.'OS Install Date'  = $Private:wmi.ConvertToDateTime($Private:wmi.InstallDate)
-                        $PCLog.'OS Service Pack'  = [string]$Private:wmi.ServicePackMajorVersion + '.' + $Private:wmi.ServicePackMinorVersion
-                 }
+                $PCLog.'OS Boot Time'     = $Private:wmi.ConvertToDateTime($Private:wmi.LastBootUpTime)
+                $PCLog.'OS System Drive'  = $Private:wmi.SystemDrive
+                $PCLog.'OS System Device' = $Private:wmi.SystemDevice
+                $PCLog.'OS Language     ' = $Private:wmi.OSLanguage
+                $PCLog.'OS Version'       = $Private:wmi.Version
+                $PCLog.'OS Windows dir'   = $Private:wmi.WindowsDirectory
+                $PCLog.'OS Name'          = $Private:wmi.Caption
+                $PCLog.'OS Install Date'  = $Private:wmi.ConvertToDateTime($Private:wmi.InstallDate)
+                $PCLog.'OS Service Pack'  = [string]$Private:wmi.ServicePackMajorVersion + '.' + $Private:wmi.ServicePackMinorVersion
+            }
 
 # Scan for open ports
                     $ports = @{
@@ -512,8 +494,7 @@ $log = "$root/$pc"
             }
             robocopy $dest\Logs $log *.* /move
             Remove-Item $dest\$filename -Verbose
-            Write-Host Files removed from $pc -Foreground "green"
-            
+            Write-Host Files removed from $pc -Foreground "green"       
     }
 x
 }
