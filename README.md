@@ -5,18 +5,19 @@ Expanded with network capabilities by using the SysInternals Tool set like PSExe
 
 Runs from Powershell version 3.0  and will be expanded to Unix Systems.
 
-# Remote Tools Available
+# Tools Available
 
-- AD User Info
+- AD User info *if connected to domain
 - Remote PC info
-- Track Alive PC's
-- Remote Temp file Cleaner 
+- Track online status of PC's within a domain / workgroup
+- Remote Temp file cleaner
+- Remote virus report
 - Remote Batch file execution
-- Dump Customisabel executable files with local and remote execution
-
+- Dump customisable executable files with local and remote logging
+- Remote CMD
+- Remote Registry
 
 # Latest News
 
 The last update, v 2.2, has taken on the chalange of going multi platform and is partionally tested on Mac OSX. Although some of the network tools are not supported yet. 
 I plan to update tools and multi platform support soon!
-
