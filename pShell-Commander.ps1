@@ -34,10 +34,14 @@ $psver = get-host | foreach {$_.Version}
 $workDir = $pwd
 $modules = "bin\Modules"
 $platform = ($PSVersionTable).Platform
+$env:PROFILE
+
 $os = ($PSVersionTable).OS
-$hostn = $env:COMPUTERNAME
+
+#MAC OSX vars
+$hostn = hostname
 $agent = $env:USER
-$log = "$env:HOME\Desktop\$pc"
+$root = "$env:HOME\Desktop\"
 $dump = "bin\_dumpFiles"
 
 
@@ -58,8 +62,8 @@ if ((Get-WmiObject -Class win32_computersystem).PartofDomain){
 # 
 write-host "                 Alive service starting ..." -foreground Green
 Write-host "         checking for existance of a Pc-list File" -Foreground Yellow
-if((test-path $env:USERPROFILE\Desktop\PC-list.txt) -eq  $False){
-    new-item $env:USERPROFILE\Desktop\PC-list.txt -type file
+if((test-path $root\PC-list.txt) -eq  $False){
+    new-item $root\PC-list.txt -type file
     Write-host creating new PC-list file -foreground Magenta
 }else{
     write-host PC-list file exists -Foreground Green
@@ -70,7 +74,7 @@ if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
 }else {
     restart-service AgentAid-Alive -ErrorAction SilentlyContinue
 }
-#invoke-item "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
+#invoke-item "$root\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
 
 
 #MODULES
@@ -433,11 +437,10 @@ function cleanUp ($pc){
         net use /delete \\$pc\C$
     }
 }
-
-function attkScan ($pc) {
+function attkScan ($root, $pc) {
     if (CC($pc)){
          $dest = "\\$pc\C$\avlog"
-         $log = "$env:USERPROFILE\Desktop\$pc"
+         $log = "$root\$pc"
 
                   if(!(Test-Path "$dest\attk_x64.exe")){
 		                 New-Item -ItemType Directory -Force -Path $dest
@@ -486,10 +489,10 @@ function loggedon($pc){
 x
 }
 
-function dumpIt ($pc){
+function dumpIt ($root, $pc){
 
 $dest = "\\$pc\C$\Temp"
-$log = "$env:USERPROFILE\Desktop\$pc"
+$log = "$root\$pc"
 
     if (CC($pc)){
 	        
@@ -726,7 +729,7 @@ function mainMenu {
 		$LengthName = $agent.length
 		$line = "************************************************" + "*"* $LengthName
         $Menu = "
-Welcome $agent  to pShell Commander         version   $version on $psVersion
+Welcome $agent to pShell Commander         version: $version on $psVersion
 Runnig on $platform $os from $hostn on $dom
 $line
 
