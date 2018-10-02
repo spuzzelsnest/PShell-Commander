@@ -7,15 +7,15 @@ Runs from Powershell version 3.0  and will be expanded to Unix Systems.
 
 # Tools Available
 
-- AD User info *if connected to domain
-- Remote PC info
-- Track online status of PC's within a domain / workgroup
-- Remote Temp file cleaner
-- Remote virus report
-- Remote Batch file execution
-- Dump customisable executable files with local and remote logging
-- Remote CMD
-- Remote Registry
+- AD User info (domain)
+- Remote PC info (domnain/local)
+- Track online status of PC's (domain/local)
+- Remote Temp file cleaner (domain/local)
+- Remote virus report (domain/local)
+- Remote Batch file execution (domain/local)
+- Dump customisable executable files (domain/local)
+- Remote CMD (domain/local)
+- Remote Registry (domain/local)
 
 # Latest News
 
