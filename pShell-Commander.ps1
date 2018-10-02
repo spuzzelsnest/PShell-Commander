@@ -22,6 +22,7 @@
 #                           - Added external popup for remote
 #                           - Checking Domain or Workgroup
 #       2.1     06.26.2018  - Adding Mac OSX options
+#               10.02.2018  - Network tools On Mac OSX
 #
 #==========================================================================
 #START VARS
@@ -35,8 +36,8 @@ $modules = "bin\Modules"
 $platform = ($PSVersionTable).Platform
 $os = ($PSVersionTable).OS
 $hostn = $env:COMPUTERNAME
-$agent = $env:USERNAME
-$log = "$env:USERPROFILE\Desktop\$pc"
+$agent = $env:USER
+$log = "$env:HOME\Desktop\$pc"
 $dump = "bin\_dumpFiles"
 
 
@@ -726,7 +727,7 @@ function mainMenu {
 		$line = "************************************************" + "*"* $LengthName
         $Menu = "
 Welcome $agent  to pShell Commander         version   $version on $psVersion
-Runnig on $platfor $os from $hostn on $dom
+Runnig on $platform $os from $hostn on $dom
 $line
 
           What you want to do:
