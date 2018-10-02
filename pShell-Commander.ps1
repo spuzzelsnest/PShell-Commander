@@ -1,5 +1,3 @@
-mainMenu
-=======
 #==========================================================================
 #
 # NAME:		pShell-Commander.ps1
@@ -25,21 +23,22 @@ mainMenu
 #                           - Checking Domain or Workgroup
 #       2.1     06.26.2018  - Adding Mac OSX options
 #
-#
 #==========================================================================
 #START VARS
 #-----------
 
 $Title = "pShell Commander"
-$version = "v 2.0"
+$version = "v 2.1"
 $psver = get-host | foreach {$_.Version}
+$workDir = $pwd
+$modules = "bin\Modules"
 $platform = ($PSVersionTable).Platform
 $os = ($PSVersionTable).OS
-$workDir = "C:\_dev\PShell-Commander"
-$modules = "C:\_dev\PShell-Commander\bin\Modules"
+$hostn = $env:COMPUTERNAME
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
 $dump = "bin\_dumpFiles"
+
 
 if ((Get-WmiObject -Class win32_computersystem).PartofDomain){ 
     $dom=  (Get-WmiObject Win32_ComputerSystem).Domain
@@ -51,9 +50,10 @@ if ((Get-WmiObject -Class win32_computersystem).PartofDomain){
     $AUser = Get-LocalUser |select Name | findstr Admin*
 }
 
+
 #PRELOADING
 #----------
-#Starting Alive Service
+##Starting Alive Service
 # 
 write-host "                 Alive service starting ..." -foreground Green
 Write-host "         checking for existance of a Pc-list File" -Foreground Yellow
@@ -70,6 +70,7 @@ if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
     restart-service AgentAid-Alive -ErrorAction SilentlyContinue
 }
 #invoke-item "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
+
 
 #MODULES
 #-------
@@ -95,12 +96,12 @@ if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
 	{
 		Import-Module -Name ActiveDirectory
 	}
+#>
 
-
-if (!(Get-PSSnapin Quest.ActiveRoles.ADManagement -registered -ErrorAction SilentlyContinue)) { Plugin needed }
-Add-PSSnapin Quest.ActiveRoles.ADManagement -ErrorAction SilentlyContinue
-
-#Load Module PSRemoteRegistry
+#if (!(Get-PSSnapin Quest.ActiveRoles.ADManagement -registered -ErrorAction SilentlyContinue)) { Plugin needed }
+#Add-PSSnapin Quest.ActiveRoles.ADManagement -ErrorAction SilentlyContinue
+#
+#load Module PSRemoteRegistry
 
 if( (Get-Module -Name PSRemoteRegistry -ErrorAction SilentlyContinue) -eq $null)
     {
@@ -143,6 +144,7 @@ else
     Write-Output "Boo, you are running an older version of powershell " -foregroundcolor red
 }
 
+
 Write-host "              The following Powershell Modules Are loaded
 " -ForegroundColor Yellow 
 
@@ -155,9 +157,11 @@ Write-Host "
 start-sleep 5
 cls
 
+
 #Global Functions
 function CC ($pc){
-	If(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($pc).result.status -eq 'Succes')){
+
+    if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($pc).result.status -eq 'Succes')){
 		Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key  " `n
 		return $False
 	}else{
@@ -475,7 +479,7 @@ x
 function loggedon($pc){
     if(CC($pc)){
         .\bin\PSTools\PsLoggedon.exe /l \\$pc -accepteula
-        Write-Host Other USERIDÂ´s in this PC.
+        Write-Host Other USERID´s in this PC.
         Get-ChildItem  \\$pc\C$\Users\ |select name
     }
 x
@@ -719,28 +723,23 @@ function ADVmenu{
 function mainMenu {
         cls
 		$LengthName = $agent.length
-		$line = "**********************************************************************************" + "*"* $LengthName
+		$line = "************************************************" + "*"* $LengthName
         $Menu = "
-Welcome $agent  to pShell Commander
-
-                                                        version   $version on powershell v: $psver
-
-$warning
-
+Welcome $agent  to pShell Commander         version   $version on $psVersion
+Runnig on $platfor $os from $hostn on $dom
 $line
 
-    What do you want to do:
-----------------------------
-                                               (1)   AD-Tools
+          What you want to do:
 
-                                               (2)   Network Tools
-
-                                               (3)   Antivirus Tools
-
-                                               (4)   Advanced Tools
-
-                                               (Q)   EXIT
-    
+                           (1)   AD-Tools  ---  $warning
+                           
+                           (2)   Network Tools
+                           
+                           (3)   Antivirus Tools
+                           
+                           (4)   Advanced Tools
+                           
+                           (Q)   Exit
                            "
 
         $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADTools", "&2 NTTools", "&3 AVTools", "&4 ADVTools", "&Quit")
