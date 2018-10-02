@@ -21,146 +21,139 @@
 #       2.0     02.21.2018  - Reorder structure
 #                           - Added external popup for remote
 #                           - Checking Domain or Workgroup
-#       2.1     06.26.2018  - Adding Mac OSX options
-#               10.02.2018  - Network tools On Mac OSX
+#       2.1     06.26.2018  - Adding Unix options
+#
 #
 #==========================================================================
 #START VARS
 #-----------
 
-$Title = "pShell Commander"
-$version = "v 2.1"
-$psver = get-host | foreach {$_.Version}
-$workDir = $pwd
-$modules = "bin\Modules"
-$platform = ($PSVersionTable).Platform
-$env:PROFILE
-
-$os = ($PSVersionTable).OS
-
-#MAC OSX vars
-$hostn = hostname
-$agent = $env:USER
-$root = "$env:HOME\Desktop\"
-$dump = "bin\_dumpFiles"
-
-
-if ((Get-WmiObject -Class win32_computersystem).PartofDomain){ 
-    $dom=  (Get-WmiObject Win32_ComputerSystem).Domain
-    $warning = "You are working from Domain $dom"
-    $AUser = $env:USERNAME
-}else{
-    $dom = (Get-WmiObject -Class Win32_ComputerSystem).Workgroup
-    $warning = "Running from WorkGroup $dom NO AD Connection possible."
-    $AUser = Get-LocalUser |select Name | findstr Admin*
-}
-
-
-#PRELOADING
-#----------
-##Starting Alive Service
-# 
-write-host "                 Alive service starting ..." -foreground Green
-Write-host "         checking for existance of a Pc-list File" -Foreground Yellow
-if((test-path $root\PC-list.txt) -eq  $False){
-    new-item $root\PC-list.txt -type file
-    Write-host creating new PC-list file -foreground Magenta
-}else{
-    write-host PC-list file exists -Foreground Green
-}
-
-if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
-    new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir\bin\Alive.ps1" -DisplayName "PC alive Service for PShell Commander" -StartupType Manual
-}else {
-    restart-service AgentAid-Alive -ErrorAction SilentlyContinue
-}
-#invoke-item "$root\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
-
-
+    $Title = "pShell Commander"
+    $version = "v 2.1"
+    $psver = get-host | foreach {$_.Version}
+    $workDir = $pwd 
+    $dump = "bin/_dumpFiles"
+   
+    $h = get-host
+    $g = $h.UI
+    $c = $h.UI.RawUI
+    $platform = ($PSVersionTable).Platform
+    
 #MODULES
 #-------
 
-#Remove all and add local path
+    ##add new local path
+    $modsFolder = "$pwd/bin/Modules"
+    $env:PSMODULEPATH += ";$modsFolder"
 
-Get-Module | Remove-Module
-$p = [Environment]::GetEnvironmentVariable("PSModulePath")
-$p += ";$modules"
-[Environment]::SetEnvironmentVariable("PSModulePath",$p)
+    ##Adding Extras
+    
+    $mods = get-ChildItem $modsFolder
+    
+    foreach ($mod in $mods){
+     
+            if( (Get-Module -Name $mod.name -ErrorAction SilentlyContinue) -eq $null){
+                    Import-Module -Name $mod -ErrorAction SilentlyContinue
+                }
+    }
+#PICK OS
+
+if ($platform -eq 'Unix'){
+
+    #MAC OSX / LINUX VARS
+    
+        $hostn = hostname
+        $agent = $env:USER
+        $root = "$env:HOME/Desktop"
+
+}else{
+
+    #WINDOWS VARS
+        $hostn = Get-Childitem Env:Computername
+        $agent = $env:USERNAME
+        $root = "$env:USERPROFILE/Desktop"
+        
+        #Set ScreenSize in Windows
+
+            $c.BackgroundColor = ($bckgrnd = 'black')
+            $p = $c.WindowPosition
+            $p.x = 0
+            $p.y = 0
+            $c.WindowPosition = $p
+
+            $s = $c.BufferSize
+            $s.Width = 140
+            $s.Height = 1000
+            $c.BufferSize = $s
+
+            $w = $c.WindowSize
+            $w.Width = 140
+            $w.Height = 46
+            $c.WindowSize = $w
+
+        ###Exchange
+        ###installed in %ExchangeInstallPath%\bin
+        #
+            if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null)
+                {
+                    Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue
+                }
 
 
-#Exchange
-#installed in %ExchangeInstallPath%\bin
-#
-if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null)
-	{
-        Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue
-	}
-#Active Directory
-#
-if( (Get-Module -Name ActiveDirectory -ErrorAction SilentlyContinue) -eq $null)
-	{
-		Import-Module -Name ActiveDirectory
-	}
-#>
+}
 
-#if (!(Get-PSSnapin Quest.ActiveRoles.ADManagement -registered -ErrorAction SilentlyContinue)) { Plugin needed }
-#Add-PSSnapin Quest.ActiveRoles.ADManagement -ErrorAction SilentlyContinue
-#
-#load Module PSRemoteRegistry
+#STARTING ALIVE SERVICE
 
-if( (Get-Module -Name PSRemoteRegistry -ErrorAction SilentlyContinue) -eq $null)
+function Alive{
+
+        if((test-path $root/PC-list.txt) -eq  $False){
+            new-item $root/PC-list.txt -type file
+            Write-host creating new PC-list file -foreground Magenta
+        }else{
+            write-host PC-list file exists -Foreground Green
+        }
+
+        if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
+            new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir/bin/Alive.ps1" -DisplayName "PC alive Service for PShell Commander" -StartupType Manual
+        }else {
+            restart-service AgentAid-Alive -ErrorAction SilentlyContinue
+        }
+        
+        
+        invoke-item "$root/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/pc-report.html"
+
+}
+
+#alive
+
+
+# START PROGRAM
+    cd $workDir
+    $loadscreen = get-content bin/visuals/loadscreen | Out-String
+    $loadedModules = get-module
+    write-host $loadscreen -ForegroundColor Magenta
+
+    if ($PSVersionTable.PSVersion.Major -gt 2)
     {
-        Import-Module -Name PSRemoteRegistry
+        Write-Output "Yay Powershell has version $psVersion"
+    }
+    else
+    {
+        Write-Output "Boo, you are running an older version of powershell " -foregroundcolor red
     }
 
-#Main window
 
-$h = get-host
-$g = $h.UI
-$c = $h.UI.RawUI
-$c.BackgroundColor = ($bckgrnd = 'black')
+    Write-host "              The following Powershell Modules Are loaded
+    " -ForegroundColor Yellow 
 
-$p = $c.WindowPosition
-$p.x = 0
-$p.y = 0
-$c.WindowPosition = $p
+    $loadedModules | %{
+        Write-Host "            - $_"-Foreground green
+    }
 
-$s = $c.BufferSize
-$s.Width = 140
-$s.Height = 1000
-$c.BufferSize = $s
-
-$w = $c.WindowSize
-$w.Width = 140
-$w.Height = 46
-$c.WindowSize = $w
-
-cd $workDir
-$loadscreen = get-content bin\visuals\loadscreen | Out-String
-$loadedModules = get-module
-write-host $loadscreen -ForegroundColor Magenta
-
-if ($PSVersionTable.PSVersion.Major -gt 2)
-{
-    Write-Output "Yay Powershell has version $psVersion"
-}
-else
-{
-    Write-Output "Boo, you are running an older version of powershell " -foregroundcolor red
-}
-
-
-Write-host "              The following Powershell Modules Are loaded
-" -ForegroundColor Yellow 
-
-$loadedModules | %{
-    Write-Host "            - $_"-Foreground green
-}
-
-Write-Host "
-       ... Just a second, script is loading ..." -foregroundcolor Green
-start-sleep 5
-cls
+    Write-Host "
+           ... Just a second, script is loading ..." -foregroundcolor Green
+    start-sleep 5
+    cls
 
 
 #Global Functions
@@ -730,7 +723,7 @@ function mainMenu {
 		$line = "************************************************" + "*"* $LengthName
         $Menu = "
 Welcome $agent to pShell Commander         version: $version on $psVersion
-Runnig on $platform $os from $hostn on $dom
+Runnig on $platform from $hostn on $dom
 $line
 
           What you want to do:
