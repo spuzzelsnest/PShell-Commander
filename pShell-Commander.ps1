@@ -21,16 +21,19 @@
 #       2.0     02.21.2018  - Reorder structure
 #                           - Added external popup for remote
 #                           - Checking Domain or Workgroup
+#       2.1     06.26.2018  - Adding Mac OSX options
 #
 #==========================================================================
 #START VARS
 #-----------
 
 $Title = "pShell Commander"
-$version = "v 2.0"
-$psVersion = get-host | select -expandproperty version
-$workDir = "C:\_dev\PShell-Commander"
-$modules = "C:\_dev\PShell-Commander\bin\Modules"
+$version = "v 2.1"
+$psver = get-host | foreach {$_.Version}
+$workDir = $pwd
+$modules = "bin\Modules"
+$platform = ($PSVersionTable).Platform
+$os = ($PSVersionTable).OS
 $hostn = $env:COMPUTERNAME
 $agent = $env:USERNAME
 $log = "$env:USERPROFILE\Desktop\$pc"
@@ -50,7 +53,7 @@ if ((Get-WmiObject -Class win32_computersystem).PartofDomain){
 
 #PRELOADING
 #----------
-#Starting Alive Service
+##Starting Alive Service
 # 
 write-host "                 Alive service starting ..." -foreground Green
 Write-host "         checking for existance of a Pc-list File" -Foreground Yellow
@@ -62,11 +65,12 @@ if((test-path $env:USERPROFILE\Desktop\PC-list.txt) -eq  $False){
 }
 
 if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
-    new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir\bin\Alive.ps1" -DisplayName "Pc alive Service for Agent AID" -StartupType Manual
+    new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir\bin\Alive.ps1" -DisplayName "PC alive Service for PShell Commander" -StartupType Manual
 }else {
     restart-service AgentAid-Alive -ErrorAction SilentlyContinue
 }
-invoke-item "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
+#invoke-item "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
+
 
 #MODULES
 #-------
@@ -78,7 +82,6 @@ $p = [Environment]::GetEnvironmentVariable("PSModulePath")
 $p += ";$modules"
 [Environment]::SetEnvironmentVariable("PSModulePath",$p)
 
-<#
 
 #Exchange
 #installed in %ExchangeInstallPath%\bin
@@ -134,7 +137,7 @@ write-host $loadscreen -ForegroundColor Magenta
 
 if ($PSVersionTable.PSVersion.Major -gt 2)
 {
-    Write-Output "Yay Powershell has version "
+    Write-Output "Yay Powershell has version $psVersion"
 }
 else
 {
@@ -157,7 +160,8 @@ cls
 
 #Global Functions
 function CC ($pc){
-	If(!(test-connection -Cn $pc -BufferSize 16 -Count 1 -ea 0 -quiet)){
+
+    if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($pc).result.status -eq 'Succes')){
 		Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key  " `n
 		return $False
 	}else{
@@ -721,8 +725,8 @@ function mainMenu {
 		$LengthName = $agent.length
 		$line = "************************************************" + "*"* $LengthName
         $Menu = "
-Welcome $agent  to pShell Commander         version   $version
-Runnig from $hostn on $dom
+Welcome $agent  to pShell Commander         version   $version on $psVersion
+Runnig on $platfor $os from $hostn on $dom
 $line
 
           What you want to do:
