@@ -65,6 +65,7 @@ if ($platform -eq 'Unix'){
         $hostn = hostname
         $agent = $env:USER
         $root = "$env:HOME/Desktop"
+        $warning = "NOT AVAILABLE"
 
 }else{
 
@@ -135,7 +136,8 @@ function Alive{
 
     if ($PSVersionTable.PSVersion.Major -gt 2)
     {
-        Write-Output "Yay Powershell has version $psver"
+        Write-Output "Yay Powershell has version $psver
+        "
     }
     else
     {
@@ -734,6 +736,7 @@ function mainMenu {
 		$line = "************************************************" + "*"* $LengthName
         $Menu = "
 Welcome $agent to pShell Commander         version: $version on PowerShell $psver
+
 Runnig on $platform from $hostn on $dom
 $line
 
@@ -749,7 +752,6 @@ $line
                            
                            (Q)   Exit
                            "
-
         $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADTools", "&2 NTTools", "&3 AVTools", "&4 ADVTools", "&Quit")
         [int]$defaultchoice = 4
         $choice =  $h.UI.PromptForChoice($Title, $Menu, $mainMenu, $defaultchoice)
