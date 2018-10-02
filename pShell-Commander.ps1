@@ -391,7 +391,6 @@ function PCInfo($pc){
                 }
         $PCLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
         $PCLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:pc Information"
-
 	x
 }
 
@@ -401,7 +400,6 @@ function alterName($pc){
     $alterNames | %{
         write-host $_ "`n" -ForegroundColor Yellow
     }
-     
     x
 }
 
@@ -430,7 +428,7 @@ function cleanUp ($pc){
         net use /delete \\$pc\C$
     }
 }
-function attkScan ($root, $pc) {
+function attkScan ($pc) {
     if (CC($pc)){
          $dest = "\\$pc\C$\avlog"
          $log = "$root\$pc"
@@ -459,7 +457,7 @@ function attkScan ($root, $pc) {
 
 function remoteCMD($pc){
     if(CC($pc)){
-                $args = "-accepteula -s \\$pc -u Administrador powershell"
+                $args = "-accepteula -s \\$pc -u $sUser powershell"
                 Start-Process psexec -ArgumentList $args
             }
 x
@@ -482,10 +480,10 @@ function loggedon($pc){
 x
 }
 
-function dumpIt ($root, $pc){
+function dumpIt ($pc){
 
-$dest = "\\$pc\C$\Temp"
-$log = "$root\$pc"
+$dest = "$pc\C$\Temp"
+$log = "$root/$pc"
 
     if (CC($pc)){
 	        
@@ -501,7 +499,7 @@ $log = "$root\$pc"
 
             if(!(Test-Path $dest\Logs)){
                 Write-host Creating $dest\Logs -ForegroundColor magenta
-				New-Item -ItemType Directory -Force -Path $dest\Logs
+				New-Item -ItemType Directory -Force -Path \\$dest\Logs
 			}else{
                 write-host The $dest\Logs directory exsists -foregroundColor green
 			}
@@ -527,182 +525,199 @@ x
 
 #Menu's
 function ADmenu{
-                $Tile = "AD Tools --   $warning"
-                $Menu = "
-                        (1)  AD-User Info
-                        (2)  AD-Server Info
-                        (3)  Find Related Server Names
-                        (4)  Who is logged on
-                        (5)  Back
+    $Tile = "AD Tools --   $warning"
+    $Menu = "
+            (1)  AD-User Info
+            
+            (2)  AD-Server Info
+            
+            (3)  Find Related Server Names
+            
+            (4)  Who is logged on
+            
+            (5)  Back
+            "
+    $ADchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADUser","&2 ADServ","&3 alternateName","&4 Loggedon","&5 Back")
+    [int]$defchoice = 4
+    $subAD =  $h.UI.PromptForChoice($Title, $Menu, $ADchoice,$defchoice)
+    switch($subAD){
+            0{
+            cls
+              write-host "################################################################"
+              write-host "                          USERINFO INFO" -ForegroundColor Green
+              write-host "################################################################
+                         "
+              $Id =''
+              if(!$id){
+                    Write-Host "Please typ in a User ID"
+                    
+                    $Id =  read-host "What is the userID "
+              }
+              userInfo $Id
+           }1{
+           cls
+             Write-Host "###############################################################"
+             Write-Host "                           PCINFO INFO" -ForegroundColor Green
+             Write-Host "###############################################################
                         "
-                $ADchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADUser","&2 ADServ","&3 alternateName","&4 Loggedon","&5 Back")
-                [int]$defchoice = 4
-                $subAD =  $h.UI.PromptForChoice($Title, $Menu, $ADchoice,$defchoice)
-                switch($subAD){
-                        0{
-                        cls
-                          write-host "################################################################"
-                          write-host "                          USERINFO INFO" -ForegroundColor Green
-                          write-host "################################################################
-                                     "
-                          $Id =''
-                          if(!$id){
-                                Write-Host "Please typ in a User ID"
-                                $Id =  read-host "What is the userID "
-                          }
-                          userInfo $Id
-                       }1{
-                       cls
-                         Write-Host "###############################################################"
-                         Write-Host "                           PCINFO INFO" -ForegroundColor Green
-                         Write-Host "###############################################################
-                                    "
-                            $pc =''
-                                if(!$pc){
-                                write-host "Please type in a PC Name or IP address "
-                                $pc = Read-Host "What is the PC name or the IP-address "
-                                }
-                          PCInfo $pc
-                       }2{
-                       cls
-                                 Write-Host "################################################################"
-                                 Write-Host "                 Find Alternative Server Name" -ForegroundColor Red
-                                 Write-Host "################################################################
-                                            "
-                                 $pc =''
-                                    if(!$pc){
-                                    write-host "Please type in a PC Name or IP address "
-                                    $pc = Read-Host "What is the PC name or the IP-address "
-                                    }
-                                alterName $pc
-                       }3{
-                       cls
-                            Write-Host "################################################################"
-                            Write-Host "         Find user who is logged on to PC" -ForegroundColor Red
-                            Write-Host "################################################################
-                                    "
-                            $pc =''
-                            if(!$pc){
-                            write-host "Please type in a PC Name or IP address "
-                            $pc = Read-Host "What is the PC name or the IP-address "
-                            }
-                            loggedOn $pc
-                        }4{mainMenu}
+                $pc =''
+                    if(!$pc){
+                    write-host "Please type in a PC Name or IP address "
+                    
+                    $pc = Read-Host "What is the PC name or the IP-address "
                 }
+              PCInfo $pc
+           }2{
+           cls
+             Write-Host "################################################################"
+             Write-Host "                 Find Alternative Server Name" -ForegroundColor Red
+             Write-Host "################################################################
+                        "
+             $pc =''
+            if(!$pc){
+                write-host "Please type in a PC Name or IP address "
+                
+                $pc = Read-Host "What is the PC name or the IP-address "
+            }
+            alterName $pc
+           }3{
+           cls
+            Write-Host "################################################################"
+            Write-Host "         Find user who is logged on to PC" -ForegroundColor Red
+            Write-Host "################################################################
+                    "
+            $pc =''
+            if(!$pc){
+                write-host "Please type in a PC Name or IP address "
+                
+                $pc = Read-Host "What is the PC name or the IP-address "
+            }
+            loggedOn $pc
+            }4{mainMenu}
+    }
 }
 
 
 function NTmenu {
-                $Title = "Network Tools"
-                $Menu = "
-                      (1)   Remote CMD
-                      (2)   Interactive CMD
-                      (3)   Dump File To PC
-                      (4)   Back
-                      "
-                $NTchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 iCMD","&3 Dump","&4 Back")
-                [int]$defchoice = 3
-                $subNT = $h.UI.PromptForChoice($Title, $Menu, $NTchoice,$defchoice)
-                switch($subNT){
-                        0{
-                        cls
-                                    Write-Host "################################################################"
-                                    Write-Host "                     Remote CMD" -ForegroundColor Red
-                                    Write-Host "################################################################
-                                    "
-                                    $pc =''
-                                    if(!$pc){
-                                    write-host "Please type in a PC Name or IP address "
-                                    $pc = Read-Host "What is the PC name or the IP-address "
-                                    }
-                                    remoteCMD $pc
-                        
-                        }1{
-                        cls
-                                    Write-Host "################################################################"
-                                    Write-Host "                     InterActive CMD" -ForegroundColor Red
-                                    Write-Host "################################################################
-                                    "
-                                    $pc =''
-                                    if(!$pc){
-                                    write-host "Please type in a PC Name or IP address "
-                                    $pc = Read-Host "What is the PC name or the IP-address "
-                                    }
-                                    interactiveCMD $pc                      
-                        
-                        }2{
-                        cls
-                                    Write-Host "################################################################"
-                                    Write-Host "                     Dump file to PC" -ForegroundColor Red
-                                    Write-Host "################################################################
-                                    "
-                                    $pc =''
-                                    if(!$pc){
-                                    write-host "Please type in a PC Name or IP address "
-                                    $pc = Read-Host "What is the PC name or the IP-address "
-                                    }
-                                    dumpIt $pc
-                        }3{mainMenu}
+    $Title = "Network Tools"
+    $Menu = "
+          (1)   Remote CMD
+
+          (2)   Interactive CMD
+
+          (3)   Dump File To PC
+
+          (4)   Back
+          "
+    $NTchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 iCMD","&3 Dump","&4 Back")
+    [int]$defchoice = 3
+    $subNT = $h.UI.PromptForChoice($Title, $Menu, $NTchoice,$defchoice)
+    switch($subNT){
+            0{
+            cls
+                Write-Host "################################################################"
+                Write-Host "                     Remote CMD" -ForegroundColor Red
+                Write-Host "################################################################
+                "
+                $pc =''
+                if(!$pc){
+                    write-host "Please type in a PC Name or IP address
+                    "
+                    $pc = Read-Host "What is the PC name or the IP-address "
                 }
+                remoteCMD $pc
+
+            }1{
+            cls
+                Write-Host "################################################################"
+                Write-Host "                     InterActive CMD" -ForegroundColor Red
+                Write-Host "################################################################
+                "
+                $pc =''
+                if(!$pc){
+                    write-host "Please type in a PC Name or IP address
+                    "
+                    $pc = Read-Host "What is the PC name or the IP-address "
+                }
+                interactiveCMD $pc                      
+
+            }2{
+            cls
+                Write-Host "################################################################"
+                Write-Host "                     Dump file to PC" -ForegroundColor Red
+                Write-Host "################################################################
+                "
+                $pc =''
+                if(!$pc){
+                    write-host "Please type in a PC Name or IP address
+                    "
+                    $pc = Read-Host "What is the PC name or the IP-address "
+                }
+                dumpIt $pc
+            }3{mainMenu}
+    }
 }
 
 function AVmenu {
-                $Title = "Anti Virus and Cleaning Tool"
-                $Menu = "
-                      (1)   Clean TEMP files
-                      
-                      (2)   ATTK-Scan
-                      
-                      (3)   Full-Scan
-                      
-                      (4)   Back
-                      "
-                $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup", "&2 ATTK", "&3 Full", "&4 Back")
-                [int]$defchoice = 3
-                $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
-                switch($subAV){
-                                0{
-                                cls
-                                    Write-Host "################################################################"
-                                    Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
-                                    Write-Host "################################################################
-                                    "
-                                    $pc =''
-                                    if(!$pc){
-                                    write-host "Please type in a PC Name or IP address "
-                                    $pc = Read-Host "What is the PC name or the IP-address "
-                                    }
-                                    cleanUp $pc
-                                    x
-                                }1{
-                                cls
-                                    Write-Host "################################################################"
-                                    Write-Host "                          ATTK Scan" -ForegroundColor Red
-                                    Write-Host "################################################################
-                                    "
-                                    $pc =''
-                                    if(!$pc){
-                                    write-host "Please type in a PC Name or IP address "
-                                    $pc = Read-Host "What is the PC name or the IP-address "
-                                    }
-                                    attkScan $pc
-                                    x
-                                }2{
-                                cls
-                                    Write-Host "################################################################"
-                                    Write-Host "                          Full Clearnup" -ForegroundColor Red
-                                    Write-Host "################################################################
-                                    "
-                                   $pc =''
-                                    if(!$pc){
-                                    write-host "Please type in a PC Name or IP address "
-                                    $pc = Read-Host "What is the PC name or the IP-address "
-                                    }
-                                    cleanup $pc
-                                    attkScan $pc
-                                    x
-                                }3{mainMenu}
-                         }
+        $Title = "Anti Virus and Cleaning Tool"
+        $Menu = "
+              (1)   Clean TEMP files
+
+              (2)   ATTK-Scan
+
+              (3)   Full-Scan
+
+              (4)   Back
+              "
+        $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup", "&2 ATTK", "&3 Full", "&4 Back")
+        [int]$defchoice = 3
+        $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
+        switch($subAV){
+                        0{
+                        cls
+                            Write-Host "################################################################"
+                            Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
+                            Write-Host "################################################################
+                            "
+                            $pc =''
+                            if(!$pc){
+                            write-host "Please type in a PC Name or IP address
+                            "
+                            $pc = Read-Host "What is the PC name or the IP-address "
+                            }
+                            cleanUp $pc
+                            x
+                        }1{
+                        cls
+                            Write-Host "################################################################"
+                            Write-Host "                          ATTK Scan" -ForegroundColor Red
+                            Write-Host "################################################################
+                            "
+                            $pc =''
+                            if(!$pc){
+                            write-host "Please type in a PC Name or IP address
+                            "
+                            $pc = Read-Host "What is the PC name or the IP-address "
+                            }
+                            attkScan $pc
+                            x
+                        }2{
+                        cls
+                            Write-Host "################################################################"
+                            Write-Host "                          Full Clearnup" -ForegroundColor Red
+                            Write-Host "################################################################
+                            "
+                           $pc =''
+                            if(!$pc){
+                            write-host "Please type in a PC Name or IP address
+                            "
+                            $pc = Read-Host "What is the PC name or the IP-address "
+                            }
+                            cleanup $pc
+                            attkScan $pc
+                            x
+                        }3{mainMenu}
+        }
 }
 
 function ADVmenu{
