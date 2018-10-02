@@ -10,9 +10,9 @@ Runs from Powershell version 3.0  and will be expanded to Unix Systems.
 - AD User Info
 - Remote PC info
 - Track Alive PC's
-- Remote Temp File Cleaner 
+- Remote Temp file Cleaner 
 - Remote Batch file execution
-- Customisable Dump Files with local and remote Execution
+- Dump Customisabel executable files with local and remote execution
 
 
 # Latest News
