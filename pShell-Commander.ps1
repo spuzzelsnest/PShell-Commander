@@ -22,15 +22,15 @@
 #                           - Added external popup for remote
 #                           - Checking Domain or Workgroup
 #       2.1     06.26.2018  - Adding Unix options
-#
+#       2.2     10.02.2018  - Restructured Module sequence
 #
 #==========================================================================
 #START VARS
 #-----------
 
     $Title = "pShell Commander"
-    $version = "v 2.1"
-    $psver = get-host | foreach {$_.Version}
+    $version = "v 2.2"
+    $psver = $PSVersionTable.PSVersion.tostring()
     $workDir = $pwd 
     $dump = "bin/_dumpFiles"
    
@@ -650,8 +650,11 @@ function AVmenu {
                 $Title = "Anti Virus and Cleaning Tool"
                 $Menu = "
                       (1)   Clean TEMP files
+                      
                       (2)   ATTK-Scan
+                      
                       (3)   Full-Scan
+                      
                       (4)   Back
                       "
                 $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup", "&2 ATTK", "&3 Full", "&4 Back")
@@ -722,7 +725,7 @@ function mainMenu {
 		$LengthName = $agent.length
 		$line = "************************************************" + "*"* $LengthName
         $Menu = "
-Welcome $agent to pShell Commander         version: $version on $psVersion
+Welcome $agent to pShell Commander         version: $version on PowerShell $psver
 Runnig on $platform from $hostn on $dom
 $line
 
