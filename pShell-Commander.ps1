@@ -54,7 +54,7 @@
      
             if( (Get-Module -Name $mod.name -ErrorAction SilentlyContinue) -eq $null){
                     Import-Module -Name $mod -ErrorAction SilentlyContinue
-                }
+            }
     }
 #PICK OS
 
@@ -94,13 +94,10 @@ if ($platform -eq 'Unix'){
 
         ###Exchange
         ###installed in %ExchangeInstallPath%\bin
-        #
-            if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null)
-                {
+            if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null){
                     Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue
-                }
+            }
 }
-
 #STARTING ALIVE SERVICE
 
 function Alive{
@@ -397,46 +394,46 @@ function cleanUp ($pc){
       	$UserFolders = get-childItem IA:\Users\ -Directory
 
         foreach ($folder in $UserFolders){
-                $path = "IA:\Users\"+$folder
-				remove-item $path\AppData\Local\Temp\* -recurse -force -verbose -ErrorAction SilentlyContinue
-				remove-item $path\AppData\Local\Microsoft\Windows\"Temporary Internet Files"\* -recurse -force -verbose -ErrorAction SilentlyContinue
-				Write-host "Cleaned up Temp Items for "$folder.Name -foreground Green
+            $path = "IA:\Users\"+$folder
+            remove-item $path\AppData\Local\Temp\* -recurse -force -verbose -ErrorAction SilentlyContinue
+            remove-item $path\AppData\Local\Microsoft\Windows\"Temporary Internet Files"\* -recurse -force -verbose -ErrorAction SilentlyContinue
+            Write-host "Cleaned up Temp Items for "$folder.Name -foreground Green
         }
         net use /delete \\$pc\C$
     }
 }
 function attkScan ($pc) {
     if (CC($pc)){
-         $dest = "\\$pc\C$\avlog"
-         $log = "$root\$pc"
+        $dest = "\\$pc\C$\avlog"
+        $log = "$root\$pc"
 
-                  if(!(Test-Path "$dest\attk_x64.exe")){
-		                 New-Item -ItemType Directory -Force -Path $dest
-                         Write-Host "copying attk scan to C:\avlog" -ForegroundColor White
-                         robocopy $dump $dest attk_x64.exe
-                        }else{
-                            Write-host "
-                            - ATTK Files available on local PC
-                            " -foregroundcolor green
-                        }
-		            if(!(Test-Path $log)){
-			            New-Item -ItemType Directory -Force -Path $log
-			            Write-Host "Creating Log directory at $log" -ForegroundColor White
-		                }else{
-                           Write-host "
-                            - Log directory available
-                           " -ForegroundColor Green
-                        }
-                .\bin\PSTools\PsExec.exe -s  \\$pc cmd /s /k  "cd C:\avlog && attk_x64.exe && exit" -accepteula
-                robocopy "\\$pc\C$\avlog\TrendMicro AntiThreat Toolkit\Output" $log *
-            }
+        if(!(Test-Path "$dest\attk_x64.exe")){
+            New-Item -ItemType Directory -Force -Path $dest
+            Write-Host "copying attk scan to C:\avlog" -ForegroundColor White
+            robocopy $dump $dest attk_x64.exe
+        }else{
+            Write-host "
+            - ATTK Files available on local PC
+            " -foregroundcolor green
+        }
+        if(!(Test-Path $log)){
+            New-Item -ItemType Directory -Force -Path $log
+            Write-Host "Creating Log directory at $log" -ForegroundColor White
+        }else{
+            Write-host "
+            - Log directory available
+            " -ForegroundColor Green
+        }
+        .\bin\PSTools\PsExec.exe -s  \\$pc cmd /s /k  "cd C:\avlog && attk_x64.exe && exit" -accepteula
+        robocopy "\\$pc\C$\avlog\TrendMicro AntiThreat Toolkit\Output" $log *
+    }
 }
 
 function remoteCMD($pc){
     if(CC($pc)){
                 $args = "-accepteula -s \\$pc -u $sUser powershell"
                 Start-Process psexec -ArgumentList $args
-            }
+    }
 x
 }
 
@@ -444,7 +441,7 @@ function interactiveCMD($pc){
     if(CC($pc)){
                 $args = "-accepteula -s -i \\$pc -u $dom\$AUser powershell"
                 Start-Process psexec -ArgumentList $args
-            }
+    }
 x
 }
 
@@ -572,7 +569,6 @@ function ADmenu{
             }4{mainMenu}
     }
 }
-
 
 function NTmenu {
     $Title = "Network Tools"
@@ -740,16 +736,16 @@ $line
              switch ($choice){
                    0{
                    cls
-                            ADmenu
+                        ADmenu
                    }1{
                    cls
-                            NTmenu
+                        NTmenu
                    }2{
                    cls
-                            AVmenu
+                        AVmenu
                    }3{
                    cls
-                            ADVmenu
+                        ADVmenu
                    }q{
                    cls
                         $h.ExitNestedPrompt()
