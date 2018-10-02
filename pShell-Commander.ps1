@@ -163,7 +163,7 @@ function CC ($pc){
 		Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key  " `n
 		return $False
 	}else{
-	return $True
+	   return $True
     }
 }
 
@@ -179,37 +179,30 @@ function UserInfo ($Id){
     $Private:Id = $Id
 
 	if (!(Get-ADUser -Filter {SamAccountName -eq $Id} )){
-             Write-Host "ID not found " -ForegroundColor Red
-             x
+        Write-Host "ID not found " -ForegroundColor Red
+        x
 	}else{
-
-
-	$userLog = [ordered]@{}
-
-      'Processing ' + $Private:Id + '...'
- 
-	#--------------GENERAL USER INFO---------------
-	$genInfo = Get-ADUser -Identity $Id -properties * -ErrorAction SilentlyContinue | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
-	#--------------GROUPS--------------------------
-	$groupInfo = get-ADPrincipalGroupMembership $Id | select -ExpandProperty name |out-string
-	#--------------MANAGER-------------------------
-	$manager = Get-ADUser $Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} |  Format-Table -HideTableHeaders |Out-String
-	$manager = $manager.Trim()
-	$manInfo = get-aduser -filter {displayName -like $manager} -properties * | Select displayName, EmailAddress, mobile | Format-Table -HideTableHeaders | out-string
-	#--------------EMAIL----------------------------
-	$migAttr = get-aduser -identity $Id -Properties *  -ErrorAction SilentlyContinue | select-object msExchRecipientTypeDetails
-	$mailInfo = Get-Recipient -Identity $Id | Select Name -ExpandProperty EmailAddresses |  select SmtpAddress |Out-String
-	#--------------BUILD LIST------------------------
-    $genInfo.psobject.Properties | foreach{ $userLog[$_.name]=$_.value}
-    $userLog.add('Manager Info', $manInfo)
-	$userLog.add('Groups', $groupInfo)
-	$userLog.add('Email Addresses', $mailInfo)
-	
-    
-    #foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
-	$userLog.getenumerator()| Ft -AutoSize -wrap | out-string
-    $userLog.GetEnumerator() | Out-GridView -Title "$Id Information"
-		
+        $userLog = [ordered]@{}
+        'Processing ' + $Private:Id + '...'
+#--------------GENERAL USER INFO---------------
+        $genInfo = Get-ADUser -Identity $Id -properties * -ErrorAction SilentlyContinue | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
+#--------------GROUPS--------------------------
+        $groupInfo = get-ADPrincipalGroupMembership $Id | select -ExpandProperty name |out-string
+#--------------MANAGER-------------------------
+        $manager = Get-ADUser $Id -Properties manager | Select-Object -Property @{label='Manager';expression={$_.manager -replace '^CN=|,.*$'}} |  Format-Table -HideTableHeaders |Out-String
+        $manager = $manager.Trim()
+        $manInfo = get-aduser -filter {displayName -like $manager} -properties * | Select displayName, EmailAddress, mobile | Format-Table -HideTableHeaders | out-string
+#--------------EMAIL----------------------------
+        $migAttr = get-aduser -identity $Id -Properties *  -ErrorAction SilentlyContinue | select-object msExchRecipientTypeDetails
+        $mailInfo = Get-Recipient -Identity $Id | Select Name -ExpandProperty EmailAddresses |  select SmtpAddress |Out-String
+#--------------BUILD LIST------------------------
+        $genInfo.psobject.Properties | foreach{ $userLog[$_.name]=$_.value}
+        $userLog.add('Manager Info', $manInfo)
+        $userLog.add('Groups', $groupInfo)
+        $userLog.add('Email Addresses', $mailInfo)
+            #foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
+        $userLog.getenumerator()| Ft -AutoSize -wrap | out-string
+        $userLog.GetEnumerator() | Out-GridView -Title "$Id Information"
     }
 x
 }
@@ -221,7 +214,7 @@ function PCInfo($pc){
         $PCLog = @{}
         $PCLog.'PC-Name' = $Private:pc
         $PCLog.''
-        # Try an ICMP ping the only way Powershell knows how...
+# Try an ICMP ping the only way Powershell knows how...
         $Private:ping = Test-Connection -quiet -count 1 $Private:pc
         $PCLog.Ping = $(if ($Private:ping) { 'Yes' } else { 'No' })
                 $ErrorActionPreference = 'SilentlyContinue'
@@ -235,15 +228,15 @@ function PCInfo($pc){
                     $PCLog.'IP Address from DNS' = 'Could not resolve'
 
                 }
-                # Make errors visible again
+# Make errors visible again
                 $ErrorActionPreference = 'Continue'
 
-                # We'll assume no ping reply means it's dead. Try this anyway if -IgnorePing is specified
+# We'll assume no ping reply means it's dead. Try this anyway if -IgnorePing is specified
                 if ($Private:ping -or $Private:ignorePing) {
 
                     $PCLog.'WMI Data Collection Attempt' = 'Yes (ping reply or -IgnorePing)'
 
-                    # Get various info from the ComputerSystem WMI class
+# Get various info from the ComputerSystem WMI class
                     if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_ComputerSystem -ErrorAction SilentlyContinue) {
 
                         $PCLog.'Computer Hardware Manufacturer' = $Private:wmi.Manufacturer
@@ -254,7 +247,7 @@ function PCInfo($pc){
 
                     $Private:wmi = $null
 
-                    # Get the free/total disk space from local disks (DriveType 3)
+# Get the free/total disk space from local disks (DriveType 3)
                     if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_LogicalDisk -Filter 'DriveType=3' -ErrorAction SilentlyContinue) {
 
                         $Private:wmi | Select 'DeviceID', 'Size', 'FreeSpace' | Foreach {
@@ -264,7 +257,7 @@ function PCInfo($pc){
                     }
                     $Private:wmi = $null
 
-                    # Get IP addresses from all local network adapters through WMI
+# Get IP addresses from all local network adapters through WMI
                     if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue) {
 
                         $Private:Ips = @{}
@@ -282,7 +275,7 @@ function PCInfo($pc){
 
                     $Private:wmi = $null
 
-    # Get CPU information with WMI
+# Get CPU information with WMI
     if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_Processor -ErrorAction SilentlyContinue) {
 
         $Private:wmi | Foreach {
@@ -311,7 +304,7 @@ function PCInfo($pc){
 
             $Private:wmi = $null
 
-            # Get BIOS info from WMI
+# Get BIOS info from WMI
             if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_Bios -ErrorAction SilentlyContinue) {
 
                 $PCLog.'BIOS Manufacturer' = $Private:wmi.Manufacturer
@@ -321,7 +314,7 @@ function PCInfo($pc){
 
          $Private:wmi = $null
 
-             # Get operating system info from WMI
+# Get operating system info from WMI
                 if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_OperatingSystem -ErrorAction SilentlyContinue) {
 
                         $PCLog.'OS Boot Time'     = $Private:wmi.ConvertToDateTime($Private:wmi.LastBootUpTime)
@@ -335,7 +328,7 @@ function PCInfo($pc){
                         $PCLog.'OS Service Pack'  = [string]$Private:wmi.ServicePackMajorVersion + '.' + $Private:wmi.ServicePackMinorVersion
                  }
 
-            # Scan for open ports
+# Scan for open ports
                     $ports = @{
                             'http'            = '80'  ;
                             'https'           = '443' ;
@@ -348,13 +341,13 @@ function PCInfo($pc){
 
                 $Private:socket = New-Object Net.Sockets.TcpClient
 
-        # Suppress error messages
+# Suppress error messages
                 $ErrorActionPreference = 'SilentlyContinue'
 
-        # Try to connect
+# Try to connect
                 $Private:socket.Connect($Private:pc, $ports.$service)
 
-        # Make error messages visible again
+# Make error messages visible again
                 $ErrorActionPreference = 'Continue'
 
         if ($Private:socket.Connected) {
@@ -374,7 +367,7 @@ function PCInfo($pc){
 
             }
 
-        # Get data from AD using Quest ActiveRoles Get-ADComputer
+# Get data from AD using Quest ActiveRoles Get-ADComputer
         $Private:pcObject = Get-ADComputer $Private:pc -ErrorAction 'SilentlyContinue'
           if ($Private:pcObject) {
 
