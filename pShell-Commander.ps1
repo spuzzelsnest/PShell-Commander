@@ -135,11 +135,11 @@ function Alive{
 
     if ($PSVersionTable.PSVersion.Major -gt 2)
     {
-        Write-Output "Yay Powershell has version $psVersion"
+        Write-Output "Yay Powershell has version $psver"
     }
     else
     {
-        Write-Output "Boo, you are running an older version of powershell " -foregroundcolor red
+        Write-Output "Boo, you are running an older version of powershell $psver" -foregroundcolor red
     }
 
 
