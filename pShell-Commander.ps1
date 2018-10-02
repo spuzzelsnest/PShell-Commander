@@ -65,7 +65,7 @@ if ($platform -eq 'Unix'){
         $hostn = hostname
         $agent = $env:USER
         $root = "$env:HOME/Desktop"
-        $warning = "NOT AVAILABLE"
+        $warning = "!!!! NOT AVAILABLE !!!!"
 
 }else{
 
