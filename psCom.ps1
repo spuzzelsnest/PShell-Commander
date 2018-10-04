@@ -23,6 +23,8 @@
 #                           - Checking Domain or Workgroup
 #       2.1.0   06.26.2018  - Adding Unix basic support
 #       2.1.1   10.02.2018  - Restructured Module sequence
+#                           - More Unix adaptions
+#                           - More Messaging
 #
 #==========================================================================
 #START VARS
@@ -33,35 +35,34 @@ clear
     $workDir = $pwd 
     $dump = "bin/_dumpFiles"
     $psTools = "bin/PSTools"
-    $pcQ= "What is the PC name or the IP-address or press ENTER to Cancel"
+
     $h = get-host
     $g = $h.UI
     $c = $h.UI.RawUI
     $platform = ($PSVersionTable).Platform
-    
+#TEXT VARS
+#---------
+    $pcQ= "What is the PC name or the IP-address or press ENTER to Cancel"
+    $userQ = ""
 #MODULES
 #-------
-
     ##add new local path
-    $modsFolder = "$workDir/bin/Modules"
-    $env:PSMODULEPATH += ";$modsFolder"
-
+        $modsFolder = "$workDir/bin/Modules"
+        $env:PSMODULEPATH += ";$modsFolder"
+    
     ##Adding Extras
-    
-    $mods = get-ChildItem $modsFolder
-    
-    foreach ($mod in $mods){
-     
-            if( (Get-Module -Name $mod.name -ErrorAction SilentlyContinue) -eq $null){
-                    Import-Module -Name $mod -ErrorAction SilentlyContinue
-            }
-    }
-#PICK OS
+        $mods = get-ChildItem $modsFolder
+        foreach ($mod in $mods){
 
+                if( (Get-Module -Name $mod.name -ErrorAction SilentlyContinue) -eq $null){
+                        Import-Module -Name $mod -ErrorAction SilentlyContinue
+                }
+        }
+#PICK OS
+#-------
 if ($platform -eq 'Unix'){
 
-    #MAC OSX / LINUX VARS
-    
+    ##MAC OSX / LINUX VARS
         $hostn = hostname
         $agent = $env:USER
         $root = "$env:HOME/Desktop"
@@ -69,13 +70,12 @@ if ($platform -eq 'Unix'){
 
 }else{
 
-    #WINDOWS VARS
+    ##WINDOWS VARS
         $hostn = Get-Childitem Env:Computername
         $agent = $env:USERNAME
         $root = "$env:USERPROFILE/Desktop"
         
-        #Set ScreenSize in Windows
-
+        ###Set ScreenSize in Windows
             $c.BackgroundColor = ($bckgrnd = 'black')
             $p = $c.WindowPosition
             $p.x = 0
@@ -147,15 +147,15 @@ function Alive{
     clear
 #Global Functions
 function CC ($pc){
-if(!($pc -eq "c")){
-    if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($pc).result.status -eq 'Succes')){
-		Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key  " `n
-        clear
-		return $False
-	}else{
-	   return $True
-    }
-}else{x}
+    if(!($pc -eq "c")){
+        if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($pc).result.status -eq 'Succes')){
+            Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key  " `n
+            clear
+            return $False
+        }else{
+           return $True
+        }
+    }else{x}
 }
 
 function x{
@@ -353,22 +353,18 @@ function PCInfo($pc){
             }
 
 # Get data from AD using Quest ActiveRoles Get-ADComputer
-        $Private:pcObject = Get-ADComputer $Private:pc -ErrorAction 'SilentlyContinue'
-          if ($Private:pcObject) {
-
-                        $PCLog.'AD Operating System'         = $Private:pcObject.OSName
-                        $PCLog.'AD Operating System Version' = $Private:pcObject.OSVersion
-                        $PCLog.'AD Service Pack'             = $Private:pcObject.OSServicePack
-                        $PCLog.'AD Enabled AD Account'       = $( if ($Private:pcObject.AccountIsDisabled) { 'No' } else { 'Yes' } )
-                        $PCLog.'AD Description'              = $Private:pcObject.Description
-
-                }else {
-
-                    $PCLog.'AD Computer Object Info Collected' = 'No'
-
-                }
-        $PCLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
-        $PCLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:pc Information"
+    $Private:pcObject = Get-ADComputer $Private:pc -ErrorAction 'SilentlyContinue'
+    if ($Private:pcObject) {
+        $PCLog.'AD Operating System'         = $Private:pcObject.OSName
+        $PCLog.'AD Operating System Version' = $Private:pcObject.OSVersion
+        $PCLog.'AD Service Pack'             = $Private:pcObject.OSServicePack
+        $PCLog.'AD Enabled AD Account'       = $( if ($Private:pcObject.AccountIsDisabled) { 'No' } else { 'Yes' } )
+        $PCLog.'AD Description'              = $Private:pcObject.Description
+    }else {
+        $PCLog.'AD Computer Object Info Collected' = 'No'
+    }
+    $PCLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
+    $PCLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:pc Information"
 x
 }
 
@@ -597,48 +593,48 @@ function NTmenu {
     [int]$defchoice = 3
     $subNT = $h.UI.PromptForChoice($Title, $Menu, $NTchoice,$defchoice)
     switch($subNT){
-            0{
-            clear
-                Write-Host "################################################################"
-                Write-Host "                     Remote CMD" -ForegroundColor Red
-                Write-Host "################################################################
+        0{
+        clear
+            Write-Host "################################################################"
+            Write-Host "                     Remote CMD" -ForegroundColor Red
+            Write-Host "################################################################
+            "
+            $pc =''
+            if(!$pc){
+                write-host "Please type in a PC Name or IP address
                 "
-                $pc =''
-                if(!$pc){
-                    write-host "Please type in a PC Name or IP address
-                    "
-                    $pc = Read-Host $pcQ
-                }
-                remoteCMD $pc
+                $pc = Read-Host $pcQ
+            }
+            remoteCMD $pc
 
-            }1{
-            clear
-                Write-Host "################################################################"
-                Write-Host "                     InterActive CMD" -ForegroundColor Red
-                Write-Host "################################################################
+        }1{
+        clear
+            Write-Host "################################################################"
+            Write-Host "                     InterActive CMD" -ForegroundColor Red
+            Write-Host "################################################################
+            "
+            $pc =''
+            if(!$pc){
+                write-host "Please type in a PC Name or IP address
                 "
-                $pc =''
-                if(!$pc){
-                    write-host "Please type in a PC Name or IP address
-                    "
-                    $pc = Read-Host $pcQ
-                }
-                interactiveCMD $pc                      
+                $pc = Read-Host $pcQ
+            }
+            interactiveCMD $pc                      
 
-            }2{
-            clear
-                Write-Host "################################################################"
-                Write-Host "                     Dump file to PC" -ForegroundColor Red
-                Write-Host "################################################################
+        }2{
+        clear
+            Write-Host "################################################################"
+            Write-Host "                     Dump file to PC" -ForegroundColor Red
+            Write-Host "################################################################
+            "
+            $pc =''
+            if(!$pc){
+                write-host "Please type in a PC Name or IP address
                 "
-                $pc =''
-                if(!$pc){
-                    write-host "Please type in a PC Name or IP address
-                    "
-                    $pc = Read-Host $pcQ
-                }
-                dumpIt $pc
-            }3{mainMenu}
+                $pc = Read-Host $pcQ
+            }
+            dumpIt $pc
+        }3{mainMenu}
     }
 }
 
@@ -657,74 +653,74 @@ function AVmenu {
         [int]$defchoice = 3
         $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
         switch($subAV){
-                        0{
-                        clear
-                            Write-Host "################################################################"
-                            Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
-                            Write-Host "################################################################
-                            "
-                            $pc =''
-                            if(!$pc){
-                            write-host "Please type in a PC Name or IP address
-                            "
-                            $pc = Read-Host 
-                            }
-                            cleanUp $pc
-                            x
-                        }1{
-                        clear
-                            Write-Host "################################################################"
-                            Write-Host "                          ATTK Scan" -ForegroundColor Red
-                            Write-Host "################################################################
-                            "
-                            $pc =''
-                            if(!$pc){
-                            write-host "Please type in a PC Name or IP address
-                            "
-                            $pc = Read-Host $pcQ
-                            }
-                            attkScan $pc
-                            x
-                        }2{
-                        clear
-                            Write-Host "################################################################"
-                            Write-Host "                          Full Clearnup" -ForegroundColor Red
-                            Write-Host "################################################################
-                            "
-                           $pc =''
-                            if(!$pc){
-                            write-host "Please type in a PC Name or IP address
-                            "
-                            $pc = Read-Host $pcQ
-                            }
-                            cleanup $pc
-                            attkScan $pc
-                            x
-                        }3{mainMenu}
+            0{
+            clear
+                Write-Host "################################################################"
+                Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
+                Write-Host "################################################################
+                "
+                $pc =''
+                if(!$pc){
+                    write-host "Please type in a PC Name or IP address
+                    "
+                    $pc = Read-Host 
+                }
+                cleanUp $pc
+                x
+            }1{
+            clear
+                Write-Host "################################################################"
+                Write-Host "                          ATTK Scan" -ForegroundColor Red
+                Write-Host "################################################################
+                "
+                $pc =''
+                if(!$pc){
+                    write-host "Please type in a PC Name or IP address
+                    "
+                    $pc = Read-Host $pcQ
+                }
+                attkScan $pc
+                x
+            }2{
+            clear
+                Write-Host "################################################################"
+                Write-Host "                          Full Clearnup" -ForegroundColor Red
+                Write-Host "################################################################
+                "
+               $pc =''
+                if(!$pc){
+                    write-host "Please type in a PC Name or IP address
+                    "
+                    $pc = Read-Host $pcQ
+                }
+                cleanup $pc
+                attkScan $pc
+                x
+            }3{mainMenu}
         }
 }
 
 function ADVmenu{
-                $Title = "Advanced Tools"
-                $Menu = "
-                      (1)   Back
-                      "
-                $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Back")
-                [int]$defchoice = 0
-                $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
-                switch($subAV){ 
+        $Title = "Advanced Tools"
+        $Menu = "
+              (1)   Back
+              "
+        $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Back")
+        [int]$defchoice = 0
+        $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
+        switch($subAV){ 
 
-                        0{mainMenu}
+                0{mainMenu}
 
-                }
+        }
 }
 
 function mainMenu {
-        $Title = "pShell Commander"
-        clear
-		$LengthName = $agent.length
-		$line = "************************************************" + "*"* $LengthName
-        $Menu = "
+    $Title = "pShell Commander"
+    clear
+    $LengthName = $agent.length
+    $line = "************************************************" + "*"* $LengthName
+    $Menu = "
 Welcome $agent to pShell Commander         version: $version on PowerShell $psver
 
 Runnig on $platform from $hostn on $dom
@@ -742,28 +738,28 @@ $line
                            
                            (Q)   Exit
                            "
-        $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADTools", "&2 NTTools", "&3 AVTools", "&4 ADVTools", "&Quit")
-        [int]$defaultchoice = 4
-        $choice =  $h.UI.PromptForChoice($Title, $Menu, $mainMenu, $defaultchoice)
+    $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADTools", "&2 NTTools", "&3 AVTools", "&4 ADVTools", "&Quit")
+    [int]$defaultchoice = 4
+    $choice =  $h.UI.PromptForChoice($Title, $Menu, $mainMenu, $defaultchoice)
 
-             switch ($choice){
-                   0{
-                   clear
-                        ADmenu
-                   }1{
-                   clear
-                        NTmenu
-                   }2{
-                   clear
-                        AVmenu
-                   }3{
-                   clear
-                        ADVmenu
-                   }q{
-                   clear
-                        $h.ExitNestedPrompt()
-                   }
-             }
+         switch ($choice){
+               0{
+                    clear
+                    ADmenu
+               }1{
+                    clear
+                    NTmenu
+               }2{
+                    clear
+                    AVmenu
+               }3{
+                    clear
+                    ADVmenu
+               }q{
+                    clear
+                    $h.ExitNestedPrompt()
+               }
+         }
 }
 
 mainMenu
