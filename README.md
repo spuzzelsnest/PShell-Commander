@@ -17,7 +17,21 @@ Runs from Powershell version 3.0  and will be expanded to Unix Systems.
 - Remote CMD (domain/local)
 - Remote Registry (domain/local)
 
+# how to run
+
+## Windows
+
+Just run the damn thing
+
+## Unix (Linux / OSX)
+
+- install powershell
+- run the script like "pwsh psCom.ps1"
+
+
 # Latest News
 
-The last update, v 2.2, has taken on the chalange of going multi platform and is partionally tested on Mac OSX. Although some of the network tools are not supported yet. 
+05-10-2018
+I Have been messing with versioning but got it right this time this is the last update, v 2.1.1!
+I have taken on the chalange of going multi platform and i am partionally testing on Mac OSX. Although some of the network tools are not supported yet. 
 I plan to update tools and multi platform support soon!
