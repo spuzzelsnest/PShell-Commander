@@ -100,6 +100,12 @@ if ($platform -eq 'Unix'){
 }
 #STARTING ALIVE SERVICE
 
+function exit{
+    clear
+    $h.ExitNestedPrompt()
+}
+
+
 function Alive{
 
         if((test-path $root/PC-list.txt) -eq  $False){
@@ -142,7 +148,8 @@ function Alive{
 
     Write-Host "
            ... Just a second, script is loading ..." -foregroundcolor Green
-    Write-Host "                      ***if you want to add more Modules add them in bin/Modules***"
+    Write-Host "
+    ***if you want to add more Modules add them in bin/Modules***" -foregroundcolor yellow
     start-sleep 5
     clear
 #Global Functions
@@ -755,10 +762,7 @@ $line
                }3{
                     clear
                     ADVmenu
-               }q{
-                    clear
-                    $h.ExitNestedPrompt()
-               }
+               }q{exit}
          }
 }
 
