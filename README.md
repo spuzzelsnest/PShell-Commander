@@ -33,5 +33,5 @@ Just run the damn thing
 
 05-10-2018
 I Have been messing with versioning but got it right this time: this is the last update, v 2.1.1!
-I have taken on the chalange of going multi platform and i am partionally testing on Mac OSX. Although some of the network tools are not supported yet. 
+I have taken on the chalange of going multi platform and I am partionally testing on Mac OSX. Although some of the network tools are not supported yet. 
 I plan to update tools and multi platform support soon!
