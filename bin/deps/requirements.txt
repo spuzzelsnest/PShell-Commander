@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 lxml
 email
 Scrapy
@@ -15,4 +16,23 @@ cryptography
 pycrypto
 impacket
 pyasn1
+=======
+lxml
+email
+Scrapy
+scipy
+FeedParser
+pypiwin32
+pip
+wheel
+numpy
+Twisted
+ansible
+pyopenssl
+setuptools
+cryptography
+pycrypto
+impacket
+pyasn1
+>>>>>>> b69d0509a6d6dfdd1e1b9b7b4e878e2ab2773dc0
 httplib2
