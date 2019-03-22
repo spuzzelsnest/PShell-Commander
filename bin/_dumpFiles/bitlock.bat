@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 ::bitlock.bat
 ::disable and enable protectors for Bitlocker 
 ::
@@ -13,20 +13,4 @@
 manage-bde -protectors -disable C:
 manage-bde -protectors -enable C:
 
-=======
-::bitlock.bat
-::disable and enable protectors for Bitlocker 
-::
-::Created by Spuzzelsnest
-::
-::Change Log
-::-----------
-::V1.0 Initial release 24-04-2017
-::############################################
-@echo off
-
-manage-bde -protectors -disable C:
-manage-bde -protectors -enable C:
-
->>>>>>> b69d0509a6d6dfdd1e1b9b7b4e878e2ab2773dc0
 exit
