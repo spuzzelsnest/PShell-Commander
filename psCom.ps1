@@ -25,6 +25,7 @@
 #       2.1.1   10.02.2018  - Restructured Module sequence
 #                           - More Unix adaptions
 #                           - More Messaging
+#       2.1.2   22.03.2019  - Windows 10 out of the box fixes
 #
 #--------------------------------------------------------------------------------
 #START VARS
@@ -491,8 +492,10 @@ write-host "You can choose from the following Files or press C to Cancel:
             
           
             if(!(Test-Path $dest\Logs)){
+                New-Item -ItemType Directory -Force -Path $dest\Logs
+
                 Write-host Creating $dest\Logs -ForegroundColor magenta
-				New-Item -ItemType Directory -Force -Path \\$dest\Logs
+				
 			}else{
                 write-host The $dest\Logs directory exsists -foregroundColor green
 			}
