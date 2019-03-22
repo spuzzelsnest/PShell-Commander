@@ -1,8 +1,3 @@
-<<<<<<< HEAD
 #
 bin/PSTools
-=======
-#
-bin/PSTools
->>>>>>> b69d0509a6d6dfdd1e1b9b7b4e878e2ab2773dc0
 bin/_dumpFiles/*.exe

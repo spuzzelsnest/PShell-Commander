@@ -3,7 +3,7 @@
 # NAME:		pShell-Commander.ps1
 #
 # AUTHOR:	Spuzzelsnest
-# EMAIL:	jan.mpdesmet@gmail.com
+# EMAIL:	j.mpdesmet@gmail.com
 #
 # COMMENT:
 #			Agent Aid to automate the job
@@ -33,8 +33,8 @@ clear
     $version = "v 2.1.1"
     $psver = $PSVersionTable.PSVersion.tostring()
     $workDir = $pwd 
-    $dump = "bin/_dumpFiles"
-    $psTools = "bin/PSTools"
+    $dump = "bin\_dumpFiles\"
+    $psTools = "bin\PSTools\"
 
     $h = get-host
     $g = $h.UI
@@ -74,6 +74,8 @@ if ($platform -eq 'Unix'){
         $hostn = Get-Childitem Env:Computername
         $agent = $env:USERNAME
         $root = "$env:USERPROFILE/Desktop"
+        $warning = "No Domain"
+
         
         ###Set ScreenSize in Windows
             $c.BackgroundColor = ($bckgrnd = 'black')
@@ -413,7 +415,8 @@ x
 
 function attkScan ($pc) {
     if (CC($pc)){
-    cd $psTools
+        cd $psTools
+        
         $dest = "\\$pc\C$\avlog"
         $log = "$root\$pc"
 
@@ -434,7 +437,8 @@ function attkScan ($pc) {
             - Log directory available
             " -ForegroundColor Green
         }
-        PsExec.exe -s  \\$pc cmd /s /k  "cd C:\avlog && attk_x64.exe && exit" -accepteula
+
+        .\PsExec.exe -s  \\$pc cmd /s /k  "cd C:\avlog && attk_x64.exe && exit" -accepteula
         robocopy.exe "\\$pc\C$\avlog\TrendMicro AntiThreat Toolkit\Output" $log *
     }
 x
@@ -444,7 +448,7 @@ function remoteCMD($pc){
     if(CC($pc)){
     cd $psTools
                 $args = "-accepteula -s \\$pc -u $sUser powershell"
-                Start-Process PsExec.exe -ArgumentList $args
+                Start-Process .\PsExec.exe -ArgumentList $args
     }
 x
 }
@@ -453,7 +457,7 @@ function interactiveCMD($pc){
     if(CC($pc)){
     cd $psTools
                 $args = "-accepteula -s -i \\$pc -u $dom\$AUser powershell"
-                Start-Process PsExec.exe -ArgumentList $args
+                Start-Process .\PsExec.exe -ArgumentList $args
     }
 x
 }
@@ -461,7 +465,7 @@ x
 function loggedon($pc){
     if(CC($pc)){
     cd $psTools
-        PsLoggedon.exe /l \\$pc -accepteula
+        .\PsLoggedon.exe /l \\$pc -accepteula
         Write-Host Other USERID´s in this PC.
         Get-ChildItem  \\$pc\C$\Users\ |select name
     }
@@ -470,8 +474,8 @@ x
 
 function dumpIt ($pc){
 
-$dest = "$pc\C$\Temp"
-$log = "$root/$pc"
+$dest = "\\$pc\C$\Temp"
+$log = "$root\$pc"
 write-host "You can choose from the following Files or press C to Cancel:
  *For now only Copy pasting the name or rewrite it in the box works*"
           $files = Get-ChildItem $dump | select Name
@@ -484,7 +488,7 @@ write-host "You can choose from the following Files or press C to Cancel:
           
 
     if (CC($pc)){
-   
+            
           
             if(!(Test-Path $dest\Logs)){
                 Write-host Creating $dest\Logs -ForegroundColor magenta
@@ -495,8 +499,10 @@ write-host "You can choose from the following Files or press C to Cancel:
 
 		    Copy-Item $dump\$filename $dest
             Write-Host $filename copied to $dest -ForegroundColor green
-            cd $psTools
-		    PsExec.exe -accepteula -s \\$pc cmd /C C:\Temp\$filename
+		    
+            cd $workDir\$psTools
+             
+            .\PsExec.exe -s \\$pc cmd /C C:\Temp\$filename -accepteula
             
             if(!(Test-path $log)){
 				Write-Host $log is not available -Foreground magenta
