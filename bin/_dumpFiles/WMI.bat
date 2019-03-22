@@ -13,7 +13,8 @@ Winmgmt /salvagerepository
 net pause winmgmt /y
 
 for %i in (*.dll) do RegSvr32 -s %i >> C:\temp\Logs\result.log
-for %i in (*.exe) do %i /RegServer >> C:\temp\Logs\result.log
+
+for %i in (*.exe) do %i /RegServer >> C:\temp\Logs\result.log
  
 
 cd /d %windir%\sysWOW64\wbem
@@ -27,6 +28,5 @@ gpupdate /force >> C:\temp\Logs\result.log
 
 cd C:\windows\ccmsetup\
 ccmsetup.exe
-
 
 exit /b
