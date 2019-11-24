@@ -1,6 +1,6 @@
 @echo off
 
-net user administrador /active:yes W33dm4ps*
+net user administrador /active:yes PASS
 
 for /f "usebackq skip=1 tokens=*" %%i in (`wmic computersystem get workgroup ^| findstr /r /v "^$" ^| findstr /r /v "^$"`) do @set wGrp=%%i
 
