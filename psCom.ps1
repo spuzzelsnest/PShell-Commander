@@ -26,25 +26,9 @@
 #                           - More Unix adaptions
 #                           - More Messaging
 #       2.1.2   22.03.2019  - Windows 10 out of the box fixes
-#
+#       2.2.0   24.11.2019  - Download PSTools Automatically
 #--------------------------------------------------------------------------------
-#START VARS
-#-----------
-clear
-    $version = "v 2.1.1"
-    $psver = $PSVersionTable.PSVersion.tostring()
-    $workDir = $pwd 
-    $dump = "bin\_dumpFiles\"
-    $psTools = "bin\PSTools\"
-
-    $h = get-host
-    $g = $h.UI
-    $c = $h.UI.RawUI
-    $platform = ($PSVersionTable).Platform
-#TEXT VARS
-#---------
-    $pcQ= "What is the PC name or the IP-address or press ENTER to Cancel"
-    $userQ = ""
+#FIRST CHECK
 #MODULES
 #-------
     ##add new local path
@@ -59,6 +43,25 @@ clear
                         Import-Module -Name $mod -ErrorAction SilentlyContinue
                 }
         }
+
+#START VARS
+#-----------
+clear
+    $version = "v 2.2.0"
+    $psver = $PSVersionTable.PSVersion.tostring()
+    $workDir = $pwd
+    $dump = "bin\_dumpFiles\"
+    $psTools = "bin\PSTools\"
+
+    $h = get-host
+    $g = $h.UI
+    $c = $h.UI.RawUI
+    $platform = ($PSVersionTable).Platform
+#TEXT VARS
+#---------
+    $pcQ= "What is the PC name or the IP-address or press ENTER to Cancel"
+    $userQ = ""
+
 #PICK OS
 #-------
 if ($platform -eq 'Unix'){
@@ -101,6 +104,28 @@ if ($platform -eq 'Unix'){
                     Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue
             }
 }
+
+#PSEXE-TOOLS
+#Download at https://download.sysinternals.com/files/PSTools.zip
+    ##test path
+    if( !(test-path $psTools )){
+       $url = "https://download.sysinternals.com/files/PSTools.zip"
+       $down = "_prep\PSTools.zip"
+       Start-BitsTransfer -Source $url -Destination $down
+  
+      
+       
+       Expand-Archive $down $psTools
+       
+       $psexeMessage = "             Added PSTools
+       "
+       rm 
+    } else {
+       $psexeMessage = "           PSTOOLS Available
+       "
+    }
+
+
 #STARTING ALIVE SERVICE
 
 function exit{
@@ -142,19 +167,21 @@ function Alive{
     {
         Write-Output "Boo, you are running an older version of powershell $psver" -foregroundcolor red
     }
+    write-host $psexeMessage -ForegroundColor green
     Write-host "              The following Powershell Modules Are loaded
     " -ForegroundColor Yellow 
 
     $loadedModules | %{
         Write-Host "            - $_"-Foreground green
     }
-
+    
     Write-Host "
            ... Just a second, script is loading ..." -foregroundcolor Green
     Write-Host "
     ***if you want to add more Modules add them in bin/Modules***" -foregroundcolor yellow
     start-sleep 5
     clear
+
 #Global Functions
 function CC ($pc){
     if(!($pc -eq "c")){
