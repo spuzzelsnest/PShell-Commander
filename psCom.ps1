@@ -27,6 +27,8 @@
 #                           - More Messaging
 #       2.1.2   22.03.2019  - Windows 10 out of the box fixes
 #       2.2.0   24.11.2019  - Download PSTools Automatically
+#
+#       2.3     27.04.2020  - Rework with invoke-command  
 #--------------------------------------------------------------------------------
 #FIRST CHECK
 #MODULES
@@ -47,7 +49,7 @@
 #START VARS
 #-----------
 clear
-    $version = "v 2.2.0"
+    $version = "v 2.3.0"
     $psver = $PSVersionTable.PSVersion.tostring()
     $workDir = $pwd
     $dump = "bin\_dumpFiles\"
@@ -60,26 +62,15 @@ clear
 #TEXT VARS
 #---------
     $pcQ= "What is the PC name or the IP-address or press ENTER to Cancel"
-    $userQ = ""
+    $userQ = "What is the UserID or press ENTER to Cancel"
 
-#PICK OS
+#Set Env
 #-------
-if ($platform -eq 'Unix'){
-
-    ##MAC OSX / LINUX VARS
-        $hostn = hostname
-        $agent = $env:USER
-        $root = "$env:HOME/Desktop"
-        $warning = "!!!! NOT AVAILABLE !!!!"
-
-}else{
 
     ##WINDOWS VARS
         $hostn = Get-Childitem Env:Computername
         $agent = $env:USERNAME
         $root = "$env:USERPROFILE/Desktop"
-        $warning = "No Domain"
-
         
         ###Set ScreenSize in Windows
             $c.BackgroundColor = ($bckgrnd = 'black')
@@ -103,7 +94,6 @@ if ($platform -eq 'Unix'){
             if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null){
                     Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue
             }
-}
 
 #PSEXE-TOOLS
 #Download at https://download.sysinternals.com/files/PSTools.zip
@@ -112,14 +102,11 @@ if ($platform -eq 'Unix'){
        $url = "https://download.sysinternals.com/files/PSTools.zip"
        $down = "_prep\PSTools.zip"
        Start-BitsTransfer -Source $url -Destination $down
-  
-      
        
        Expand-Archive $down $psTools
        
        $psexeMessage = "             Added PSTools
        "
-       rm 
     } else {
        $psexeMessage = "           PSTOOLS Available
        "
@@ -205,14 +192,13 @@ function x{
 
 #Program
 function UserInfo ($Id){
-    $Private:Id = $Id
 
 	if (!(Get-ADUser -Filter {SamAccountName -eq $Id} )){
         Write-Host "ID not found " -ForegroundColor Red
         x
 	}else{
         $userLog = [ordered]@{}
-        'Processing ' + $Private:Id + '...'
+        'Processing ' + $Id + '...'
 #--------------GENERAL USER INFO---------------
         $genInfo = Get-ADUser -Identity $Id -properties * -ErrorAction SilentlyContinue | select SamAccountName, Name, surName, GivenName,  StreetAddress, PostalCode, City, Country, OfficePhone, otherTelephone, Title, Department, Company, Organization, UserPrincipalName, DistinguishedName, ObjectClass, Enabled,scriptpath, homedrive, homedirectory, SID
 #--------------GROUPS--------------------------
@@ -549,7 +535,7 @@ x
 
 #Menu's
 function ADmenu{
-    $Tile = "AD Tools --   $warning"
+    $Tile = "AD Tools"
     $Menu = "
             (1)  AD-User Info
             
@@ -573,9 +559,9 @@ function ADmenu{
                          "
               $Id =''
               if(!$id){
-                    Write-Host "Please typ in a User ID"
                     
-                    $Id =  read-host "What is the userID "
+                    $Id =  read-host $userQ
+                    write-host $Id
               }
               userInfo $Id
            }1{
@@ -586,7 +572,6 @@ function ADmenu{
                         "
                 $pc =''
                     if(!$pc){
-                    write-host $pcQ
                     
                     $pc = Read-Host $pcQ
                 }
@@ -599,7 +584,6 @@ function ADmenu{
                         "
              $pc =''
             if(!$pc){
-                write-host $pcQ
                 
                 $pc = Read-Host $pcQ
             }
@@ -612,7 +596,6 @@ function ADmenu{
                     "
             $pc =''
             if(!$pc){
-                write-host $pcQ
                 
                 $pc = Read-Host $pcQ
             }
@@ -644,8 +627,6 @@ function NTmenu {
             "
             $pc =''
             if(!$pc){
-                write-host "Please type in a PC Name or IP address
-                "
                 $pc = Read-Host $pcQ
             }
             remoteCMD $pc
@@ -658,8 +639,6 @@ function NTmenu {
             "
             $pc =''
             if(!$pc){
-                write-host "Please type in a PC Name or IP address
-                "
                 $pc = Read-Host $pcQ
             }
             interactiveCMD $pc                      
@@ -672,8 +651,6 @@ function NTmenu {
             "
             $pc =''
             if(!$pc){
-                write-host "Please type in a PC Name or IP address
-                "
                 $pc = Read-Host $pcQ
             }
             dumpIt $pc
@@ -704,8 +681,7 @@ function AVmenu {
                 "
                 $pc =''
                 if(!$pc){
-                    write-host "Please type in a PC Name or IP address
-                    "
+
                     $pc = Read-Host 
                 }
                 cleanUp $pc
@@ -718,8 +694,7 @@ function AVmenu {
                 "
                 $pc =''
                 if(!$pc){
-                    write-host "Please type in a PC Name or IP address
-                    "
+
                     $pc = Read-Host $pcQ
                 }
                 attkScan $pc
@@ -732,9 +707,8 @@ function AVmenu {
                 "
                $pc =''
                 if(!$pc){
-                    write-host "Please type in a PC Name or IP address
-                    "
-                    $pc = Read-Host $pcQ
+
+                     $pc = Read-Host $pcQ
                 }
                 cleanup $pc
                 attkScan $pc
@@ -771,7 +745,7 @@ $line
 
           What you want to do:
 
-                           (1)   AD-Tools  ---  $warning
+                           (1)   AD-Tools
                            
                            (2)   Network Tools
                            
