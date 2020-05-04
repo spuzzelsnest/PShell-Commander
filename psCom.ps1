@@ -107,21 +107,20 @@ function Alive{
 
         if((test-path $root/PC-list.txt) -eq  $False){
             new-item $root/PC-list.txt -type file
-            Write-host creating new PC-list file -foreground Magenta
+            Write-host creating new PC-list file -ForegroundColor Magenta
         }else{
-            write-host PC-list file exists -Foreground Green
+            write-host PC-list file exists -ForegroundColor Green
         }
 
         if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
-            write-host Createing server -Foreground Magenta
+            write-host Createing server -ForegroundColor Magenta
             new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir/bin/Alive.ps1" -DisplayName "PC alive Service for PShell Commander" -StartupType Manual
         }else {
-            write-host restarting service -Foreground Green
+            write-host restarting service -ForegroundColor Yellow
             restart-service AgentAid-Alive -ErrorAction SilentlyContinue
         }
-        invoke-item "$root/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/pc-report.html"
+        invoke-item "$env:USERPROFILE/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/pc-report.html"
 }
-Alive
 
 # START PROGRAM
     cd $workDir
@@ -134,23 +133,27 @@ Alive
         Write-Host "Yay Powershell is running on version $psver
         "
     }else{
-        Write-Host "Boo, you are running an older version of powershell $psver" -foregroundcolor red
+        Write-Host "Boo, you are running an older version of powershell $psver" -foregroundcolor Red
     }
     if ($warning){
-        Write-Host "      $warning -ForegroundColor Red
-    "}
+        Write-Host "      $warning" -ForegroundColor Red
+    }
     
-    Write-host "              The following Powershell Modules Are loaded
+    Write-host "
+                  The following Powershell Modules Are loaded
     " -ForegroundColor Yellow 
 
     $loadedModules | %{
-        Write-Host "            - $_"-Foreground green
+        Write-Host "            - $_"-ForegroundColor Green
     }
+
+    Write-Host "
+    ***if you want to add more Modules add them in bin/Modules***" -ForegroundColor Yellow
     
     Write-Host "
-           ... Just a second, script is loading ..." -foregroundcolor Green
-    Write-Host "
-    ***if you want to add more Modules add them in bin/Modules***" -foregroundcolor yellow
+           ... Just a second, Alive Script is loading ..." -ForegroundColor Green
+    Alive
+
     start-sleep 5
 
 #Global Functions
@@ -390,14 +393,14 @@ function cleanUp ($pc){
         Write-progress "Removing Temp Folders from "  "in Progress:"
 		new-PSdrive IA Filesystem \\$pc\C$
 		remove-item IA:\"$"Recycle.Bin\* -recurse -force -verbose
-		Write-host "Cleaned up Recycle.Bin" -foreground Green
+		Write-host "Cleaned up Recycle.Bin" -ForegroundColor Green
 		if (Test-Path IA:\Windows.old){
             Remove-Item IA:\Windows.old\ -Recurse -Force -Verbose
 		}else{
-		    Write-host "no Windows.old Folder found" -foreground green
+		    Write-host "no Windows.old Folder found" -ForegroundColor Green
 		}
-        remove-item IA:\Windows\Temp\* -recurse -force -verbose
-        write-host "Cleaned up C:\Windows\Temp" -foreground Green
+        remove-item IA:\Windows\Temp\* -recurse -Force -Verbose
+        write-host "Cleaned up C:\Windows\Temp" -ForegroundColor Green
       	$UserFolders = get-childItem IA:\Users\ -Directory
 
         foreach ($folder in $UserFolders){
@@ -411,19 +414,17 @@ function cleanUp ($pc){
 x
 }
 
-
-
 function remotePS($pc){
     if(CC($pc)){
-        New-PSSession -ComputerName $pc
-        Enter-PSSession -ComputerName $pc
+        New-PSSession -CN $pc
+        Enter-PSSession -CN $pc
     }
 x
 }
 
 function loggedon($pc){
     if(CC($pc)){
-        Invoke-Command -ComputerName $pc -ScriptBlock { quser }
+        Invoke-Command -CN $pc -ScriptBlock { quser }
     }
 x
 }
@@ -432,35 +433,33 @@ function dumpIt ($pc){
 
 $dest = "\\$pc\C$\Temp"
 $log = "$root\$pc"
-write-host "You can choose from the following Files or press C to Cancel:
+Write-Host "You can choose from the following Files or press C to Cancel:
  *For now only Copy pasting the name or rewrite it in the box works*"
           $files = Get-ChildItem $dump | select Name
           
             for ([int]$i = 1; $i -le $files.length; $i++){
-                        write-host $i $files[$i-1].name
+                        Write-Host $i $files[$i-1].name
                    }
             
             $fileName = Read-Host "What File do you want to send"
-          
-
+ 
     if (CC($pc)){
-            
-          
+ 
             if(!(Test-Path $dest\Logs)){
                 New-Item -ItemType Directory -Force -Path $dest\Logs
 
-                Write-host Creating $dest\Logs -ForegroundColor magenta
+                Write-Host Creating $dest\Logs -ForegroundColor magenta
 				
 			}else{
-                write-host The $dest\Logs directory exsists -foregroundColor green
+                Write-Host The $dest\Logs directory exsists -ForegroundColor Green
 			}
 
 		    Copy-Item $dump\$filename $dest
-            Write-Host $filename copied to $dest -ForegroundColor green
+            Write-Host $filename copied to $dest -ForegroundColor Green
 		    
             cd $workDir\$psTools
              
-            invoke-command -computername $pc -filepath $workDir/bin/_dumpFiles/$filename
+            Invoke-Command -CN $pc -FilePath $workDir/bin/_dumpFiles/$filename
             
             if(!(Test-path $log)){
 				Write-Host $log is not available -Foreground magenta
@@ -495,29 +494,27 @@ function ADmenu{
     switch($subAD){
             0{
             clear
-              write-host "################################################################"
-              write-host "                          USERINFO INFO" -ForegroundColor Green
-              write-host "################################################################
+             Write-Host "################################################################"
+             Write-Host "                          USERINFO INFO" -ForegroundColor Green
+             Write-Host "################################################################
                          "
-              $Id =''
-              if(!$id){
-                    
-                    $Id =  read-host $userQ
-                    write-host $Id
-              }
-              userInfo $Id
+             $Id =''
+             if(!$id){
+                $Id =  Read-Host $userQ
+                Write-Host $Id
+             }
+             userInfo $Id
            }1{
            clear
              Write-Host "###############################################################"
              Write-Host "                           PCINFO INFO" -ForegroundColor Green
              Write-Host "###############################################################
                         "
-                $pc =''
-                    if(!$pc){
-                    
-                    $pc = Read-Host $pcQ
-                }
-              PCInfo $pc
+             $pc =''
+             if(!$pc){
+                $pc = Read-Host $pcQ
+             }
+             PCInfo $pc
            }2{
            clear
              Write-Host "################################################################"
@@ -525,11 +522,10 @@ function ADmenu{
              Write-Host "################################################################
                         "
              $pc =''
-            if(!$pc){
-                
+             if(!$pc){
                 $pc = Read-Host $pcQ
-            }
-            alterName $pc
+             }
+             alterName $pc
            }3{
            clear
             Write-Host "################################################################"
@@ -585,7 +581,6 @@ function NTmenu {
         }2{mainMenu}
     }
 }
-
 
 function ADVmenu{
         $Title = "Advanced Tools"
