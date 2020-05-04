@@ -1,9 +1,9 @@
  # pShell-Commander                
 
-Built and restructured from an old Batch Program I once wrote, AD-Aid, a tool for Active Directory info. Writen in PowerShell this time and build on a set of tools like Get-ADUser and Get-ADComputer.
-Expanded with network capabilities by using the SysInternals Tool set like PSExec and module support like PSRemoteRegistry.
+Built and restructured from an old batch program I once wrote, AD-Aid, a tool for Active Directory information gathering. Writen in PowerShell this time and build on a set of tools like Get-ADUser and Get-ADComputer.
+Expanded with network capabilities by using the Invoke-Command.
 
-Runs from Powershell version 3.0  and will be expanded to Unix Systems.
+Runs from PowerShell version 3.0  and will be expanded to Unix Systems.
 
 # Tools Available
 
@@ -11,17 +11,26 @@ Runs from Powershell version 3.0  and will be expanded to Unix Systems.
 - Remote PC info (domnain/local)
 - Track online status of PC's (domain/local)
 - Remote Temp file cleaner (domain/local)
-- Remote virus report (domain/local)
-- Remote Batch file execution (domain/local)
+- Remote script file execution (domain/local)
 - Dump customisable executable files (domain/local)
 - Remote CMD (domain/local)
 - Remote Registry (domain/local)
 
-# how to run
+# How to run
 
 ## Windows
 
-Just run the damn thing
+Make sure the execution policy is set in PowerShell, to check use:
+
+```bash
+Get-ExecutionPolicy
+```
+
+To set the execution policy, run PowerShell as an Administrator and  to open scripts use:
+
+```bash
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
+```
 
 ## Unix (Linux / OSX)
 
