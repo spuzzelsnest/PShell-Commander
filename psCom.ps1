@@ -58,7 +58,7 @@ clear
     $h = get-host
     $g = $h.UI
     $c = $h.UI.RawUI
-    $platform = ($PSVersionTable).Platform
+   
 #TEXT VARS
 #---------
     $pcQ= "What is the PC name or the IP-address or press ENTER to Cancel"
@@ -68,7 +68,7 @@ clear
 #-------
 
     ##WINDOWS VARS
-        $hostn = Get-Childitem Env:Computername
+        $hostn = $env:Computername
         $agent = $env:USERNAME
         $root = "$env:USERPROFILE/Desktop"
         
@@ -112,14 +112,12 @@ clear
        "
     }
 
-
-#STARTING ALIVE SERVICE
-
 function exit{
     clear
     $h.ExitNestedPrompt()
 }
 
+#STARTING ALIVE SERVICE
 
 function Alive{
 
@@ -131,13 +129,15 @@ function Alive{
         }
 
         if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
+            write-host Createing server -Foreground Magenta
             new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir/bin/Alive.ps1" -DisplayName "PC alive Service for PShell Commander" -StartupType Manual
         }else {
+            write-host restarting service -Foreground Green
             restart-service AgentAid-Alive -ErrorAction SilentlyContinue
         }
         invoke-item "$root/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/pc-report.html"
 }
-#alive
+Alive
 
 # START PROGRAM
     cd $workDir
@@ -147,7 +147,7 @@ function Alive{
 
     if ($PSVersionTable.PSVersion.Major -gt 2)
     {
-        Write-Output "Yay Powershell is running on version $psver
+        Write-host "Yay Powershell is running on version $psver
         "
     }
     else
@@ -733,14 +733,14 @@ function ADVmenu{
 }
 
 function mainMenu {
-    $Title = "pShell Commander"
+    $Title = "pShell Commander $hostn"
     clear
     $LengthName = $agent.length
     $line = "************************************************" + "*"* $LengthName
     $Menu = "
-Welcome $agent to pShell Commander         version: $version on PowerShell $psver
+Welcome $agent         version: $version on PowerShell $psver
 
-Runnig on $platform from $hostn on $dom
+Running from $hostn on $dom
 $line
 
           What you want to do:
