@@ -56,7 +56,10 @@
         $hostn = $env:Computername
         $agent = $env:USERNAME
         $dom = $env:USERDNSDOMAIN
-        if (!$dom) { $dom = "." }
+        if (!$dom) { 
+            $dom = "."
+            $warning = "!!NOT in Domain!!"
+         }
         $root = "$env:USERPROFILE/Desktop"
         
         ###Set ScreenSize in Windows
@@ -128,13 +131,15 @@ Alive
 
     if ($PSVersionTable.PSVersion.Major -gt 2)
     {
-        Write-host "Yay Powershell is running on version $psver
+        Write-Host "Yay Powershell is running on version $psver
         "
+    }else{
+        Write-Host "Boo, you are running an older version of powershell $psver" -foregroundcolor red
     }
-    else
-    {
-        Write-Output "Boo, you are running an older version of powershell $psver" -foregroundcolor red
-    }
+    if ($warning){
+        Write-Host "      $warning -ForegroundColor Red
+    "}
+    
     Write-host "              The following Powershell Modules Are loaded
     " -ForegroundColor Yellow 
 
@@ -406,36 +411,6 @@ function cleanUp ($pc){
 x
 }
 
-function attkScan ($pc) {
-    if (CC($pc)){
-        cd $psTools
-        
-        $dest = "\\$pc\C$\avlog"
-        $log = "$root\$pc"
-
-        if(!(Test-Path "$dest\attk_x64.exe")){
-            New-Item -ItemType Directory -Force -Path $dest
-            Write-Host "copying attk scan to C:\avlog" -ForegroundColor White
-            robocopy.exe $dump $dest attk_x64.exe
-        }else{
-            Write-host "
-            - ATTK Files available on local PC
-            " -foregroundcolor green
-        }
-        if(!(Test-Path $log)){
-            New-Item -ItemType Directory -Force -Path $log
-            Write-Host "Creating Log directory at $log" -ForegroundColor White
-        }else{
-            Write-host "
-            - Log directory available
-            " -ForegroundColor Green
-        }
-
-        .\PsExec.exe -s  \\$pc cmd /s /k  "cd C:\avlog && attk_x64.exe && exit" -accepteula
-        robocopy.exe "\\$pc\C$\avlog\TrendMicro AntiThreat Toolkit\Output" $log *
-    }
-x
-}
 
 
 function remotePS($pc){
@@ -628,17 +603,18 @@ function ADVmenu{
 }
 
 function mainMenu {
-    $Title = "pShell Commander"
+    $Title = "pShell Commander $version"
     clear
     $LengthName = $agent.length
-    $line = "************************************************" + "*"* $LengthName
+    $lengthDom = $dom.Length
+    $line = "*****************************************************" + "*"* $LengthName +"*"* $lengthDom 
     $Menu = "
-Welcome $agent         version: $version on PowerShell $psver
+Welcome $agent                                   PowerShell $psver
 
-Running from $hostn on $dom
+      Running from $hostn on $dom $warning
 $line
 
-          What you want to do:
+       What do you want to do:
 
                            (1)   AD-Tools
                            
