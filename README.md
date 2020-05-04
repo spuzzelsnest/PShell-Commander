@@ -7,14 +7,14 @@ Runs from PowerShell version 3.0  and will be expanded to Unix Systems.
 
 # Tools Available
 
-- AD User info (domain)
-- Remote PC info (domnain/local)
-- Track online status of PC's (domain/local)
-- Remote Temp file cleaner (domain/local)
-- Remote script file execution (domain/local)
-- Dump customisable executable files (domain/local)
-- Remote CMD (domain/local)
-- Remote Registry (domain/local)
+- AD User info
+- Remote PC info
+- Track online status of PC's
+- Remote Temp file cleaner
+- Remote script file execution
+- Dump customisable executable files
+- Remote CMD
+- Remote Registry
 
 # How to run
 
@@ -26,21 +26,14 @@ Make sure the execution policy is set in PowerShell, to check use:
 Get-ExecutionPolicy
 ```
 
-To set the execution policy, run PowerShell as an Administrator and  to open scripts use:
+To set the execution policy, run PowerShell as an Administrator and run this code:
 
 ```bash
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
 ```
 
-## Unix (Linux / OSX)
+After downloading the project, you can run the script from powershell.
 
-- install powershell
-- run the script like "pwsh psCom.ps1"
-
-
-# Latest News
-
-05-10-2018
-I Have been messing with versioning but got it right this time: this is the last update, v 2.1.1!
-I have taken on the chalange of going multi platform and I am partionally testing on Mac OSX. Although some of the network tools are not supported yet. 
-I plan to update tools and multi platform support soon!
+```bash
+.\psCom.ps1
+```
