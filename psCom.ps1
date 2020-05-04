@@ -38,7 +38,7 @@
     $psver = $PSVersionTable.PSVersion.tostring()
     $workDir = $pwd
     $dump = "bin\_dumpFiles\"
-    $psTools = "bin\PSTools\"
+    $modsFolder = "$workDir/bin/Modules"
 
     $h = get-host
     $g = $h.UI
@@ -56,6 +56,7 @@
         $hostn = $env:Computername
         $agent = $env:USERNAME
         $dom = $env:USERDNSDOMAIN
+        if (!$dom) { $dom = "." }
         $root = "$env:USERPROFILE/Desktop"
         
         ###Set ScreenSize in Windows
@@ -83,34 +84,14 @@
 
 #MODULES
 #-------
-    ##add new local path
-        $modsFolder = "$workDir/bin/Modules"
-    
+
     ##Adding Extras
         $mods = get-ChildItem $modsFolder
         foreach ($mod in $mods){
-
                 if( (Get-Module -Name $mod.name -ErrorAction SilentlyContinue) -eq $null){
                         Import-Module -Name $mod -ErrorAction SilentlyContinue
                 }
         }
-
-#PSEXE-TOOLS
-#Download at https://download.sysinternals.com/files/PSTools.zip
-    ##test path
-    if( !(test-path $psTools )){
-       $url = "https://download.sysinternals.com/files/PSTools.zip"
-       $down = "_prep\PSTools.zip"
-       Start-BitsTransfer -Source $url -Destination $down
-       
-       Expand-Archive $down $psTools
-       
-       $psexeMessage = "             Added PSTools
-       "
-    } else {
-       $psexeMessage = "           PSTOOLS Available
-       "
-    }
 
 function exit{
     clear
@@ -154,7 +135,6 @@ Alive
     {
         Write-Output "Boo, you are running an older version of powershell $psver" -foregroundcolor red
     }
-    write-host $psexeMessage -ForegroundColor green
     Write-host "              The following Powershell Modules Are loaded
     " -ForegroundColor Yellow 
 
@@ -167,7 +147,6 @@ Alive
     Write-Host "
     ***if you want to add more Modules add them in bin/Modules***" -foregroundcolor yellow
     start-sleep 5
-    clear
 
 #Global Functions
 function CC ($pc){
@@ -458,30 +437,18 @@ function attkScan ($pc) {
 x
 }
 
-function remoteCMD($pc){
-    if(CC($pc)){
-    cd $psTools
-                $args = "-accepteula -s \\$pc -u $sUser powershell"
-                Start-Process .\PsExec.exe -ArgumentList $args
-    }
-x
-}
 
-function interactiveCMD($pc){
+function remotePS($pc){
     if(CC($pc)){
-    cd $psTools
-                $args = "-accepteula -s -i \\$pc -u $dom\$AUser powershell"
-                Start-Process .\PsExec.exe -ArgumentList $args
+        New-PSSession -ComputerName $pc
+        Enter-PSSession -ComputerName $pc
     }
 x
 }
 
 function loggedon($pc){
     if(CC($pc)){
-    cd $psTools
-        .\PsLoggedon.exe /l \\$pc -accepteula
-        Write-Host Other USERID´s in this PC.
-        Get-ChildItem  \\$pc\C$\Users\ |select name
+        Invoke-Command -ComputerName $pc -ScriptBlock { quser }
     }
 x
 }
@@ -518,7 +485,7 @@ write-host "You can choose from the following Files or press C to Cancel:
 		    
             cd $workDir\$psTools
              
-            invoke-command -computername $pc -filepath $workDir/bin/$filename
+            invoke-command -computername $pc -filepath $workDir/bin/_dumpFiles/$filename
             
             if(!(Test-path $log)){
 				Write-Host $log is not available -Foreground magenta
@@ -607,43 +574,29 @@ function ADmenu{
 function NTmenu {
     $Title = "Network Tools"
     $Menu = "
-          (1)   Remote CMD
+          (1)   Remote PowerShell
 
-          (2)   Interactive CMD
+          (2)   Dump File To PC
 
-          (3)   Dump File To PC
-
-          (4)   Back
+          (3)   Back
           "
-    $NTchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 iCMD","&3 Dump","&4 Back")
-    [int]$defchoice = 3
+    $NTchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 Dump","&3 Back")
+    [int]$defchoice = 2
     $subNT = $h.UI.PromptForChoice($Title, $Menu, $NTchoice,$defchoice)
     switch($subNT){
         0{
         clear
             Write-Host "################################################################"
-            Write-Host "                     Remote CMD" -ForegroundColor Red
+            Write-Host "                     Remote PowerShell" -ForegroundColor Red
             Write-Host "################################################################
             "
             $pc =''
             if(!$pc){
                 $pc = Read-Host $pcQ
             }
-            remoteCMD $pc
+            remotePS $pc                   
 
         }1{
-        clear
-            Write-Host "################################################################"
-            Write-Host "                     InterActive CMD" -ForegroundColor Red
-            Write-Host "################################################################
-            "
-            $pc =''
-            if(!$pc){
-                $pc = Read-Host $pcQ
-            }
-            interactiveCMD $pc                      
-
-        }2{
         clear
             Write-Host "################################################################"
             Write-Host "                     Dump file to PC" -ForegroundColor Red
@@ -654,68 +607,10 @@ function NTmenu {
                 $pc = Read-Host $pcQ
             }
             dumpIt $pc
-        }3{mainMenu}
+        }2{mainMenu}
     }
 }
 
-function AVmenu {
-        $Title = "Anti Virus and Cleaning Tool"
-        $Menu = "
-              (1)   Clean TEMP files
-
-              (2)   ATTK-Scan
-
-              (3)   Full-Scan
-
-              (4)   Back
-              "
-        $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup", "&2 ATTK", "&3 Full", "&4 Back")
-        [int]$defchoice = 3
-        $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
-        switch($subAV){
-            0{
-            clear
-                Write-Host "################################################################"
-                Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
-                Write-Host "################################################################
-                "
-                $pc =''
-                if(!$pc){
-
-                    $pc = Read-Host 
-                }
-                cleanUp $pc
-                x
-            }1{
-            clear
-                Write-Host "################################################################"
-                Write-Host "                          ATTK Scan" -ForegroundColor Red
-                Write-Host "################################################################
-                "
-                $pc =''
-                if(!$pc){
-
-                    $pc = Read-Host $pcQ
-                }
-                attkScan $pc
-                x
-            }2{
-            clear
-                Write-Host "################################################################"
-                Write-Host "                          Full Clearnup" -ForegroundColor Red
-                Write-Host "################################################################
-                "
-               $pc =''
-                if(!$pc){
-
-                     $pc = Read-Host $pcQ
-                }
-                cleanup $pc
-                attkScan $pc
-                x
-            }3{mainMenu}
-        }
-}
 
 function ADVmenu{
         $Title = "Advanced Tools"
@@ -748,15 +643,13 @@ $line
                            (1)   AD-Tools
                            
                            (2)   Network Tools
-                           
-                           (3)   Antivirus Tools
-                           
-                           (4)   Advanced Tools
+                                                      
+                           (3)   Advanced Tools
                            
                            (Q)   Exit
                            "
-    $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADTools", "&2 NTTools", "&3 AVTools", "&4 ADVTools", "&Quit")
-    [int]$defaultchoice = 4
+    $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADTools", "&2 NTTools", "&3 ADVTools", "&Quit")
+    [int]$defaultchoice = 3
     $choice =  $h.UI.PromptForChoice($Title, $Menu, $mainMenu, $defaultchoice)
 
          switch ($choice){
@@ -766,10 +659,8 @@ $line
                }1{
                     clear
                     NTmenu
+
                }2{
-                    clear
-                    AVmenu
-               }3{
                     clear
                     ADVmenu
                }q{exit}
