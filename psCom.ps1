@@ -31,24 +31,9 @@
 #       2.3     27.04.2020  - Rework with invoke-command  
 #--------------------------------------------------------------------------------
 #FIRST CHECK
-#MODULES
-#-------
-    ##add new local path
-        $modsFolder = "$workDir/bin/Modules"
-        $env:PSMODULEPATH += ";$modsFolder"
-    
-    ##Adding Extras
-        $mods = get-ChildItem $modsFolder
-        foreach ($mod in $mods){
-
-                if( (Get-Module -Name $mod.name -ErrorAction SilentlyContinue) -eq $null){
-                        Import-Module -Name $mod -ErrorAction SilentlyContinue
-                }
-        }
-
 #START VARS
 #-----------
-clear
+
     $version = "v 2.3.0"
     $psver = $PSVersionTable.PSVersion.tostring()
     $workDir = $pwd
@@ -61,8 +46,8 @@ clear
    
 #TEXT VARS
 #---------
-    $pcQ= "What is the PC name or the IP-address or press ENTER to Cancel"
-    $userQ = "What is the UserID or press ENTER to Cancel"
+    $pcQ= "What is the PC name or the IP-address or press c to Cancel"
+    $userQ = "What is the UserID or press c to Cancel"
 
 #Set Env
 #-------
@@ -70,6 +55,7 @@ clear
     ##WINDOWS VARS
         $hostn = $env:Computername
         $agent = $env:USERNAME
+        $dom = $env:USERDNSDOMAIN
         $root = "$env:USERPROFILE/Desktop"
         
         ###Set ScreenSize in Windows
@@ -94,6 +80,20 @@ clear
             if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null){
                     Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue
             }
+
+#MODULES
+#-------
+    ##add new local path
+        $modsFolder = "$workDir/bin/Modules"
+    
+    ##Adding Extras
+        $mods = get-ChildItem $modsFolder
+        foreach ($mod in $mods){
+
+                if( (Get-Module -Name $mod.name -ErrorAction SilentlyContinue) -eq $null){
+                        Import-Module -Name $mod -ErrorAction SilentlyContinue
+                }
+        }
 
 #PSEXE-TOOLS
 #Download at https://download.sysinternals.com/files/PSTools.zip
@@ -518,7 +518,7 @@ write-host "You can choose from the following Files or press C to Cancel:
 		    
             cd $workDir\$psTools
              
-            .\PsExec.exe -s \\$pc cmd /C C:\Temp\$filename -accepteula
+            invoke-command -computername $pc -filepath $workDir/bin/$filename
             
             if(!(Test-path $log)){
 				Write-Host $log is not available -Foreground magenta
@@ -733,7 +733,7 @@ function ADVmenu{
 }
 
 function mainMenu {
-    $Title = "pShell Commander $hostn"
+    $Title = "pShell Commander"
     clear
     $LengthName = $agent.length
     $line = "************************************************" + "*"* $LengthName
