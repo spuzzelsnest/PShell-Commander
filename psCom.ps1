@@ -87,7 +87,6 @@
 
 #MODULES
 #-------
-
     ##Adding Extras
         $mods = get-ChildItem $modsFolder
         foreach ($mod in $mods){
@@ -96,9 +95,30 @@
                 }
         }
 
+#Global Functions
 function exit{
     clear
     $h.ExitNestedPrompt()
+}
+
+function CC ($pc){
+    if(!($pc -eq "c")){
+        if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($pc).result.status -eq 'Succes')){
+            Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key  " `n
+            clear
+            return $False
+        }else{
+           return $True
+        }
+    }else{x}
+}
+
+function x{
+    write-host "Press any key to go back to the main menu"
+    $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    clear
+    cd $workdir
+    mainMenu
 }
 
 #STARTING ALIVE SERVICE
@@ -155,27 +175,6 @@ function Alive{
     Alive
 
     start-sleep 5
-
-#Global Functions
-function CC ($pc){
-    if(!($pc -eq "c")){
-        if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($pc).result.status -eq 'Succes')){
-            Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key  " `n
-            clear
-            return $False
-        }else{
-           return $True
-        }
-    }else{x}
-}
-
-function x{
-    write-host "Press any key to go back to the main menu"
-    $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    clear
-    cd $workdir
-    mainMenu
-}
 
 #Program
 function UserInfo ($Id){
@@ -416,8 +415,7 @@ x
 
 function remotePS($pc){
     if(CC($pc)){
-        New-PSSession -CN $pc
-        Enter-PSSession -CN $pc
+        start-process powershell.exe -ArgumentList "-noexit & Enter-PSSession $pc"
     }
 x
 }
