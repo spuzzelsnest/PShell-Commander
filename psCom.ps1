@@ -478,7 +478,7 @@ function ADmenu{
     $Menu = "
             (1)  AD-User Info
             
-            (2)  AD-Server Info
+            (2)  AD-Computer Info
             
             (3)  Find Related Server Names
             
@@ -583,14 +583,29 @@ function NTmenu {
 function ADVmenu{
         $Title = "Advanced Tools"
         $Menu = "
-              (1)   Back
+              (1)   Cleanup Temp
+
+              (2)   Back
               "
-        $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Back")
-        [int]$defchoice = 0
+        $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup""&2 Back")
+        [int]$defchoice = -1
         $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
         switch($subAV){ 
 
-                0{mainMenu}
+              0{
+                clear
+                Write-Host "################################################################"
+                Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
+                Write-Host "################################################################
+                "
+                $pc =''
+                if(!$pc){
+
+                    $pc = Read-Host $pcQ
+                }
+                cleanUp $pc
+                x
+            }1{mainMenu}
 
         }
 }
