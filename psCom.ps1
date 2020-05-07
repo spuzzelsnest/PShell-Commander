@@ -445,13 +445,15 @@ Write-Host "You can choose from the following Files or press C to Cancel:
     if (CC($pc)){
  
             if(!(Test-Path $dest\Logs)){
-                New-Item -ItemType Directory -Force -Path $dest\Logs
 
                 Write-Host Creating $dest\Logs -ForegroundColor magenta
-				
+				New-Item -ItemType Directory -Force -Path $dest\Logs
+
 			}else{
+
                 Write-Host The $dest\Logs directory exsists -ForegroundColor Green
 			}
+
 
 		    Copy-Item $dump\$filename $dest
             Write-Host $filename copied to $dest -ForegroundColor Green
@@ -475,6 +477,7 @@ x
 
 #Menu's
 function ADmenu{
+    clear
     $Tile = "AD Tools"
     $Menu = "
             (1)  AD-User Info
@@ -542,6 +545,7 @@ function ADmenu{
 }
 
 function NTmenu {
+    clear
     $Title = "Network Tools"
     $Menu = "
           (1)   Remote PowerShell
@@ -582,6 +586,7 @@ function NTmenu {
 }
 
 function ADVmenu{
+        clear
         $Title = "Advanced Tools"
         $Menu = "
               (1)   Cleanup Temp
