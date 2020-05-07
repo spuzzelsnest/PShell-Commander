@@ -143,6 +143,7 @@ function Alive{
 }
 
 # START PROGRAM
+    clear
     cd $workDir
     $loadscreen = get-content bin/visuals/loadscreen | Out-String
     $loadedModules = get-module
