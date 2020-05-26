@@ -41,7 +41,6 @@
     $modsFolder = "$workDir/bin/Modules"
 
     $h = get-host
-    $g = $h.UI
     $c = $h.UI.RawUI
    
 #TEXT VARS
@@ -132,12 +131,12 @@ function Alive{
             write-host PC-list file exists -ForegroundColor Green
         }
 
-        if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
+        if(!( get-service Pshell-Alive -ErrorAction SilentlyContinue) -eq $True){
             write-host Createing server -ForegroundColor Magenta
-            new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir/bin/Alive.ps1" -DisplayName "PC alive Service for PShell Commander" -StartupType Manual
+            new-service -name Pshell-Alive -BinaryPathName "powershell.exe -NoLogo -File $workDir\bin\Alive.ps1" -DisplayName "PC alive Service for PShell Commander" -StartupType Manual
         }else {
             write-host restarting service -ForegroundColor Yellow
-            restart-service AgentAid-Alive -ErrorAction SilentlyContinue
+            restart-service Pshell-Alive -ErrorAction SilentlyContinue
         }
         invoke-item "$env:USERPROFILE/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/pc-report.html"
 }
