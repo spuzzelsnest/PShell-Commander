@@ -1,6 +1,6 @@
 $Complete = @{}
-
-Do {
+function onStart() {
+  do {
   $pcs = Get-Content $env:USERPROFILE\Desktop\PC-list.txt
   
   $pcs | %{
@@ -36,3 +36,6 @@ Do {
   Start-Sleep -Seconds 30
 
 } While ($Complete.Count -lt $pcs.Count)
+}
+
+function onStop(){}
