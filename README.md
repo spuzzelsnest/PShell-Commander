@@ -37,3 +37,9 @@ After downloading the project, you can run the script from powershell.
 ```bash
 .\psCom.ps1
 ```
+
+## Using the Alive service
+
+The Alive.ps1 is a script I wrote to generate a HTML file with the status of a given list of ip addresses. The list of PC's should be located on the desktop, as the code referres to ```bash $env:USERPROFILE\Desktop\PC-list.txt ```
+The HTML file will be create in the startup folder located at ```bash "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html" ```
+
