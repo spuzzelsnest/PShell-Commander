@@ -41,6 +41,7 @@ After downloading the project, you can run the script from powershell.
 ## Using the Alive service
 
 The Alive.ps1, located in the ./bin/ folder, is a script I wrote to generate a HTML file do display the status of a given list of ip addresses. The list of PC's should be located on the desktop, as the code refers to ```bash $env:USERPROFILE\Desktop\PC-list.txt ```
+
 The HTML file will be create in the startup folder located at ```bash "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html" ```
 
 To make it work, I used [PS2EXE-GUI](https://gallery.technet.microsoft.com/scriptcenter/PS2EXE-GUI-Convert-e7cb69d5) to convert it first to an EXE file to run it as a service with the main PShell Commander program.
