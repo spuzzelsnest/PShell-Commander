@@ -1,6 +1,6 @@
-$Complete = @{}
-
 function onStart(){
+
+$Complete = @{}
 
     Do {
 
