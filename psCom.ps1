@@ -28,7 +28,8 @@
 #       2.1.2   22.03.2019  - Windows 10 out of the box fixes
 #       2.2.0   24.11.2019  - Download PSTools Automatically
 #
-#       2.3     27.04.2020  - Rework with invoke-command  
+#       2.3.0   27.04.2020  - Rework with invoke-command  
+#       2.3.1   26.05.2020  - Rework of the Alive Service
 #--------------------------------------------------------------------------------
 #FIRST CHECK
 #START VARS
@@ -38,6 +39,7 @@
     $psver = $PSVersionTable.PSVersion.tostring()
     $workDir = $pwd
     $dump = "bin\_dumpFiles\"
+    $logs = "bin\Logs\"
     $modsFolder = "$workDir/bin/Modules"
 
     $h = get-host
@@ -124,8 +126,8 @@ function x{
 
 function Alive{
 
-        if((test-path $root/PC-list.txt) -eq  $False){
-            new-item $root/PC-list.txt -type file
+        if((test-path $logs/PC-list.txt) -eq  $False){
+            new-item $logs/PC-list.txt -type file
             Write-host creating new PC-list file -ForegroundColor Magenta
         }else{
             write-host PC-list file exists -ForegroundColor Green

@@ -1,46 +1,42 @@
-function onStart(){
 
 $Complete = @{}
+$dump = $env:USERPROFILE+"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
+Do {
+  $pcs = Get-Content $env:USERPROFILE\Desktop\PC-list.txt
 
-    Do {
+  $pcs | %{
+    $status = (Test-Connection -CN $_ -Count 1 -quiet)
+    $cnName = ([system.net.dns]::GetHostAddresses($_)).hostname
+    Write-Output $cnName
+    If (!$Complete.Containskey($_)){
+       If ($status -eq  $True){
+    
+       $Complete.Add($_,$status)
 
-      $file = $env:USERPROFILE+'\Desktop\PC-list.txt'
-
-      $pcs = Get-Content $File
-
-      $pcs | %{
-        $status = (Test-Connection -CN $_ -BufferSize 16 -Count 1 -ea 0 -quiet)
-        If (!$Complete.Containskey($_)){
-           If ($status -eq  $True){
-           $Complete.Add($_,$status)
-          }
-        }
       }
-
-    # Build the HTML output
-      $Head = "
-        <title>Status Report</title>
-        <meta http-equiv='refresh' content='30' />"
-
-      $Body = @()
-      $Body += "<center><table><tr><th>Pc Name</th><th>State</th></tr>"
-      $Body += $pcs | %{
-        If ($Complete.Contains($_)) {
-        "<tr><td>$_</td><td><font color='green'>Running</font></td></tr>"
-        } Else {
-        "<tr><td>$_</td><td><font color='red'>Not Available</font></td></tr>"
-        }
-      }
-      $Body += "</table></center>"
-      $Html = ConvertTo-Html -Body $Body -Head $Head
-
-    # save HTML
-      $Html >   "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
+    }
+  }
   
-    # Sleep a while
-      Start-Sleep -Seconds 30
+# Build the HTML output
+  $head = "
+    <title>Status Report</title>
+    <meta http-equiv='refresh' content='30' />"
 
-    } While ($Complete.Count -lt $pcs.Count)
-}
+  $body = @()
+  $body += "<center><table><tr><th>Pc Name</th><th>State</th></tr>"
+  $body += $pcs | %{
+    If ($Complete.Contains($_)) {
+    "<tr><td>$_ $cnName</td><td><font color='green'>Running</font></td></tr>"
+    } Else {
+    "<tr><td>$_</td><td><font color='red'>Not Available</font></td></tr>"
+    }
+  }
+  $body += "</table></center>"
+  $html = ConvertTo-Html -Body $body -Head $head
 
-function onStop(){}
+# save HTML
+  $html >  $dump
+
+# Sleep a while
+  Start-Sleep -Seconds 30
+} While ($Complete.Count -lt $pcs.Count)

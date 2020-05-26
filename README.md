@@ -7,13 +7,13 @@ Runs from PowerShell version 3.0  and will be expanded to Unix Systems.
 
 # Tools Available
 
-- AD User info
-- Remote PC info
+- AD-User info
+- Remote AD-Computer info
 - Track online status of PC's
 - Remote Temp file cleaner
 - Remote script file execution
 - Dump customisable executable files
-- Remote CMD
+- Remote Shell
 - Remote Registry
 
 # How to run
@@ -37,3 +37,13 @@ After downloading the project, you can run the script from powershell.
 ```bash
 .\psCom.ps1
 ```
+
+## Using the Alive service
+
+The Alive.ps1, located in the ./bin/ folder, is a script I wrote to generate a HTML file do display the status of a given list of ip addresses. The list of PC's should be located on the desktop, as the code refers to ```bash $env:USERPROFILE\Desktop\PC-list.txt ```
+
+The HTML file will be create in the startup folder located at ```bash "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html" ```
+
+Running it as a service with the main PShell Commander program.
+
+
