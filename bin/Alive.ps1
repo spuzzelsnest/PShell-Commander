@@ -1,8 +1,8 @@
 $Complete = @{}
-function onStart() {
-  do {
+
+Do {
   $pcs = Get-Content $env:USERPROFILE\Desktop\PC-list.txt
-  
+
   $pcs | %{
     $status = (Test-Connection -CN $_ -BufferSize 16 -Count 1 -ea 0 -quiet)
     If (!$Complete.Containskey($_)){
@@ -31,11 +31,7 @@ function onStart() {
 
 # save HTML
   $Html >   "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
-  
+
 # Sleep a while
   Start-Sleep -Seconds 30
-
 } While ($Complete.Count -lt $pcs.Count)
-}
-
-function onStop(){}
