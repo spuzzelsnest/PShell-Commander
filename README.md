@@ -7,13 +7,13 @@ Runs from PowerShell version 3.0  and will be expanded to Unix Systems.
 
 # Tools Available
 
-- AD User info
-- Remote PC info
+- AD-User info
+- Remote AD-Computer info
 - Track online status of PC's
 - Remote Temp file cleaner
 - Remote script file execution
 - Dump customisable executable files
-- Remote CMD
+- Remote Shell
 - Remote Registry
 
 # How to run
@@ -44,6 +44,6 @@ The Alive.ps1, located in the ./bin/ folder, is a script I wrote to generate a H
 
 The HTML file will be create in the startup folder located at ```bash "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html" ```
 
-To make it work, I used [PS2EXE-GUI](https://gallery.technet.microsoft.com/scriptcenter/PS2EXE-GUI-Convert-e7cb69d5) to convert it first to an EXE file to run it as a service with the main PShell Commander program.
+Running it as a service with the main PShell Commander program.
 
 
