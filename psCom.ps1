@@ -366,6 +366,8 @@ function PCInfo($pc){
     $Private:pcObject = Get-ADComputer $Private:pc -ErrorAction 'SilentlyContinue'
     if ($Private:pcObject) {
         $PCLog.'AD Operating System'         = $Private:pcObject.OSName
+        $PCLog.'AD OU path'                  = $Private:pcObject.CanonicalName
+        $PCLog.'AD LDAP Data'                = $Private:pcObject.DistinguishedName
         $PCLog.'AD Operating System Version' = $Private:pcObject.OSVersion
         $PCLog.'AD Service Pack'             = $Private:pcObject.OSServicePack
         $PCLog.'AD Enabled AD Account'       = $( if ($Private:pcObject.AccountIsDisabled) { 'No' } else { 'Yes' } )
@@ -373,7 +375,7 @@ function PCInfo($pc){
     }else {
         $PCLog.'AD Computer Object Info Collected' = 'No'
     }
-    $PCLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
+    $PCLog.GetEnumerator() | Sort-Object 'Name' | Ft -AutoSize -wrap
     $PCLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:pc Information"
 x
 }
