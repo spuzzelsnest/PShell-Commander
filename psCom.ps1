@@ -28,7 +28,8 @@
 #       2.1.2   22.03.2019  - Windows 10 out of the box fixes
 #       2.2.0   24.11.2019  - Download PSTools Automatically
 #
-#       2.3     27.04.2020  - Rework with invoke-command  
+#       2.3.0   27.04.2020  - Rework with invoke-command  
+#       2.3.1   26.05.2020  - Rework of the Alive Service
 #--------------------------------------------------------------------------------
 #FIRST CHECK
 #START VARS
@@ -41,7 +42,6 @@
     $modsFolder = "$workDir/bin/Modules"
 
     $h = get-host
-    $g = $h.UI
     $c = $h.UI.RawUI
    
 #TEXT VARS
@@ -132,12 +132,12 @@ function Alive{
             write-host PC-list file exists -ForegroundColor Green
         }
 
-        if(!( get-service AgentAid-Alive -ErrorAction SilentlyContinue) -eq $True){
+        if(!( get-service Pshell-Alive -ErrorAction SilentlyContinue) -eq $True){
             write-host Createing server -ForegroundColor Magenta
-            new-service -name AgentAid-Alive -BinaryPathName "powershell.exe -NoLogo -Path $workDir/bin/Alive.ps1" -DisplayName "PC alive Service for PShell Commander" -StartupType Manual
+            new-service -name Pshell-Alive -BinaryPathName "powershell.exe -NoLogo -File $workDir\bin\Alive.ps1" -DisplayName "PC alive Service for PShell Commander" -StartupType Manual
         }else {
             write-host restarting service -ForegroundColor Yellow
-            restart-service AgentAid-Alive -ErrorAction SilentlyContinue
+            restart-service Pshell-Alive -ErrorAction SilentlyContinue
         }
         invoke-item "$env:USERPROFILE/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/pc-report.html"
 }
@@ -366,6 +366,8 @@ function PCInfo($pc){
     $Private:pcObject = Get-ADComputer $Private:pc -ErrorAction 'SilentlyContinue'
     if ($Private:pcObject) {
         $PCLog.'AD Operating System'         = $Private:pcObject.OSName
+        $PCLog.'AD OU path'                  = $Private:pcObject.CanonicalName
+        $PCLog.'AD LDAP Data'                = $Private:pcObject.DistinguishedName
         $PCLog.'AD Operating System Version' = $Private:pcObject.OSVersion
         $PCLog.'AD Service Pack'             = $Private:pcObject.OSServicePack
         $PCLog.'AD Enabled AD Account'       = $( if ($Private:pcObject.AccountIsDisabled) { 'No' } else { 'Yes' } )
@@ -373,7 +375,7 @@ function PCInfo($pc){
     }else {
         $PCLog.'AD Computer Object Info Collected' = 'No'
     }
-    $PCLog.GetEnumerator() | Sort-Object 'Name' | Format-Table -AutoSize
+    $PCLog.GetEnumerator() | Sort-Object 'Name' | Ft -AutoSize -wrap
     $PCLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:pc Information"
 x
 }
