@@ -2,11 +2,12 @@
 $Complete = @{}
 $dump = $env:USERPROFILE+"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
 Do {
+
   $pcs = Get-Content $env:USERPROFILE\Desktop\PC-list.txt
 
   $pcs | %{
     $status = (Test-Connection -CN $_ -Count 1 -quiet)
-    $cnName = ([system.net.dns]::GetHostAddresses($_)).hostname
+
     Write-Output $cnName
     If (!$Complete.Containskey($_)){
        If ($status -eq  $True){
@@ -26,7 +27,7 @@ Do {
   $body += "<center><table><tr><th>Pc Name</th><th>State</th></tr>"
   $body += $pcs | %{
     If ($Complete.Contains($_)) {
-    "<tr><td>$_ $cnName</td><td><font color='green'>Running</font></td></tr>"
+    "<tr><td>$_</td><td><font color='green'>Running</font></td></tr>"
     } Else {
     "<tr><td>$_</td><td><font color='red'>Not Available</font></td></tr>"
     }

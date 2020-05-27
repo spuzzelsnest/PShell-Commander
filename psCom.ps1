@@ -39,7 +39,7 @@
     $psver = $PSVersionTable.PSVersion.tostring()
     $workDir = $pwd
     $dump = "bin\_dumpFiles\"
-    $logs = "bin\Logs\"
+    $logs = "bin\Logs"
     $modsFolder = "$workDir/bin/Modules"
 
     $h = get-host
@@ -126,8 +126,8 @@ function x{
 
 function Alive{
 
-        if((test-path $logs/PC-list.txt) -eq  $False){
-            new-item $logs/PC-list.txt -type file
+        if((test-path $root/PC-list.txt) -eq  $False){
+            new-item $root/PC-list.txt -type file
             Write-host creating new PC-list file -ForegroundColor Magenta
         }else{
             write-host PC-list file exists -ForegroundColor Green
