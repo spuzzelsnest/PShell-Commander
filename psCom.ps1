@@ -31,9 +31,8 @@
 #       2.3.0   27.04.2020  - Rework with invoke-command  
 #       2.3.1   26.05.2020  - Rework of the Alive Service
 #--------------------------------------------------------------------------------
-#FIRST CHECK
-#START VARS
-#-----------
+# FIRST CHECK
+# START VARS
 
     $version = "v 2.3.0"
     $psver = $PSVersionTable.PSVersion.tostring()
@@ -45,15 +44,14 @@
     $h = get-host
     $c = $h.UI.RawUI
    
-#TEXT VARS
-#---------
+# TEXT VARS
+
     $pcQ= "What is the PC name or the IP-address or press c to Cancel"
     $userQ = "What is the UserID or press c to Cancel"
 
-#Set Env
-#-------
+# Set Env
+# WINDOWS VARS
 
-    ##WINDOWS VARS
         $hostn = $env:Computername
         $agent = $env:USERNAME
         $dom = $env:USERDNSDOMAIN
@@ -63,7 +61,7 @@
          }
         $root = "$env:USERPROFILE/Desktop"
         
-        ###Set ScreenSize in Windows
+# Set ScreenSize in Windows
             $c.BackgroundColor = ($bckgrnd = 'black')
             $p = $c.WindowPosition
             $p.x = 0
@@ -80,15 +78,14 @@
             $w.Height = 46
             $c.WindowSize = $w
 
-        ###Exchange
-        ###installed in %ExchangeInstallPath%\bin
+  # Exchange
+  # Installed in %ExchangeInstallPath%\bin
             if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null){
                     Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue
             }
 
-#MODULES
-#-------
-    ##Adding Extras
+# MODULES
+# Adding Extras
         $mods = get-ChildItem $modsFolder
         foreach ($mod in $mods){
                 if( (Get-Module -Name $mod.name -ErrorAction SilentlyContinue) -eq $null){
@@ -96,7 +93,7 @@
                 }
         }
 
-#Global Functions
+# Global Functions
 function exit{
     clear
     $h.ExitNestedPrompt()
@@ -122,7 +119,7 @@ function x{
     mainMenu
 }
 
-#STARTING ALIVE SERVICE
+# STARTING ALIVE SERVICE
 
 function Alive{
 
@@ -178,7 +175,7 @@ function Alive{
 
     start-sleep 5
 
-#Program
+# Program
 function UserInfo ($Id){
 
 	if (!(Get-ADUser -Filter {SamAccountName -eq $Id} )){
