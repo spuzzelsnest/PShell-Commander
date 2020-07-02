@@ -593,7 +593,7 @@ function ADVmenu{
 
               (2)   Back
               "
-        $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup""&2 Back")
+        $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup","&2 Back")
         [int]$defchoice = -1
         $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
         switch($subAV){ 
