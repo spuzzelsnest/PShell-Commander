@@ -17,6 +17,10 @@
 
 $file = get-content "$env:USERPROFILE\Desktop\PC-list.txt"
 
+
+$ErrorActionPreference = "SilentlyContinue"
+	
+
 foreach ($f in $file){
 
 
@@ -26,12 +30,12 @@ if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($f).result.s
 
 }else{
 
-    $pcinfo = get-adcomputer $f -Properties * | Select-object samAccountName, OperatingSystem, Lastlogondate
+    #$pcinfo = get-adcomputer $f -Properties * | Select-object samAccountName, OperatingSystem, Lastlogondate
     
-    $wmi = Get-WmiObject -Computer $f -Class Win32_ComputerSystem
-    
-    $pcinfo
-    $wmi.model
+    $wmi = Get-WmiObject -Computer $f -Class Win32_ComputerSystem | select-object 
+ 
+
+    $info = $f $wmi.username  $wmi.OperatingSystem $wmi.model | export-csv -path pc-list.csv -append 
 
     }
 }
