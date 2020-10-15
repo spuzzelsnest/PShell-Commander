@@ -42,6 +42,7 @@
     $workDir = $pwd
     $dump = "bin\_dumpFiles\"
     $logs = "bin\Logs"
+    $report = "network-report.html"
     $modsFolder = "$workDir/bin/Modules"
 
     $h = get-host
@@ -62,7 +63,7 @@
             $dom = "."
             $warning = "!!NOT in Domain!!"
          }
-        $root = "$env:USERPROFILE/Desktop"
+        $logs = "$workdir/bin/Logs"
         
 # Set ScreenSize in Windows
             $c.BackgroundColor = ($bckgrnd = 'black')
@@ -122,29 +123,77 @@ function x{
     mainMenu
 }
 
-# STARTING ALIVE SERVICE
+# ALIVE SERVICE
 
 function Alive{
 
-        if((test-path $root/PC-list.txt) -eq  $False){
-            new-item $root/PC-list.txt -type file
-            Write-host creating new PC-list file -ForegroundColor Magenta
-        }else{
-            write-host PC-list file exists -ForegroundColor Green
-        }
+        if(!(test-path $logs\PC-list.txt)){
+                
+                Write-host No PC list found -ForegroundColor Magenta
+            
+            }else{
 
-        if(!( get-service Pshell-Alive -ErrorAction SilentlyContinue) -eq $True){
-            write-host Createing server -ForegroundColor Magenta
-            new-service -name Pshell-Alive -BinaryPathName "powershell.exe -NoLogo -File $workDir\bin\Alive.ps1" -DisplayName "PC alive Service for PShell Commander" -StartupType Manual
-        }else {
-            write-host restarting service -ForegroundColor Yellow
-            restart-service Pshell-Alive -ErrorAction SilentlyContinue
-        }
-        invoke-item "bin/Logs/pc-report.html"
+
+                $Complete = @{}
+                $i=0
+            
+                if (Test-Path $logs\$report){
+
+                    copy-item $logs\$report -destination $logs\$report-$(Get-Date -format "yyyy_MM_dd_hh_mm_ss")
+                 }
+
+                 $pcs = Get-Content $logs\PC-list.txt
+
+               
+                 
+                 $pcs | %{
+
+                        $j = [math]::Round((($i / $pcs.Count) * 100),2)
+
+                        Write-Progress -Activity "Creating report" -Status "$j% Complete:" -PercentComplete $j
+   
+
+                        $status = (Test-Connection -CN $_ -Count 1 -quiet)
+
+                        Write-Output $cnName
+                        If (!$Complete.Containskey($_)){
+                            If ($status -eq  $True){
+                                $Complete.Add($_,$status)
+                            }
+                        }
+   
+                        $i++
+                   }
+  
+            # Build the HTML output
+                    $head = "
+                    <title>Status Report</title>
+                    <meta http-equiv='refresh' content='30' />"
+
+                    $body = @()
+                    $body += "<center><table><tr><th>Pc Name</th><th>State</th></tr>"
+                    $body += $pcs | %{
+                    if ($Complete.Contains($_)) {
+                        "<tr><td>$_</td><td><font color='green'>Running</font></td></tr>"
+                        } else {
+                        "<tr><td>$_</td><td><font color='red'>Not Available</font></td></tr>"
+                        }
+                    }
+                    $body += "</table></center>"
+                    $html = ConvertTo-Html -Body $body -Head $head
+
+                # save HTML
+                    $html >  $logs/$report
+
+             
+                
+                invoke-item "bin/Logs/network-report.html"
+            }
 }
+    
 
 # START PROGRAM
-    #clear
+
     cd $workDir
     $loadscreen = get-content bin/visuals/loadscreen | Out-String
     $loadedModules = get-module
