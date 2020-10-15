@@ -28,8 +28,11 @@
 #       2.1.2   22.03.2019  - Windows 10 out of the box fixes
 #       2.2.0   24.11.2019  - Download PSTools Automatically
 #
-#       2.3.0   27.04.2020  - Rework with invoke-command  
+#       2.3.0   27.04.2020  - Rework with invoke-command
 #       2.3.1   26.05.2020  - Rework of the Alive Service
+#       2.3.2   15-10-2020  - Change dir for Alive to Logs 
+#                           - Removed auto start for webpage
+#       2.4.0   
 #--------------------------------------------------------------------------------
 # FIRST CHECK
 # START VARS
@@ -137,11 +140,11 @@ function Alive{
             write-host restarting service -ForegroundColor Yellow
             restart-service Pshell-Alive -ErrorAction SilentlyContinue
         }
-        invoke-item "$env:USERPROFILE/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/pc-report.html"
+        invoke-item "bin/Logs/pc-report.html"
 }
 
 # START PROGRAM
-    clear
+    #clear
     cd $workDir
     $loadscreen = get-content bin/visuals/loadscreen | Out-String
     $loadedModules = get-module
@@ -477,7 +480,7 @@ x
 
 #Menu's
 function ADmenu{
-    clear
+    #clear
     $Tile = "AD Tools"
     $Menu = "
             (1)  AD-User Info
