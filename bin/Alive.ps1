@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------------
 #
-# NAME:		pShell-Commander.ps1
+# NAME:		Alive.ps1
 #
 # AUTHOR:	Spuzzelsnest
 #
