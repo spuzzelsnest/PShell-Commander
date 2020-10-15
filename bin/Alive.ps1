@@ -1,11 +1,17 @@
-
 $Complete = @{}
-$dump = $env:USERPROFILE+"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\pc-report.html"
+$dump = "bin\Logs\pc-report.html"
+$i = 0
 Do {
 
   $pcs = Get-Content $env:USERPROFILE\Desktop\PC-list.txt
 
   $pcs | %{
+
+
+   
+    Write-Progress -Activity "Search in Progress" -Status "$i% Complete:" -PercentComplete $i;
+    
+
     $status = (Test-Connection -CN $_ -Count 1 -quiet)
 
     Write-Output $cnName
@@ -16,6 +22,7 @@ Do {
 
       }
     }
+    $i++
   }
   
 # Build the HTML output
@@ -40,4 +47,4 @@ Do {
 
 # Sleep a while
   Start-Sleep -Seconds 30
-} While ($Complete.Count -lt $pcs.Count)
+} While ($Complete.Count -lt $pcs.Coun
