@@ -16,7 +16,9 @@
 param([string] [string]$iface = 'Ethernet',
                        $T)
 
-if(!(Get-NetAdapter -Name $iface).status -eq 'Up'){
+$ErrorActionPreference = "SilentlyContinue"
+
+if(!(Get-NetAdapter -Name $iface).Status -eq 'Up'){
     Write-Host  $iface ' is down!'
 
 }else{
@@ -28,11 +30,19 @@ Write-Host "Host IP: " $hostIp
 
 if (!(Test-Connection -CN $T -count 1 -quiet)){
 
-        Write-Host "host is down" -ForegroundColor Red
+        Write-Host "Target is down" -ForegroundColor Red
     
     } else {
 
-        Write-Host "host is up"
+        Write-Host "Target is up"
+        write-Host "Trying to get hostname" -ForegroundColor Yellow
+        $hostName = (nslookup $T | Select-String 'Name').tostring().Trimstart('Name: ') 
+        
+        if( $hostName -eq $null ) {
+            write-host 'hostname not found' -ForegroundColor red
+        }else{
+            write-host 'hostname ' $hostName -ForegroundColor Green
+       }
     }
 
 }
