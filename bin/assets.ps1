@@ -15,11 +15,13 @@
 # get PC names from the list ans check for default values name, version, 
 
 
-$file = get-content "$env:USERPROFILE\Desktop\PC-list.txt"
+$file = get-content C:\PShell-Commander\bin\Logs\PC-list.txt
+
+write-host $file.count " pc's in list"
 
 
-$ErrorActionPreference = "SilentlyContinue"
-	
+#$ErrorActionPreference = "SilentlyContinue"
+$pcinfo = @()
 
 foreach ($f in $file){
 
@@ -30,12 +32,14 @@ if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($f).result.s
 
 }else{
 
-    #$pcinfo = get-adcomputer $f -Properties * | Select-object samAccountName, OperatingSystem, Lastlogondate
+    $pcinfo = get-adcomputer $f -Properties * | Select-object samAccountName, OperatingSystem, Lastlogondate
     
-    $wmi = Get-WmiObject -Computer $f -Class Win32_ComputerSystem | select-object 
- 
+    $pcinfo += Get-WmiObject -Computer $f -Class Win32_ComputerSystem | Select-Object name, username, model | format-table
+    $pcinfo += (Get-WmiObject -Computer $f win32_bios).SerialNumber
 
-    $info = $f $wmi.username  $wmi.OperatingSystem $wmi.model | export-csv -path pc-list.csv -append 
+     export-csv -InputObject $pcinfo test.csv -Append
 
     }
+
+   
 }
