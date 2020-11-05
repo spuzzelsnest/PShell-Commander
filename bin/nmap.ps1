@@ -48,4 +48,4 @@ if (!(Test-Connection -CN $T -count 1 -quiet)){
 }
 #1..255 | % { Test-NetConnection -ComputerName x.x.x.$_ } | FT -AutoSize
 
-#Test-NetConnection -ComputerName www.thomasmaurer.ch -Port 80  
+#Test-NetConnection -ComputerName -Port 80  
