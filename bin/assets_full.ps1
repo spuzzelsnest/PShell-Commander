@@ -1,12 +1,10 @@
 ﻿$psc = get-content C:\PShell-Commander\bin\Logs\PC-list.txt
-
- $PCLog = @{}
+$PCLog = @{}
 
 foreach ($pc in $pcs){
 
         $Private:pc = $pc
         'Processing ' + $Private:pc + '...'
-       
         $PCLog.'PC-Name' = $Private:pc
         $PCLog.''
 # Try an ICMP ping the only way Powershell knows how...
