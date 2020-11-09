@@ -27,13 +27,9 @@ function getLan($Selection){
 
     $iface = $MenuOptions[$Selection]
     $hostIp = ($iface | Get-NetIPAddress).IPv4Address
+    $range = $hostIp -split '.', -3
 
-
-    Write-Host "you have selected" $iface.name "with ip " $hostIp
-
-    
-
-
+    Write-Host "you have selected " $iface.name "with ip " $hostIp " in range " $range "x"
 
     #1..254 | % {"10.38.1.$($_): $(Test-Connection -count 1 -comp 10.38.1.$($_) -quiet)"} | select-string "True" | Foreach-Object {$_ -replace ": True"} | ForEach-Object {([system.net.dns]::GetHostByAddress($_)).hostname >>hostnames.txt}
 
