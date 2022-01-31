@@ -223,7 +223,7 @@ function Alive{
     
     Write-Host "
            ... Just a second, Alive Script is loading ..." -ForegroundColor Green
-    Alive
+    #Alive
 
     start-sleep 5
 
@@ -529,7 +529,7 @@ x
 
 #Menu's
 function ADmenu{
-    #clear
+    clear
     $Tile = "AD Tools"
     $Menu = "
             (1)  AD-User Info
