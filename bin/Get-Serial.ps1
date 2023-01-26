@@ -3,7 +3,7 @@
 # NAME:		Assets.ps1
 #
 # AUTHOR:	Spuzzelsnest
-# EMAIL:	j.mpdesmet@gmail.com
+# EMAIL:	j.mpdesmet@protonmail.com
 #
 # COMMENT:
 #           get Assets active on the network

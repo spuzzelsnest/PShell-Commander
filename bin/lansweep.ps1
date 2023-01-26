@@ -3,7 +3,7 @@
 # NAME:		lansweep.ps1
 #
 # AUTHOR:	Spuzzelsnest
-# EMAIL:	j.mpdesmet@gmail.com
+# EMAIL:	j.mpdesmet@protomail.com
 #
 # COMMENT:
 #           get Assets active on the network
