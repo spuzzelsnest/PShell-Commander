@@ -34,7 +34,9 @@ if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($f).result.s
 }else{
         
       $serial =  (Get-WmiObject -ComputerName $f win32_bios).serialnumber
-
-      write-host $f " " $serial
+      $serials += $serial
   }
+
 }
+
+$serials |Out-GridView
