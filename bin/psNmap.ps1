@@ -1,3 +1,18 @@
+#--------------------------------------------------------------------------------
+#
+# NAME:		nmap.ps1
+#
+# AUTHOR:	Spuzzelsnest
+#
+# COMMENT:
+#			Network scan - Automating the job
+#
+#
+#       VERSION HISTORY:
+#       0.0.1   15-10-2020  - My powershell NMAP
+#--------------------------------------------------------------------------------
+# START VARS
+
 <#
 .SYNOPSIS
     Portscan that scans for Online hosts on the subnet of the first connected network Adapter on your PC.

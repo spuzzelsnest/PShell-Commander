@@ -12,27 +12,24 @@
 #       VERSION HISTORY:
 #       1.0     06.18.2020 	- Initial release
 #--------------------------------------------------------------------------------
-# get PC names from the list ans check for default values name, version, 
+# get PC names from the list of pcna and check for default values name, version, 
 
 
-$file = get-content C:\PShell-Commander\bin\Logs\PC-list_prod.txt | select -Unique 
+$list = Get-Content .\Logs\hostnames.txt
 
-write-host $file.count " pc's in list"
+Write-Host $list.count " pc's in list"
+
 $serialList = @{}
 
-foreach ($f in $file){
+foreach ($l in $list){
 
-
-if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($f).result.status -eq 'Succes')){
-
-     write-host $f "is niet online!"
-
-}else{
-      write-host $f
-      $serial = (gwmi -computerName $f Win32_bios).serialnumber
-      $serialList.add( $f, $serial )
-  }
-
+    if ( Test-Connection -Count 1 $l -ErrorAction SilentlyContinue) {
+        Write-Host "Checking PC " $l
+        $serial = (Get-WmiObject -ComputerName $l Win32_bios).serialnumber
+        $serialList.add($l,$serial)
+    }else{
+        write-host $l "is niet online!" -ForegroundColor Red
+    }
 }
 
-$serialList
+$serialList | Out-GridView
