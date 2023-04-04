@@ -15,14 +15,10 @@
 # get PC names from the list ans check for default values name, version, 
 
 
-$file = get-content C:\PShell-Commander\bin\Logs\PC-list_prod.txt
+$file = get-content C:\PShell-Commander\bin\Logs\PC-list_prod.txt | select -Unique 
 
 write-host $file.count " pc's in list"
-
-
-#$ErrorActionPreference = "SilentlyContinue"
-        $PCLog = @{}
-        $PCLog.''
+$serialList = @{}
 
 foreach ($f in $file){
 
@@ -32,11 +28,11 @@ if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($f).result.s
      write-host $f "is niet online!"
 
 }else{
-        
-      $serial =  (Get-WmiObject -ComputerName $f win32_bios).serialnumber
-      $serials += $serial
+      write-host $f
+      $serial = (gwmi -computerName $f Win32_bios).serialnumber
+      $serialList.add( $f, $serial )
   }
 
 }
 
-$serials |Out-GridView
+$serialList
