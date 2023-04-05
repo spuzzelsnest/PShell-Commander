@@ -1,5 +1,6 @@
 #
 bin/*.exe
 bin/Logs
-bin/Modules/*
+bin/Modules
+bin/Modules
 bin/_dumpFiles/*.exe

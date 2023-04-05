@@ -13,13 +13,15 @@ if ($expol -eq "Bypass"){
             Write-Host "################################################################"
             Write-Host "    Supports PowerShell Version 5 checking for latest update" -ForegroundColor Green
             Write-Host "################################################################"
-            choco upgrade PowerShell
+            choco upgrade PowerShell -y
             Write-Host "################################################################"
             Write-Host "               Starting the Speculation Test" -ForegroundColor Green
             Write-Host "################################################################"
             
-            if(!(Get-PackageProvider -Name NuGet)){
+            if(!($((Get-PackageProvider | select-object name ) -contains "NuGet"))){
+
                 Install-packageprovider -name NuGet -MinimumVersion 2.8.5.201 -Force
+            
             }
 
             if(!(Get-Module -Name SpeculationControl)){

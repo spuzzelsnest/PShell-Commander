@@ -9,8 +9,8 @@
 ::############################################
 
 @echo off
-reg.exe save hklm\sam c:\temp\Logs\sam.hiv
-reg.exe save hklm\security c:\temp\Logs\security.hiv
-reg.exe save hklm\system c:\temp\Logs\system.hiv
+reg.exe save HKLM\SAM c:\temp\Logs\sam.hiv
+reg.exe save HKLM\SECURITY c:\temp\Logs\security.hiv
+reg.exe save HKLM\SYSTEM c:\temp\Logs\system.hiv
 
-exit
+::exit
