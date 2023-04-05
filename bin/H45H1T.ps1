@@ -1,4 +1,4 @@
-Set-ExecutionPolicy Unrestricted
+
 
 $floc = read-host "Location of the hives: "
 $user = $env:username
