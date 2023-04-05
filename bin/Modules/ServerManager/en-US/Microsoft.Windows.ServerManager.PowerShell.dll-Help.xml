@@ -1,0 +1,600 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<helpItems xmlns="http://msh" schema="maml">
+<command:command 
+    xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
+    xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" 
+    xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+
+    <command:details>
+        <command:name>Get-WindowsFeature</command:name>
+        <command:verb>Get</command:verb>
+        <command:noun>WindowsFeature</command:noun>
+        <maml:description>
+            <maml:para>
+The Get-WindowsFeature cmdlet allows you to retrieve information about 
+roles, role services, and features that are available on a computer that 
+is running Windows Server 2008 R2.
+            </maml:para>
+        </maml:description>
+    </command:details>
+
+    <maml:description>
+        <maml:para>
+The Get-WindowsFeature cmdlet allows you to retrieve information about 
+roles, role services, and features that are available on a computer that 
+is running Windows Server 2008 R2. The cmdlet results display both those 
+Windows features that are already installed on the computer and those that 
+are available to install.
+        </maml:para>
+    </maml:description>
+
+    <command:syntax>
+        <command:syntaxItem>
+            <maml:name>Get-WindowsFeature</maml:name>
+            <command:parameter 
+                required="false" 
+                pipelineInput="true (ByValue)"
+                globbing="true"
+                position="1">
+                <maml:name>Name</maml:name>
+                <command:parameterValue required="true">string[]</command:parameterValue>
+            </command:parameter>
+            <command:parameter 
+                required="false" 
+                pipelineInput="false"
+                globbing="false"
+                position="named">
+                <maml:name>logPath</maml:name>
+                <command:parameterValue required="true">string</command:parameterValue>
+            </command:parameter>
+        </command:syntaxItem>
+    </command:syntax>
+
+    <command:parameters>
+        <command:parameter 
+            required="false" 
+            pipelineInput="true (ByValue)"
+            globbing="true"
+            position="1">
+            <maml:name>Name</maml:name>
+            <maml:description>
+                <maml:para>
+Specifies the command IDs of roles, role services, or features you want
+the Get-WindowsFeature cmdlet to return information about.
+
+You can find a list of command IDs for all roles, role services, and 
+features in the topic "Overview of Server Manager Commands" in the 
+Server Manager Help.
+                </maml:para>
+            </maml:description>
+            <command:parameterValue required="true">string[]</command:parameterValue>
+        </command:parameter>
+        <command:parameter 
+            required="false" 
+            pipelineInput="false"
+            globbing="false"
+            position="named">
+            <maml:name>logPath</maml:name>
+            <maml:description>
+                <maml:para>
+Specifies a name and location for a log file, other than the default,
+%windir%\logs\servermanager.log. Add this parameter if you want the 
+results of the Get-WindowsFeature cmdlet to be stored in a log.
+                </maml:para>
+            </maml:description>
+            <command:parameterValue required="true">string</command:parameterValue>
+        </command:parameter>
+    </command:parameters>
+
+    <command:inputTypes>
+        <command:inputType>
+            <dev:type>
+                <maml:name>string[]</maml:name>
+                <maml:uri/>
+                <maml:description>
+                    <maml:para>Array of strings.</maml:para>
+                </maml:description>
+            </dev:type>
+            <maml:description>Array of strings, each represent a command ID of a Windows feature.</maml:description>
+        </command:inputType>
+    </command:inputTypes>
+
+    <command:returnValues>
+        <command:returnValue>
+            <dev:type>
+                <maml:name>Microsoft.Windows.ServerManager.Commands.Feature(s)</maml:name>
+                <maml:uri/>
+                <maml:description>
+                    <maml:para>Feature object(s)</maml:para>
+                </maml:description>
+            </dev:type>
+            <maml:description>Feature object(s) each represent a Windows feature available on the computer.</maml:description>
+        </command:returnValue>
+    </command:returnValues>
+
+  <!--
+  <maml:alertSet>
+  </maml:alertSet>
+  -->
+    <command:examples>
+        <command:example>
+            <maml:title>-------- Example 1 ----------</maml:title>
+            <dev:code>Get-WindowsFeature AD*,Web*</dev:code>
+            <dev:remarks>
+                <maml:para>Returns a list of features with Command ID that starts with AD or Web.</maml:para>
+            </dev:remarks>
+        </command:example>
+        <command:example>
+            <maml:title>-------- Example 2 ----------</maml:title>
+            <dev:code>Get-WindowsFeature</dev:code>
+            <dev:remarks>
+                <maml:para>Get all the Windows features available on the computer.</maml:para>
+            </dev:remarks>
+        </command:example>
+    </command:examples>
+
+    <maml:relatedLinks>
+        <maml:navigationLink>
+            <maml:linkText>Add-WindowsFeature</maml:linkText>
+            <maml:linkText>Remove-WindowsFeature</maml:linkText>
+        </maml:navigationLink>
+    </maml:relatedLinks>
+</command:command>
+
+<command:command 
+    xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
+    xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" 
+    xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+
+    <command:details>
+        <command:name>Add-WindowsFeature</command:name>
+        <command:verb>Add</command:verb>
+        <command:noun>WindowsFeature</command:noun>
+        <maml:description>
+            <maml:para>
+The Add-WindowsFeature cmdlet allows you to install specified roles, role 
+services, and features on a computer that is running Windows Server 2008 
+R2.
+            </maml:para>
+        </maml:description>
+    </command:details>
+
+    <maml:description>
+        <maml:para>
+The Add-WindowsFeature cmdlet allows you to install specified roles, role 
+services, and features on a computer that is running Windows Server 2008 
+R2. The Add-WindowsFeature cmdlet functions similarly to the Add Roles 
+Wizard and Add Features Wizard that you can start from the Server Manager 
+UI. As in those wizards, you can add more than one role, role service, or 
+feature per session, and all roles, role services, or features that are 
+required by those Windows features you want to install are added 
+automatically.
+
+You can find a list of command IDs for all roles, role services, and 
+features in the topic "Overview of Server Manager Commands" in the Server 
+Manager Help.
+        </maml:para>
+    </maml:description>
+
+    <command:syntax>
+        <command:syntaxItem>
+            <maml:name>Add-WindowsFeature</maml:name>
+            <command:parameter 
+                required="true" 
+                pipelineInput="true (ByValue)"
+                globbing="false"
+                position="1">
+                <maml:name>Name</maml:name>
+                <command:parameterValue required="true">string[]</command:parameterValue>
+            </command:parameter>
+            <command:parameter 
+                required="false" 
+                pipelineInput="false"
+                globbing="false"
+                position="named">
+                <maml:name>IncludeAllSubFeature</maml:name>
+            </command:parameter>
+            <command:parameter 
+                required="false" 
+                pipelineInput="false"
+                globbing="false"
+                position="named">
+                <maml:name>logPath</maml:name>
+                <command:parameterValue required="true">string</command:parameterValue>
+            </command:parameter>
+            <command:parameter 
+                required="false" 
+                pipelineInput="false"
+                globbing="false"
+                position="named">
+                <maml:name>WhatIf</maml:name>
+            </command:parameter>
+            <command:parameter 
+                required="false" 
+                pipelineInput="false"
+                globbing="false"
+                position="named">
+                <maml:name>Restart</maml:name>
+            </command:parameter>
+            <command:parameter 
+                required="false" 
+                pipelineInput="false"
+                globbing="false"
+                position="named">
+                <maml:name>Concurrent</maml:name>
+            </command:parameter>
+        </command:syntaxItem>
+    </command:syntax>
+
+    <command:parameters>
+        <command:parameter 
+            required="true" 
+            pipelineInput="true (ByValue)"
+            globbing="false"
+            position="1">
+            <maml:name>Name</maml:name>
+            <maml:description>
+                <maml:para>
+Specifies the command IDs of roles, role services, or features you 
+want to install by using the Add-WindowsFeature cmdlet. Alternatively, 
+an array of Feature objects will also be accepted.
+
+You can find a list of command IDs for all roles, role services, and 
+features in the topic "Overview of Server Manager Commands" in the 
+Server Manager Help.
+                </maml:para>
+            </maml:description>
+            <command:parameterValue required="true">string[]</command:parameterValue>
+        </command:parameter>
+        <command:parameter 
+            required="false" 
+            pipelineInput="false"
+            globbing="false"
+            position="named">
+            <maml:name>IncludeAllSubFeature</maml:name>
+            <maml:description>
+                <maml:para>
+Specifies the installation of all subordinate services and features 
+along with the parent role, role service, or feature named in the 
+Name parameter. 
+                </maml:para>
+            </maml:description>
+        </command:parameter>
+        <command:parameter 
+            required="false" 
+            pipelineInput="false"
+            globbing="false"
+            position="named">
+            <maml:name>logPath</maml:name>
+            <maml:description>
+                <maml:para>
+Specifies a name and location for the log file, other than the 
+default, %windir%\logs\ServerManager.log.
+                </maml:para>
+            </maml:description>
+            <command:parameterValue required="true">string</command:parameterValue>
+        </command:parameter>
+        <command:parameter 
+            required="false" 
+            pipelineInput="false"
+            globbing="false"
+            position="named">
+            <maml:name>WhatIf</maml:name>
+            <maml:description>
+                <maml:para>
+Displays any operations that are specified for the Add-WindowsFeature 
+cmdlet; for example, displays the Windows features that are also 
+installed because the role, role service, or feature you want to 
+install is dependent upon them.
+                </maml:para>
+            </maml:description>
+        </command:parameter>
+        <command:parameter 
+            required="false" 
+            pipelineInput="false"
+            globbing="false"
+            position="named">
+            <maml:name>Restart</maml:name>
+            <maml:description>
+                <maml:para>
+Restarts the computer automatically when installation is complete, 
+if restarting is required by the roles or features installed.
+                </maml:para>
+            </maml:description>
+        </command:parameter>
+        <command:parameter 
+            required="false" 
+            pipelineInput="false"
+            globbing="false"
+            position="named">
+            <maml:name>Concurrent</maml:name>
+            <maml:description>
+                <maml:para>
+Allows concurrent instances of the Server Manager Add-WindowsFeature 
+or Remove-WindowsFeature cmdlets to be running at the same time. 
+Do not add this parameter unless you are installing roles, role 
+services, or features that are downloaded separately from Windows 
+Server 2008 R2, and you want to install Windows features on which 
+the downloaded technology depends at the same time.
+
+The use of this switch is not recommended.  This switch is intended 
+for out-of-band feature(s) to install their dependencies.
+                </maml:para>
+            </maml:description>
+        </command:parameter>
+    </command:parameters>
+
+    <command:inputTypes>
+        <command:inputType>
+            <dev:type>
+                <maml:name>string[]</maml:name>
+                <maml:uri/>
+                <maml:description>
+                    <maml:para>Array of strings.</maml:para>
+                </maml:description>
+            </dev:type>
+            <maml:description>Array of strings, each represent a command ID of a Windows feature.</maml:description>
+        </command:inputType>
+    </command:inputTypes>
+
+    <command:returnValues>
+        <command:returnValue>
+            <dev:type>
+                <maml:name>Microsoft.Windows.ServerManager.Commands.FeatureOperationResult</maml:name>
+                <maml:uri/>
+                <maml:description>
+                    <maml:para>FeatureOperationResult object</maml:para>
+                </maml:description>
+            </dev:type>
+            <maml:description>This object is a container for all results of the Add-WindowsFeature or Remove-WindowsFeature cmdlet.</maml:description>
+        </command:returnValue>
+    </command:returnValues>
+
+    <maml:alertSet>
+        <maml:title>The -Confirm parameter is not used by this cmdlet, because multiple roles, role services, or features can be installed in a single session.</maml:title>
+        <maml:alert>
+            <maml:para/>
+        </maml:alert>
+    </maml:alertSet>
+
+    <command:examples>
+        <command:example>
+            <maml:title>-------- Example 1 ----------</maml:title>
+            <dev:code>Add-WindowsFeature Telnet-Server,Telnet-Client</dev:code>
+            <dev:remarks>
+                <maml:para>Install both Telnet Server and Telnet Client.</maml:para>
+                <maml:para/>
+            </dev:remarks>
+        </command:example>
+        <command:example>
+            <maml:title>-------- Example 2 ----------</maml:title>
+            <dev:code>Get-WindowsFeature Web-* | Add-WindowsFeature</dev:code>
+            <dev:remarks>
+                <maml:para>Install all Web features.</maml:para>
+                <maml:para/>
+            </dev:remarks>
+        </command:example>
+    </command:examples>
+
+    <maml:relatedLinks>
+        <maml:navigationLink>
+            <maml:linkText>Get-WindowsFeature</maml:linkText>
+            <maml:linkText>Remove-WindowsFeature</maml:linkText>
+        </maml:navigationLink>
+    </maml:relatedLinks>
+</command:command>
+
+<command:command 
+    xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
+    xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" 
+    xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+
+    <command:details>
+        <command:name>Remove-WindowsFeature</command:name>
+        <command:verb>Remove</command:verb>
+        <command:noun>WindowsFeature</command:noun>
+        <maml:description>
+            <maml:para>
+The Remove-WindowsFeature cmdlet allows you to remove specified roles, 
+role services, and features from a computer that is running Windows 
+Server 2008 R2.
+            </maml:para>
+        </maml:description>
+    </command:details>
+
+    <maml:description>
+        <maml:para>
+The Remove-WindowsFeature cmdlet allows you to remove specified roles, 
+role services, and features from a computer that is running Windows 
+Server 2008 R2. The Remove-WindowsFeature cmdlet functions similarly 
+to the Remove Roles Wizard and Remove Features Wizard that you can start 
+from the Server Manager UI. As in those wizards, you can remove more than 
+one role, role service, or feature per session.
+
+You can find a list of command IDs for all roles, role services, and 
+features in the topic "Overview of Server Manager Commands" in the Server 
+Manager Help.
+        </maml:para>
+    </maml:description>
+
+    <command:syntax>
+        <command:syntaxItem>
+            <maml:name>Remove-WindowsFeature</maml:name>
+            <command:parameter 
+                required="true" 
+                pipelineInput="true (ByValue)"
+                globbing="false"
+                position="1">
+                <maml:name>Name</maml:name>
+                <command:parameterValue required="true">string[]</command:parameterValue>
+            </command:parameter>
+            <command:parameter 
+                required="false" 
+                pipelineInput="false"
+                globbing="false"
+                position="named">
+                <maml:name>logPath</maml:name>
+                <command:parameterValue required="true">string</command:parameterValue>
+            </command:parameter>
+            <command:parameter 
+                required="false" 
+                pipelineInput="false"
+                globbing="false"
+                position="named">
+                <maml:name>WhatIf</maml:name>
+            </command:parameter>
+            <command:parameter 
+                required="false" 
+                pipelineInput="false"
+                globbing="false"
+                position="named">
+                <maml:name>Restart</maml:name>
+            </command:parameter>
+            <command:parameter 
+                required="false" 
+                pipelineInput="false"
+                globbing="false"
+                position="named">
+                <maml:name>Concurrent</maml:name>
+            </command:parameter>
+        </command:syntaxItem>
+    </command:syntax>
+
+    <command:parameters>
+        <command:parameter 
+            required="true" 
+            pipelineInput="true (ByValue)"
+            globbing="false"
+            position="1">
+            <maml:name>Name</maml:name>
+            <maml:description>
+                <maml:para>
+Specifies the command IDs of roles, role services, or features you 
+want to remove by using the Remove-WindowsFeature cmdlet.  
+Alternatively, an array of Feature objects will also be accepted.
+
+You can find a list of command IDs for all roles, role services, and 
+features in the topic "Overview of Server Manager Commands" in the 
+Server Manager Help.
+                </maml:para>
+            </maml:description>
+            <command:parameterValue required="true">string[]</command:parameterValue>
+        </command:parameter>
+        <command:parameter 
+            required="false" 
+            pipelineInput="false"
+            globbing="false"
+            position="named">
+            <maml:name>logPath</maml:name>
+            <maml:description>
+                <maml:para>
+Specifies a name and location for the log file, other than the default,
+%windir%\logs\ServerManager.log.
+                </maml:para>
+            </maml:description>
+            <command:parameterValue required="true">string</command:parameterValue>
+        </command:parameter>
+        <command:parameter 
+            required="false" 
+            pipelineInput="false"
+            globbing="false"
+            position="named">
+            <maml:name>WhatIf</maml:name>
+            <maml:description>
+                <maml:para>
+Displays any operations that are specified for the 
+Remove-WindowsFeature cmdlet; displays the names of all roles, role 
+services, or features that are removed.
+                </maml:para>
+            </maml:description>
+        </command:parameter>
+        <command:parameter 
+            required="false" 
+            pipelineInput="false"
+            globbing="false"
+            position="named">
+            <maml:name>Restart</maml:name>
+            <maml:description>
+                <maml:para>
+Restarts the computer automatically when removal is complete, if 
+restarting is required by the roles or features that were removed.
+                </maml:para>
+            </maml:description>
+        </command:parameter>
+        <command:parameter 
+            required="false" 
+            pipelineInput="false"
+            globbing="false"
+            position="named">
+            <maml:name>Concurrent</maml:name>
+            <maml:description>
+                <maml:para>
+Allows concurrent instances of the Server Manager Add-WindowsFeature 
+or Remove-WindowsFeature cmdlets to be running at the same time.
+                </maml:para>
+            </maml:description>
+        </command:parameter>
+    </command:parameters>
+
+    <command:inputTypes>
+        <command:inputType>
+            <dev:type>
+                <maml:name>string[]</maml:name>
+                <maml:uri/>
+                <maml:description>
+                    <maml:para>Array of strings.</maml:para>
+                </maml:description>
+            </dev:type>
+            <maml:description>Array of strings, each represent a command name of a Windows feature.</maml:description>
+        </command:inputType>
+    </command:inputTypes>
+
+    <command:returnValues>
+        <command:returnValue>
+            <dev:type>
+                <maml:name>Microsoft.Windows.ServerManager.Commands.FeatureOperationResult</maml:name>
+                <maml:uri/>
+                <maml:description>
+                    <maml:para>FeatureOperationResult object</maml:para>
+                </maml:description>
+            </dev:type>
+            <maml:description>This object is a container for all results of the Add-WindowsFeature or Remove-WindowsFeature cmdlet.</maml:description>
+        </command:returnValue>
+    </command:returnValues>
+
+    <maml:alertSet>
+        <maml:title>The -Confirm parameter is not used by this cmdlet, because multiple roles, role services, or features can be removed in a single session.</maml:title>
+        <maml:alert>
+            <maml:para/>
+        </maml:alert>
+    </maml:alertSet>
+
+    <command:examples>
+        <command:example>
+            <maml:title>-------- Example 1 ----------</maml:title>
+            <dev:code>Remove-WindowsFeature Telnet-Server,Telnet-Client</dev:code>
+            <dev:remarks>
+                <maml:para>Remove both Telnet Server and Telnet Client.</maml:para>
+                <maml:para/>
+            </dev:remarks>
+        </command:example>
+        <command:example>
+            <maml:title>-------- Example 2 ----------</maml:title>
+            <dev:code>Get-WindowsFeature Web-* | Remove-WindowsFeature</dev:code>
+            <dev:remarks>
+                <maml:para>Remove all Web features and any other Windows feature(s) that depend on 
+them.</maml:para>
+                <maml:para/>
+            </dev:remarks>
+        </command:example>
+    </command:examples>
+
+    <maml:relatedLinks>
+        <maml:navigationLink>
+            <maml:linkText>Get-WindowsFeature</maml:linkText>
+            <maml:linkText>Add-WindowsFeature</maml:linkText>
+        </maml:navigationLink>
+    </maml:relatedLinks>
+</command:command>
+
+</helpItems>

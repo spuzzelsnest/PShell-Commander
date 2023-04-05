@@ -223,7 +223,7 @@ function Alive{
     
     Write-Host "
            ... Just a second, Alive Script is loading ..." -ForegroundColor Green
-    Alive
+    #Alive
 
     start-sleep 5
 

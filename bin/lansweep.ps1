@@ -13,11 +13,7 @@
 #       1.0     11.05.2020 	- Initial release
 #--------------------------------------------------------------------------------
 
-#get active network adaptors
-
-#$ErrorActionPreference = "SilentlyContinue"
-
-$MenuOptions = Get-NetAdapter |? {$_.status -eq 'up'}
+$MenuOptions = Get-NetAdapter |? {$_.Status -eq "Up"}
 $MenuTitle = "                   found "+ $MenuOptions.count +" interfaces"
 $Selection = 0
 $EnterPressed = $False
@@ -27,12 +23,27 @@ function getLan($Selection){
 
     $iface = $MenuOptions[$Selection]
     $hostIp = ($iface | Get-NetIPAddress).IPv4Address
-    $range = $hostIp -split '.', -3
+    $range = (($hostIp.Split(".")|Select-Object -First 3) -join ".")+"."
 
-    Write-Host "you have selected " $iface.name "with ip " $hostIp " in range " $range "x"
+    Write-Host "you have selected " $iface.name "with ip $hostIp"
+    pingRange($range)
+}
 
-    #1..254 | % {"10.38.1.$($_): $(Test-Connection -count 1 -comp 10.38.1.$($_) -quiet)"} | select-string "True" | Foreach-Object {$_ -replace ": True"} | ForEach-Object {([system.net.dns]::GetHostByAddress($_)).hostname >>hostnames.txt}
+function pingRange{
+    param($range)
 
+    Write-Host "Let's Try to Ping sweep the Range "$range"x"
+    $ping = New-Object System.Net.NetworkInformation.ping
+    $ips = @()
+
+    For ($i = 1; $i -lt 255; $i++) {
+        $ip = $range+$i
+	    if ($ping.send($ip,500).status -eq "Success"){
+	    	write-host "$ip online" -foregroundcolor green
+	    	$ips += $ip
+	    }
+    }
+   $ips | out-file .\Logs\hostnames.txt   
 }
 
 function MainMenu{
