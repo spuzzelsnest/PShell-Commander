@@ -1,7 +1,7 @@
-﻿$psc = get-content C:\PShell-Commander\bin\Logs\PC-list.txt
+﻿$list = get-content .\Logs\hostnames.txt
 $PCLog = @{}
 
-foreach ($pc in $pcs){
+foreach ($pc in $list){
 
         $Private:pc = $pc
         'Processing ' + $Private:pc + '...'

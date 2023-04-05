@@ -529,7 +529,7 @@ x
 
 #Menu's
 function ADmenu{
-    #clear
+    clear
     $Tile = "AD Tools"
     $Menu = "
             (1)  AD-User Info

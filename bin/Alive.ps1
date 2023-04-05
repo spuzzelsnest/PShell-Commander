@@ -17,51 +17,48 @@
 #--------------------------------------------------------------------------------
 # START VARS
 
-$pcs = Get-Content bin\Logs\PC-list.txt
-$dump = "bin\Logs\"
+$pcs = Get-Content Logs\Server-list.txt
+$dump = "Logs\"
 $file = "network-report.html"
 $tot = ($pcs | Measure-Object -Line).lines
 $i = 1
  
-#make backup 
+#make backup
 
 if (Test-Path $dump\$file){ 
 
 copy-item $dump\$file -destination $dump\$file-$(Get-Date -format "yyyy_MM_dd_hh_mm_ss")
 }
 
+# Iterate Servers
 
+$Complete = @{}
 
+Do {
   $pcs | %{
+        $status = (Test-Connection -ComputerName $_ -Buffersize 16 -count 1 -quiet)
+        $Complete.Add($_,$status)
+      }
+      
+} While ($Complete.Count -lt $pcs.Count)
 
-    $j = [math]::Round((($i / $tot) * 100),2)
-
-    Write-Progress -Activity "Creating report" -Status "$j% Complete:" -PercentComplete $j
-   
-
-    $status = (Test-Connection -CN $_ -Count 1 -quiet)
-
-    Write-Output $cnName
-   
-    $i++
-  }
-  
 # Build the HTML output
-  $head = "
+
+  $Head = "
     <title>Status Report</title>
     <meta http-equiv='refresh' content='30' />"
 
-  $body = @()
-  $body += "<center><table><tr><th>Pc Name</th><th>State</th></tr>"
-  $body += $pcs | %{
-    If ($Complete.Contains($_)) {
+  $Body = @()
+  $Body += "<center><table><tr><th>ServerName</th><th>State</th></tr>"
+  $Body += $pcs | %{
+    If ($Complete.$_ -eq "True") {
     "<tr><td>$_</td><td><font color='green'>Running</font></td></tr>"
     } Else {
     "<tr><td>$_</td><td><font color='red'>Not Available</font></td></tr>"
     }
   }
-  $body += "</table></center>"
-  $html = ConvertTo-Html -Body $body -Head $head
+  $Body += "</table></center>"
+  $Html = ConvertTo-Html -Body $Body -Head $Head
 
 # save HTML
-  $html >  $dump/$file
+  $Html > $dump/$file
