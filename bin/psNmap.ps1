@@ -1,18 +1,3 @@
-#--------------------------------------------------------------------------------
-#
-# NAME:		nmap.ps1
-#
-# AUTHOR:	Spuzzelsnest
-#
-# COMMENT:
-#			Network scan - Automating the job
-#
-#
-#       VERSION HISTORY:
-#       0.0.1   15-10-2020  - My powershell NMAP
-#--------------------------------------------------------------------------------
-# START VARS
-
 <#
 .SYNOPSIS
     Portscan that scans for Online hosts on the subnet of the first connected network Adapter on your PC.
@@ -40,12 +25,12 @@
     $openPorts  - Empty hashtable for storing Online IP's with Open Ports
 
 #>
-
 # env
 
 $ErrorActionPreference = "silentlycontinue"
 
 # Vars
+$ping = New-Object System.Net.NetworkInformation.ping
 $ifList = Get-NetAdapter | Where-Object { $_.Status -eq "Up" }
 $ifIndex = 0
 $TCPports = @(22,80,443)
@@ -82,7 +67,7 @@ do {
 $ownIP = (Get-NetIPAddress -InterfaceIndex $ifIndex).IPv4Address | Out-String
 $ipRange = (($ownIP.Split(".")|Select-Object -First 3) -join ".")+"."
 
-Write-Host "Selected interface " $ifList[$selectedAdapter].Name " With IP range $ipRange.1/24"
+Write-Host "Selected interface " $ifList[$selectedAdapter].Name " With IP range "$ipRange"1/24"
 
 Clear-Content -Path .\hostname.txt
 
@@ -93,7 +78,7 @@ For ($i = 1; $i -lt 254; $i++) {
     if ($ip -eq $ownIP){
         Write-Debug "Removing own IP from List so no time is wasted scanning ports on localhost"
     }else{
-        if ( Test-Connection -count 1 -comp $ip -quiet ){
+        if ($ping.send($ip,500).status -eq "Success"){
             $ips += $ip
         }
     }
@@ -103,14 +88,12 @@ Write-Host "... Starting scan for popular ports ...`n[$TCPports] on "$ips.Count"
 
 foreach ($ip in $ips){
     foreach ($TCPport in $TCPports){
-        If(Test-Connection -BufferSize 32 -Count 1 -Quiet -ComputerName $ip){
-            $socket = New-Object System.Net.Sockets.TcpClient($ip, $TCPport)
-            If($socket.Connected) {
-                $openPorts.Add($ip,$TCPport) 
-                $socket.Close()
-            }else{
-                Write-Debug "$ip port $TCPport not open"
-            }
+        $socket = New-Object System.Net.Sockets.TcpClient($ip, $TCPport)
+        If($socket.Connected) {
+            $openPorts.Add($ip,$TCPport) 
+            $socket.Close()
+        }else{
+            Write-Debug "$ip port $TCPport not open"
         }
     }
 }

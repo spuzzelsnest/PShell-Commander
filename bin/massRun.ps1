@@ -1,5 +1,5 @@
-﻿$logs = 'C:\PShell-Commander\bin\Logs'
-$dumpFiles = 'C:\PShell-Commander\bin\_dumpFiles'
+﻿$logs = 'Logs'
+$dumpFiles = '_dumpFiles'
 
 $parameters = @{
   ComputerName = (Get-Content -Path  $logs\TEST-list.txt)

@@ -1,7 +1,29 @@
-﻿#Connect to azure
+﻿<#
+.SYNOPSIS
+    bookingsCalendars.ps1
+ 
+.DESCRIPTION
+    This program looks for a list of pcnames which it wil check for .
+ 
+.NOTES
+       VERSION HISTORY:
+       1.0     07-05-2021  - Checking bookingsCalender permissions
+ 
+.COMPONENT 
+    Exchange Modules
+    Azure Modules
+ 
+.LINK
+    https://github.com/spuzzelsnest/
+ 
+.Parameter ParameterName
+ 
+#>
+#Connect to azure
 
-Connect-EXOPSSession -UserPrincipalName jan.desmet@sint-lievens-houtem.be
-Connect-ExchangeOnline  -UserPrincipalName jan.desmet@sint-lievens-houtem.be
+$operator = Read-Host "Whats your E-Mail Address? "
+Connect-EXOPSSession -UserPrincipalName $operator
+Connect-ExchangeOnline  -UserPrincipalName $operator
 
 # prerequisite: Exchange Online v2 PowerShell module, must be connected to the service
 

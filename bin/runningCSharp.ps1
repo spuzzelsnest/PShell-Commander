@@ -1,4 +1,4 @@
-﻿$source = Get-content -Path "C:\PShell-Commander\bin\dotNetVersion.cs"
+﻿$source = Get-content -Path "_dumpFiles\dotNetVersion.cs"
 
 Add-Type -TypeDefinition "$source"
 

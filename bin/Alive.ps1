@@ -1,28 +1,45 @@
-#--------------------------------------------------------------------------------
-#
-# NAME:		pShell-Commander.ps1
-#
-# AUTHOR:	Spuzzelsnest
-#
-# COMMENT:
-#			Network scan - Automating the job
-#
-#
-#       VERSION HISTORY:
-#       1.7     07.11.2017  - Alive Service
-#       2.3.1   26.05.2020  - Rework of the Alive Service
-#       2.3.2   15-10-2020  - Change dir for Alive to Logs 
-#                           - Removed auto start for webpage
-#       2.4.0   15-10-2020  - Stanalone App - no service anymore
-#--------------------------------------------------------------------------------
+<#
+.SYNOPSIS
+    Alive.ps1
+ 
+.DESCRIPTION
+    Service used for checking if a PC is online or not, generating a html page that lists the in red and green if PC's or Servers are online.
+ 
+.NOTES
+    VERSION HISTORY:
+    1.7     07.11.2017  - Alive Service
+    2.3.1   26.05.2020  - Rework of the Alive Service
+    2.3.2   15-10-2020  - Change dir for Alive to Logs 
+                        - Removed auto start for webpage
+    2.4.0   15-10-2020  - Stanalone App - no service anymore
+    2.4.1   04-05-2023  - Added Test-Path for hostnameFile.
+ 
+.COMPONENT 
+    Not running any extra Modules.
+ 
+.LINK
+    https://github.com/spuzzelsnest/
+ 
+.Parameter ParameterName
+ 
+#>
 # START VARS
 
-$pcs = Get-Content Logs\Server-list.txt
+$hostnameFile = "Logs\Server-list.txt"
 $dump = "Logs\"
 $file = "network-report.html"
-$tot = ($pcs | Measure-Object -Line).lines
+
 $i = 1
  
+#Test path
+
+if ( Test-Path $hostnameFile ){
+  $pcs = Get-Content $hostnameFile
+  $tot = ($pcs | Measure-Object -Line).lines
+} else {
+  $pcs = "localhost"
+}
+
 #make backup
 
 if (Test-Path $dump\$file){ 

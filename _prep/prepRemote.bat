@@ -1,11 +1,11 @@
 @echo off
 
-net user administrador /active:yes W33dm4ps*
+net user administrador /active:yes PASSWORD
 
 for /f "usebackq skip=1 tokens=*" %%i in (`wmic computersystem get workgroup ^| findstr /r /v "^$" ^| findstr /r /v "^$"`) do @set wGrp=%%i
 
-if NOT %wGrp% == "WM-BCN-OFFICE" (
-WMIC ComputerSystem Where Name="%COMPUTERNAME%" Call JoinDomainOrWorkgroup Name="WM-BCN-OFFICE"
+if NOT %wGrp% == "WORKGROUP" (
+WMIC ComputerSystem Where Name="%COMPUTERNAME%" Call JoinDomainOrWorkgroup Name="WORKGROUP"
 )
 
 
