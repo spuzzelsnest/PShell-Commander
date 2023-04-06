@@ -44,12 +44,8 @@ foreach ($pc in $list){
                 if ( $ips = [System.Net.Dns]::GetHostAddresses($pc) | foreach { $_.IPAddressToString } ) {
 
                     $PCLog.'IP Address(es) from DNS' = ($ips -join ', ')
-                }
-
-                else {
-
+                } else {
                     $PCLog.'IP Address from DNS' = 'Could not resolve'
-
                 }
 # Make errors visible again
                 $ErrorActionPreference = 'Continue'

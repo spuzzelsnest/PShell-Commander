@@ -126,72 +126,6 @@ function x{
     mainMenu
 }
 
-# ALIVE SERVICE
-
-function Alive{
-
-        if(!(test-path $logs\PC-list.txt)){
-                
-                Write-host No PC list found -ForegroundColor Magenta
-            
-            }else{
-
-
-                $Complete = @{}
-                $i=0
-            
-                if (Test-Path $logs\$report){
-
-                    copy-item $logs\$report -destination $logs\$report-$(Get-Date -format "yyyy_MM_dd_hh_mm_ss")
-                 }
-
-                 $pcs = Get-Content $logs\PC-list.txt
-
-               
-                 
-                 $pcs | %{
-
-                        $j = [math]::Round((($i / $pcs.Count) * 100),2)
-
-                        Write-Progress -Activity "Creating report" -Status "$j% Complete:" -PercentComplete $j
-                        $pingStatus = ( $ping.send($_,500).status )
-
-                        Write-Output $cnName
-                        If (!$Complete.Containskey($_)){
-                            If ($pingStatus -eq  $True){
-                                $Complete.Add($_,$pingStatus)
-                            }
-                        }
-                        $i++
-                   }
-  
-            # Build the HTML output
-                    $head = "
-                    <title>Status Report</title>
-                    <meta http-equiv='refresh' content='30' />"
-
-                    $body = @()
-                    $body += "<center><table><tr><th>Pc Name</th><th>State</th></tr>"
-                    $body += $pcs | %{
-                    if ($Complete.Contains($_)) {
-                        "<tr><td>$_</td><td><font color='green'>Running</font></td></tr>"
-                        } else {
-                        "<tr><td>$_</td><td><font color='red'>Not Available</font></td></tr>"
-                        }
-                    }
-                    $body += "</table></center>"
-                    $html = ConvertTo-Html -Body $body -Head $head
-
-                # save HTML
-                    $html >  $logs/$report
-
-             
-                
-                invoke-item "bin/Logs/network-report.html"
-            }
-}
-    
-
 # START PROGRAM
 
     cd $workDir
@@ -265,19 +199,19 @@ function PCInfo($pc){
     'Processing ' + $Private:pc + '...'
     $PCLog = @{}
     $PCLog.'PC-Name' = $Private:pc
-    $PCLog.''
+#    $PCLog.''
 # Try an ICMP ping the only way Powershell knows how...
-    $PCLog.ping =if ( $ping.send($Private:pc,500).status ){"Yes"}else{"No"}
+    $PCLog.ping = if ( $ping.send($Private:pc,500).status -eq "Success"){"Yes"}else{"No"}
 
     if ( $Private:ips = [System.Net.Dns]::GetHostAddresses($Private:pc) | foreach { $_.IPAddressToString } ) {
-
         $PCLog.'IP Address(es) from DNS' = ($Private:ips -join ', ')
     } else {
         $PCLog.'IP Address from DNS' = 'Could not resolve'
     }
+
 # We'll assume no ping reply means it's dead. Try this anyway if -IgnorePing is specified
-    if ($Private:pingStatus -or $Private:ignorePing) {
-        $PCLog.'WMI Data Collection Attempt' = 'Yes (ping reply or -IgnorePing)'
+    if ($PCLog.ping -eq "Yes"){
+            $PCLog.'WMI Data Collection Attempt' = 'Yes (ping reply or -IgnorePing)'
 # Get various info from the ComputerSystem WMI class
         if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_ComputerSystem -ErrorAction SilentlyContinue) {
             $PCLog.'Computer Hardware Manufacturer' = $Private:wmi.Manufacturer
