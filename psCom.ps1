@@ -7,9 +7,9 @@
 
 .NOTES
     VERSION HISTORY:
-       1.0     02.17.2017 	- Initial release
+       1.0     02.17.2017  - Initial release
        1.1     03.03.2017  - Test Connection as a function
-       1.2		04.17.2017  - Changed dump function
+       1.2	   04.17.2017  - Changed dump function
        1.3     04.24.2017  - Changed userinfo layout
        1.4     04.28.2017  - Return of the scrollbar
        1.5     05.04.2017  - Loggedon module
@@ -29,6 +29,7 @@
        2.3.2   15-10-2020  - Change dir for Alive to Logs 
                            - Removed auto start for webpage
        2.4.0   05-04-2023  - Merge with old version.
+       2.4.1   12-04-2023  - Fix dump files
  
 .COMPONENT 
     Not running any extra Modules.
@@ -40,12 +41,12 @@
  
 #>
 
-    $version = "v 2.4.0"
+    $version = "v 2.4.1"
     $psver = $PSVersionTable.PSVersion.tostring()
     $ping = New-Object System.Net.NetworkInformation.Ping
-    $workDir = $pwd
-    $dump = "bin\_dumpFiles\"
-    $logs = "bin\Logs"
+    $workDir = "C:\PShell-Commander"
+    $dump = "$workDir\bin\_dumpFiles"
+    $logs = "$workDir\bin\Logs"
     $report = "network-report.html"
     $modsFolder = "$workDir/bin/Modules"
 
@@ -54,8 +55,8 @@
    
 # TEXT VARS
 
-    $pcQ= "What is the PC name or the IP-address or press c to Cancel"
-    $userQ = "What is the UserID or press c to Cancel"
+    $pcQ= "What is the PC name or the IP-address or press C to Cancel"
+    $userQ = "What is the UserID or press C to Cancel"
 
 # Set Env
 # WINDOWS VARS
@@ -110,7 +111,7 @@ function exit{
 function CC ($pc){
     if(!($pc -eq "c")){
         if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($pc).result.status -eq 'Succes')){
-            Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key  " `n
+            Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key " `n
             clear
             return $False
         }else{
@@ -118,6 +119,16 @@ function CC ($pc){
         }
     }else{x}
 }
+
+function checkDestination(){
+
+    param($dir)
+
+    if (! (Test-Path $dir)) {
+        New-Item -ItemType Directory -Force -Path $dir
+    }
+}
+
 
 function x{
     Write-Host "Press any key to go back to the main menu"
@@ -148,8 +159,6 @@ function Alive{
 
                  $pcs = Get-Content $logs\PC-list.txt
 
-               
-                 
                  $pcs | %{
 
                         $j = [math]::Round((($i / $pcs.Count) * 100),2)
@@ -186,19 +195,17 @@ function Alive{
 
                 # save HTML
                     $html >  $logs/$report
-
-             
-                
-                invoke-item "bin/Logs/network-report.html"
+                    invoke-item "bin/Logs/network-report.html"
             }
 }
     
 
 # START PROGRAM
-
+    
     cd $workDir
     $loadscreen = get-content bin/visuals/loadscreen | Out-String
     $loadedModules = get-module
+    clear
     write-host $loadscreen -ForegroundColor Magenta
 
     if ($PSVersionTable.PSVersion.Major -gt 2)
@@ -254,11 +261,11 @@ function UserInfo ($Id){
         $userLog.add('Manager Info', $manInfo)
         $userLog.add('Groups', $groupInfo)
         $userLog.add('Email Addresses', $mailInfo)
-            #foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
+       #foreach ($item in $userLog.GetEnumerator() | Format-Table -AutoSize){$item}
         $userLog.getenumerator()| Ft -AutoSize -wrap | out-string
         $userLog.GetEnumerator() | Out-GridView -Title "$Id Information"
     }
-x
+  x
 }
 
 function alterName($pc){
@@ -267,10 +274,11 @@ function alterName($pc){
     $alterNames | %{
         write-host $_ "`n" -ForegroundColor Yellow
     }
-x
+  x
 }
 
 function cleanUp ($pc){
+  
     if (CC($pc)){
 
         Write-progress "Removing Temp Folders from "  "in Progress:"
@@ -294,68 +302,52 @@ function cleanUp ($pc){
         }
         net use /delete \\$pc\C$
     }
-x
+  x
 }
 
 function remotePS($pc){
     if(CC($pc)){
         start-process powershell.exe -ArgumentList "-noexit & Enter-PSSession $pc"
     }
-x
+  x
 }
 
 function loggedon($pc){
     if(CC($pc)){
         Invoke-Command -CN $pc -ScriptBlock { quser }
     }
-x
+  x
 }
 
 function dumpIt ($pc){
 
-$dest = "\\$pc\C$\Temp"
-$log = "$root\$pc"
-Write-Host "You can choose from the following Files or press C to Cancel:
- *For now only Copy pasting the name or rewrite it in the box works*"
-          $files = Get-ChildItem $dump | select Name
-          
-            for ([int]$i = 1; $i -le $files.length; $i++){
-                        Write-Host $i $files[$i-1].name
-                   }
-            
-            $fileName = Read-Host "What File do you want to send"
+    Write-Host "You can choose from the following Files or press C to Cancel:`n*For now only Copy pasting the name or rewrite it in the box works*"
+    $files = Get-ChildItem $dump | select Name
+
+    for ([int]$i = 1; $i -le $files.length; $i++){
+        Write-Host $i $files[$i-1].name
+    }    
+
+    $fileName = Read-Host "What File do you want to send"
  
     if (CC($pc)){
- 
-            if(!(Test-Path $dest\Logs)){
 
-                Write-Host Creating $dest\Logs -ForegroundColor magenta
-				New-Item -ItemType Directory -Force -Path $dest\Logs
+        $dest = "\\$pc\C$\Temp"
+        $logs = "$logs\$pc"
+        checkDestination($dest)
+        checkDestination($logs)
+        New-Item -ItemType Directory -Force -Path $dest/Logs
 
-			}else{
-
-                Write-Host The $dest\Logs directory exsists -ForegroundColor Green
-			}
-
-
-		    Copy-Item $dump\$filename $dest
-            Write-Host $filename copied to $dest -ForegroundColor Green
-		    
-            cd $workDir\$psTools
+	    Copy-Item $dump\$filename $dest
+        Write-Host $filename copied to $dest -ForegroundColor Green
              
-            Invoke-Command -CN $pc -FilePath $workDir/bin/_dumpFiles/$filename
+        Invoke-Command -ComputerName $pc -FilePath $dump/$filename
             
-            if(!(Test-path $log)){
-				Write-Host $log is not available -Foreground magenta
-				new-Item $log -type directory -Force
-			}else{
-		        Write-Host Logs will be written to $log -Foreground green
-            }
-            robocopy.exe $dest\Logs $log *.* /move
-            Remove-Item $dest\$filename -Verbose
-            Write-Host Files removed from $pc -Foreground "green"       
+        robocopy.exe $dest\Logs $logs *.* /move
+        Remove-Item $dest\$filename -Verbose
+        Write-Host Files removed from $pc -Foreground Green
     }
-x
+  x
 }
 
 #Menu's
@@ -363,67 +355,58 @@ function ADmenu{
     clear
     $Tile = "AD Tools"
     $Menu = "
-            (1)  AD-User Info
-            
-            (2)  AD-Computer Info
-            
-            (3)  Find Related Server Names
-            
-            (4)  Who is logged on
-            
-            (5)  Back
-            "
+            (1)  AD-User Info`n
+            (2)  AD-Computer Info`n
+            (3)  Find Related Server Names`n
+            (4)  Who is logged on`n
+            (5)  Back`n`n"
     $ADchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADUser","&2 ADServ","&3 alternateName","&4 Loggedon","&5 Back")
     [int]$defchoice = 4
     $subAD =  $h.UI.PromptForChoice($Title, $Menu, $ADchoice,$defchoice)
     switch($subAD){
-            0{
-            clear
-             Write-Host "################################################################"
-             Write-Host "                          USERINFO INFO" -ForegroundColor Green
-             Write-Host "################################################################
-                         "
-             $Id =''
-             if(!$id){
-                $Id =  Read-Host $userQ
-                Write-Host $Id
-             }
-             userInfo $Id
-           }1{
-           clear
-             Write-Host "###############################################################"
-             Write-Host "                           PCINFO INFO" -ForegroundColor Green
-             Write-Host "###############################################################
-                        "
-             $pc =''
-             if(!$pc){
-                $pc = Read-Host $pcQ
-             }
-             PCInfo $pc
-           }2{
-           clear
-             Write-Host "################################################################"
-             Write-Host "                 Find Alternative Server Name" -ForegroundColor Red
-             Write-Host "################################################################
-                        "
-             $pc =''
-             if(!$pc){
-                $pc = Read-Host $pcQ
-             }
-             alterName $pc
-           }3{
-           clear
+        0{
+        clear
             Write-Host "################################################################"
-            Write-Host "         Find user who is logged on to PC" -ForegroundColor Red
-            Write-Host "################################################################
-                    "
+            Write-Host "                          USERINFO INFO" -ForegroundColor Green
+            Write-Host "################################################################`n"
+            $Id =''
+            if(!$id){
+            $Id =  Read-Host $userQ
+            Write-Host $Id
+            }
+            userInfo $Id
+        }1{
+        clear
+            Write-Host "###############################################################"
+            Write-Host "                           PCINFO INFO" -ForegroundColor Green
+            Write-Host "###############################################################`n"
             $pc =''
             if(!$pc){
-                
-                $pc = Read-Host $pcQ
+            $pc = Read-Host $pcQ
             }
-            loggedOn $pc
-            }4{mainMenu}
+            PCInfo $pc
+        }2{
+        clear
+            Write-Host "################################################################"
+            Write-Host "                 Find Alternative Server Name" -ForegroundColor Green
+            Write-Host "################################################################`n"
+            $pc =''
+            if(!$pc){
+            $pc = Read-Host $pcQ
+            }
+            alterName $pc
+        }3{
+        clear
+        Write-Host "################################################################"
+        Write-Host "         Find user who is logged on to PC" -ForegroundColor Green
+        Write-Host "################################################################`n"
+        $pc =''
+        if(!$pc){
+                
+            $pc = Read-Host $pcQ
+        }
+        loggedOn $pc
+        }4{mainMenu}
     }
 }
 
@@ -431,12 +414,9 @@ function NTmenu {
     clear
     $Title = "Network Tools"
     $Menu = "
-          (1)   Remote PowerShell
-
-          (2)   Dump File To PC
-
-          (3)   Back
-          "
+          (1)   Remote PowerShell`n
+          (2)   Dump File To PC`n
+          (3)   Back`n`n"
     $NTchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 CMD","&2 Dump","&3 Back")
     [int]$defchoice = 2
     $subNT = $h.UI.PromptForChoice($Title, $Menu, $NTchoice,$defchoice)
@@ -445,8 +425,7 @@ function NTmenu {
         clear
             Write-Host "################################################################"
             Write-Host "                     Remote PowerShell" -ForegroundColor Red
-            Write-Host "################################################################
-            "
+            Write-Host "################################################################`n"
             $pc =''
             if(!$pc){
                 $pc = Read-Host $pcQ
@@ -457,8 +436,7 @@ function NTmenu {
         clear
             Write-Host "################################################################"
             Write-Host "                     Dump file to PC" -ForegroundColor Red
-            Write-Host "################################################################
-            "
+            Write-Host "################################################################`n"
             $pc =''
             if(!$pc){
                 $pc = Read-Host $pcQ
@@ -469,34 +447,30 @@ function NTmenu {
 }
 
 function ADVmenu{
-        clear
-        $Title = "Advanced Tools"
-        $Menu = "
-              (1)   Cleanup Temp
+    clear
+    $Title = "Advanced Tools"
+    $Menu = "`n(1)   Cleanup Temp
 
-              (2)   Back
-              "
+           (2)   Back`n`n"
         $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup","&2 Back")
         [int]$defchoice = -1
         $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
-        switch($subAV){ 
+    switch($subAV){ 
 
-              0{
-                clear
-                Write-Host "################################################################"
-                Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
-                Write-Host "################################################################
-                "
-                $pc =''
-                if(!$pc){
+            0{
+            clear
+            Write-Host "################################################################"
+            Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
+            Write-Host "################################################################`n"
+            $pc =''
+            if(!$pc){
 
-                    $pc = Read-Host $pcQ
-                }
-                cleanUp $pc
-                x
-            }1{mainMenu}
-
-        }
+                $pc = Read-Host $pcQ
+            }
+            cleanUp $pc
+            x
+        }1{mainMenu}
+    }
 }
 
 function mainMenu {
@@ -505,8 +479,7 @@ function mainMenu {
     $LengthName = $agent.length
     $lengthDom = $dom.Length
     $line = "*****************************************************" + "*"* $LengthName +"*"* $lengthDom 
-    $Menu = "
-Welcome $agent                                   PowerShell $psver
+    $Menu = "`nWelcome $agent                                   PowerShell $psver
 
       Running from $hostn on $dom $warning
 $line
@@ -519,25 +492,24 @@ $line
                                                       
                            (3)   Advanced Tools
                            
-                           (Q)   Exit
-                           "
+                           (Q)   Exit`n`n"
     $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADTools", "&2 NTTools", "&3 ADVTools", "&Quit")
     [int]$defaultchoice = 3
     $choice =  $h.UI.PromptForChoice($Title, $Menu, $mainMenu, $defaultchoice)
 
-         switch ($choice){
-               0{
-                    clear
-                    ADmenu
-               }1{
-                    clear
-                    NTmenu
+    switch ($choice){
+        0{
+            clear
+            ADmenu
+        }1{
+            clear
+            NTmenu
 
-               }2{
-                    clear
-                    ADVmenu
-               }q{exit}
-         }
+        }2{
+            clear
+            ADVmenu
+        }q{exit}
+    }
 }
 
 mainMenu
