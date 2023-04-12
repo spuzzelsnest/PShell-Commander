@@ -142,61 +142,57 @@ function x{
 
 function Alive{
 
-        if(!(test-path $logs\PC-list.txt)){
-                
-                Write-host No PC list found -ForegroundColor Magenta
-            
-            }else{
+    if(!(test-path $logs\PC-list.txt)){
 
+            Write-host No PC list found -ForegroundColor Magenta
+        }else{
+            $Complete = @{}
+            $i=0
 
-                $Complete = @{}
-                $i=0
-            
-                if (Test-Path $logs\$report){
+            if (Test-Path $logs\$report){
 
-                    copy-item $logs\$report -destination $logs\$report-$(Get-Date -format "yyyy_MM_dd_hh_mm_ss")
-                 }
+                copy-item $logs\$report -destination $logs\$report-$(Get-Date -format "yyyy_MM_dd_hh_mm_ss")
+                }
 
-                 $pcs = Get-Content $logs\PC-list.txt
+                $pcs = Get-Content $logs\PC-list.txt
 
-                 $pcs | %{
+                $pcs | %{
 
-                        $j = [math]::Round((($i / $pcs.Count) * 100),2)
+                    $j = [math]::Round((($i / $pcs.Count) * 100),2)
 
-                        Write-Progress -Activity "Creating report" -Status "$j% Complete:" -PercentComplete $j
-                        $status = ( $ping.send($_,500).status )
+                    Write-Progress -Activity "Creating report" -Status "$j% Complete:" -PercentComplete $j
+                    $status = ( $ping.send($_,500).status )
 
-                        Write-Output $cnName
-                        If (!$Complete.Containskey($_)){
-                            If ($status -eq  $True){
-                                $Complete.Add($_,$status)
-                            }
-                        }
-   
-                        $i++
-                   }
-  
-            # Build the HTML output
-                    $head = "
-                    <title>Status Report</title>
-                    <meta http-equiv='refresh' content='30' />"
-
-                    $body = @()
-                    $body += "<center><table><tr><th>Pc Name</th><th>State</th></tr>"
-                    $body += $pcs | %{
-                    if ($Complete.Contains($_)) {
-                        "<tr><td>$_</td><td><font color='green'>Running</font></td></tr>"
-                        } else {
-                        "<tr><td>$_</td><td><font color='red'>Not Available</font></td></tr>"
+                    Write-Output $cnName
+                    If (!$Complete.Containskey($_)){
+                        If ($status -eq  $True){
+                            $Complete.Add($_,$status)
                         }
                     }
-                    $body += "</table></center>"
-                    $html = ConvertTo-Html -Body $body -Head $head
+                  $i++
+                }
+  
+        # Build the HTML output
+                $head = "
+                <title>Status Report</title>
+                <meta http-equiv='refresh' content='30' />"
 
-                # save HTML
-                    $html >  $logs/$report
-                    invoke-item "bin/Logs/network-report.html"
-            }
+                $body = @()
+                $body += "<center><table><tr><th>Pc Name</th><th>State</th></tr>"
+                $body += $pcs | %{
+                if ($Complete.Contains($_)) {
+                    "<tr><td>$_</td><td><font color='green'>Running</font></td></tr>"
+                    } else {
+                    "<tr><td>$_</td><td><font color='red'>Not Available</font></td></tr>"
+                    }
+                }
+                $body += "</table></center>"
+                $html = ConvertTo-Html -Body $body -Head $head
+
+            # save HTML
+                $html >  $logs/$report
+                invoke-item "bin/Logs/network-report.html"
+        }
 }
     
 
@@ -287,11 +283,13 @@ function cleanUp ($pc){
 		new-PSdrive IA Filesystem \\$pc\C$
 		remove-item IA:\"$"Recycle.Bin\* -recurse -force -verbose
 		Write-host "Cleaned up Recycle.Bin" -ForegroundColor Green
-		if (Test-Path IA:\Windows.old){
+		
+        if (Test-Path IA:\Windows.old){
             Remove-Item IA:\Windows.old\ -Recurse -Force -Verbose
 		}else{
 		    Write-host "no Windows.old Folder found" -ForegroundColor Green
 		}
+        
         remove-item IA:\Windows\Temp\* -recurse -Force -Verbose
         write-host "Cleaned up C:\Windows\Temp" -ForegroundColor Green
       	$UserFolders = get-childItem IA:\Users\ -Directory
@@ -328,10 +326,10 @@ function dumpIt ($pc){
 
     for ([int]$i = 1; $i -le $files.length; $i++){
         Write-Host $i $files[$i-1].name
-    }    
+    }
 
     $fileName = Read-Host "What File do you want to send"
- 
+
     if (CC($pc)){
 
         $dest = "\\$pc\C$\Temp"
@@ -342,7 +340,7 @@ function dumpIt ($pc){
 
 	    Copy-Item $dump\$filename $dest
         Write-Host $filename copied to $dest -ForegroundColor Green
-             
+
         Invoke-Command -ComputerName $pc -FilePath $dump/$filename
 
         robocopy.exe $dest\Logs $logs *.* /move
