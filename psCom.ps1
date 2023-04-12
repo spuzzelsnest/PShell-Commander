@@ -44,7 +44,7 @@
     $version = "v 2.4.1"
     $psver = $PSVersionTable.PSVersion.tostring()
     $ping = New-Object System.Net.NetworkInformation.Ping
-    $workDir = "C:\PShell-Commander"
+    $workDir = $pwd
     $dump = "$workDir\bin\_dumpFiles"
     $logs = "$workDir\bin\Logs"
     $report = "network-report.html"
@@ -205,7 +205,9 @@ function Alive{
     cd $workDir
     $loadscreen = get-content bin/visuals/loadscreen | Out-String
     $loadedModules = get-module
-    clear
+    # remove to clean startup
+    #clear
+    
     write-host $loadscreen -ForegroundColor Magenta
 
     if ($PSVersionTable.PSVersion.Major -gt 2)
