@@ -342,7 +342,7 @@ function dumpIt ($pc){
         Write-Host $filename copied to $dest -ForegroundColor Green
              
         Invoke-Command -ComputerName $pc -FilePath $dump/$filename
-            
+
         robocopy.exe $dest\Logs $logs *.* /move
         Remove-Item $dest\$filename -Verbose
         Write-Host Files removed from $pc -Foreground Green
