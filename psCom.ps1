@@ -9,7 +9,7 @@
     VERSION HISTORY:
        1.0     02.17.2017  - Initial release
        1.1     03.03.2017  - Test Connection as a function
-       1.2	   04.17.2017  - Changed dump function
+       1.2     04.17.2017  - Changed dump function
        1.3     04.24.2017  - Changed userinfo layout
        1.4     04.28.2017  - Return of the scrollbar
        1.5     05.04.2017  - Loggedon module
@@ -44,7 +44,7 @@
     $version = "v 2.4.1"
     $psver = $PSVersionTable.PSVersion.tostring()
     $ping = New-Object System.Net.NetworkInformation.Ping
-    $workDir = "C:\PShell-Commander"
+    $workDir = $pwd
     $dump = "$workDir\bin\_dumpFiles"
     $logs = "$workDir\bin\Logs"
     $report = "network-report.html"
@@ -142,61 +142,57 @@ function x{
 
 function Alive{
 
-        if(!(test-path $logs\PC-list.txt)){
-                
-                Write-host No PC list found -ForegroundColor Magenta
-            
-            }else{
+    if(!(test-path $logs\PC-list.txt)){
 
+            Write-host No PC list found -ForegroundColor Magenta
+        }else{
+            $Complete = @{}
+            $i=0
 
-                $Complete = @{}
-                $i=0
-            
-                if (Test-Path $logs\$report){
+            if (Test-Path $logs\$report){
 
-                    copy-item $logs\$report -destination $logs\$report-$(Get-Date -format "yyyy_MM_dd_hh_mm_ss")
-                 }
+                copy-item $logs\$report -destination $logs\$report-$(Get-Date -format "yyyy_MM_dd_hh_mm_ss")
+                }
 
-                 $pcs = Get-Content $logs\PC-list.txt
+                $pcs = Get-Content $logs\PC-list.txt
 
-                 $pcs | %{
+                $pcs | %{
 
-                        $j = [math]::Round((($i / $pcs.Count) * 100),2)
+                    $j = [math]::Round((($i / $pcs.Count) * 100),2)
 
-                        Write-Progress -Activity "Creating report" -Status "$j% Complete:" -PercentComplete $j
-                        $status = ( $ping.send($_,500).status )
+                    Write-Progress -Activity "Creating report" -Status "$j% Complete:" -PercentComplete $j
+                    $status = ( $ping.send($_,500).status )
 
-                        Write-Output $cnName
-                        If (!$Complete.Containskey($_)){
-                            If ($status -eq  $True){
-                                $Complete.Add($_,$status)
-                            }
-                        }
-   
-                        $i++
-                   }
-  
-            # Build the HTML output
-                    $head = "
-                    <title>Status Report</title>
-                    <meta http-equiv='refresh' content='30' />"
-
-                    $body = @()
-                    $body += "<center><table><tr><th>Pc Name</th><th>State</th></tr>"
-                    $body += $pcs | %{
-                    if ($Complete.Contains($_)) {
-                        "<tr><td>$_</td><td><font color='green'>Running</font></td></tr>"
-                        } else {
-                        "<tr><td>$_</td><td><font color='red'>Not Available</font></td></tr>"
+                    Write-Output $cnName
+                    If (!$Complete.Containskey($_)){
+                        If ($status -eq  $True){
+                            $Complete.Add($_,$status)
                         }
                     }
-                    $body += "</table></center>"
-                    $html = ConvertTo-Html -Body $body -Head $head
+                  $i++
+                }
+  
+        # Build the HTML output
+                $head = "
+                <title>Status Report</title>
+                <meta http-equiv='refresh' content='30' />"
 
-                # save HTML
-                    $html >  $logs/$report
-                    invoke-item "bin/Logs/network-report.html"
-            }
+                $body = @()
+                $body += "<center><table><tr><th>Pc Name</th><th>State</th></tr>"
+                $body += $pcs | %{
+                if ($Complete.Contains($_)) {
+                    "<tr><td>$_</td><td><font color='green'>Running</font></td></tr>"
+                    } else {
+                    "<tr><td>$_</td><td><font color='red'>Not Available</font></td></tr>"
+                    }
+                }
+                $body += "</table></center>"
+                $html = ConvertTo-Html -Body $body -Head $head
+
+            # save HTML
+                $html >  $logs/$report
+                invoke-item "bin/Logs/network-report.html"
+        }
 }
     
 
@@ -205,7 +201,9 @@ function Alive{
     cd $workDir
     $loadscreen = get-content bin/visuals/loadscreen | Out-String
     $loadedModules = get-module
-    clear
+    # remove to clean startup
+    #clear
+    
     write-host $loadscreen -ForegroundColor Magenta
 
     if ($PSVersionTable.PSVersion.Major -gt 2)
@@ -239,10 +237,10 @@ function Alive{
 # Program
 function UserInfo ($Id){
 
-	if (!(Get-ADUser -Filter {SamAccountName -eq $Id} )){
+    if (!(Get-ADUser -Filter {SamAccountName -eq $Id} )){
         Write-Host "ID not found " -ForegroundColor Red
         x
-	}else{
+    }else{
         $userLog = [ordered]@{}
         'Processing ' + $Id + '...'
 #--------------GENERAL USER INFO---------------
@@ -268,6 +266,145 @@ function UserInfo ($Id){
   x
 }
 
+function PCInfo($pc){
+
+    $Private:pc = $pc
+    'Processing ' + $Private:pc + '...'
+    $PCLog = @{}
+    $PCLog.'PC-Name' = $Private:pc
+#    $PCLog.''
+# Try an ICMP ping the only way Powershell knows how...
+    $PCLog.ping = if ( $ping.send($Private:pc,500).status -eq "Success"){"Yes"}else{"No"}
+
+    if ( $Private:ips = [System.Net.Dns]::GetHostAddresses($Private:pc) | foreach { $_.IPAddressToString } ) {
+        $PCLog.'IP Address(es) from DNS' = ($Private:ips -join ', ')
+    } else {
+        $PCLog.'IP Address from DNS' = 'Could not resolve'
+    }
+
+# We'll assume no ping reply means it's dead. Try this anyway if -IgnorePing is specified
+    if ($PCLog.ping -eq "Yes"){
+            $PCLog.'WMI Data Collection Attempt' = 'Yes (ping reply or -IgnorePing)'
+# Get various info from the ComputerSystem WMI class
+        if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_ComputerSystem -ErrorAction SilentlyContinue) {
+            $PCLog.'Computer Hardware Manufacturer' = $Private:wmi.Manufacturer
+            $PCLog.'Computer Hardware Model'        = $Private:wmi.Model
+            $PCLog.'Physical Memory in MB'          = ($Private:wmi.TotalPhysicalMemory/1MB).ToString('N')
+            $PCLog.'Logged On User'                 = $Private:wmi.Username
+        }
+        $Private:wmi = $null
+
+# Get the free/total disk space from local disks (DriveType 3)
+        if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_LogicalDisk -Filter 'DriveType=3' -ErrorAction SilentlyContinue) {
+            $Private:wmi | Select 'DeviceID', 'Size', 'FreeSpace' | Foreach {
+                $PCLog."Local disk $($_.DeviceID)" = ('' + ($_.FreeSpace/1MB).ToString('N') + ' MB free of ' + ($_.Size/1MB).ToString('N') + ' MB total space' )
+            }
+        }
+        $Private:wmi = $null
+
+# Get IP addresses from all local network adapters through WMI
+        if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue) {
+
+            $Private:Ips = @{}
+            $Private:wmi | Where { $_.IPAddress -match '\S+' } | Foreach { $Private:Ips.$($_.IPAddress -join ', ') = $_.MACAddress }
+            $Private:counter = 0
+            $Private:Ips.GetEnumerator() | Foreach {
+                $Private:counter++; $PCLog."IP Address $Private:counter" = '' + $_.Name + ' (MAC: ' + $_.Value + ')'
+            }
+        }
+        $Private:wmi = $null
+
+# Get CPU information with WMI
+        if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_Processor -ErrorAction SilentlyContinue) {
+            $Private:wmi | Foreach {
+                $Private:maxClockSpeed     =  $_.MaxClockSpeed
+                $Private:numberOfCores     += $_.NumberOfCores
+                $Private:description       =  $_.Description
+                $Private:numberOfLogProc   += $_.NumberOfLogicalProcessors
+                $Private:socketDesignation =  $_.SocketDesignation
+                $Private:status            =  $_.Status
+                $Private:manufacturer      =  $_.Manufacturer
+                $Private:name              =  $_.Name
+            }
+            $PCLog.'CPU Clock Speed'        = $Private:maxClockSpeed
+            $PCLog.'CPU Cores'              = $Private:numberOfCores
+            $PCLog.'CPU Description'        = $Private:description
+            $PCLog.'CPU Logical Processors' = $Private:numberOfLogProc
+            $PCLog.'CPU Socket'             = $Private:socketDesignation
+            $PCLog.'CPU Status'             = $Private:status
+            $PCLog.'CPU Manufacturer'       = $Private:manufacturer
+            $PCLog.'CPU Name'               = $Private:name -replace '\s+', ' '
+        }
+        $Private:wmi = $null
+
+# Get BIOS info from WMI
+        if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_Bios -ErrorAction SilentlyContinue) {
+            $PCLog.'BIOS Manufacturer' = $Private:wmi.Manufacturer
+            $PCLog.'BIOS Name'         = $Private:wmi.Name
+            $PCLog.'BIOS Version'      = $Private:wmi.Version
+        }
+        $Private:wmi = $null
+
+# Get operating system info from WMI
+        if ($Private:wmi = Get-WmiObject -Computer $Private:pc -Class Win32_OperatingSystem -ErrorAction SilentlyContinue) {
+            $PCLog.'OS Boot Time'     = $Private:wmi.ConvertToDateTime($Private:wmi.LastBootUpTime)
+            $PCLog.'OS System Drive'  = $Private:wmi.SystemDrive
+            $PCLog.'OS System Device' = $Private:wmi.SystemDevice
+            $PCLog.'OS Language     ' = $Private:wmi.OSLanguage
+            $PCLog.'OS Version'       = $Private:wmi.Version
+            $PCLog.'OS Windows dir'   = $Private:wmi.WindowsDirectory
+            $PCLog.'OS Name'          = $Private:wmi.Caption
+            $PCLog.'OS Install Date'  = $Private:wmi.ConvertToDateTime($Private:wmi.InstallDate)
+            $PCLog.'OS Service Pack'  = [string]$Private:wmi.ServicePackMajorVersion + '.' + $Private:wmi.ServicePackMinorVersion
+        }
+
+# Scan for open ports
+        $ports = @{
+            'http'            = '80'  ;
+            'https'           = '443' ;
+            'File shares/RPC' = '139' ;
+            'File shares'     = '445' ;
+            'RDP'             = '3389';
+        }
+
+        foreach ($service in $ports.Keys) {
+
+            $Private:socket = New-Object Net.Sockets.TcpClient
+# Suppress error messages
+            $ErrorActionPreference = 'SilentlyContinue'
+# Try to connect
+            $Private:socket.Connect($Private:pc, $ports.$service)
+# Make error messages visible again
+            if ($Private:socket.Connected) {
+                $PCLog."Port $($ports.$service) ($service)" = 'Open'
+                $Private:socket.Close()
+            } else {
+                $PCLog."Port $($ports.$service) ($service)" = 'Closed or filtered'
+            }
+            $Private:socket = $null
+        }
+    } else {
+        $PCLog.'WMI Data Collected' = 'No (no ping reply and -IgnorePing not specified)'
+    }
+
+# Get data from AD using Quest ActiveRoles Get-ADComputer
+    $Private:pcObject = Get-ADComputer $Private:pc -ErrorAction 'SilentlyContinue'
+    if ($Private:pcObject) {
+        $PCLog.'AD Operating System'         = $Private:pcObject.OSName
+        $PCLog.'AD OU path'                  = $Private:pcObject.CanonicalName
+        $PCLog.'AD LDAP Data'                = $Private:pcObject.DistinguishedName
+        $PCLog.'AD Operating System Version' = $Private:pcObject.OSVersion
+        $PCLog.'AD Service Pack'             = $Private:pcObject.OSServicePack
+        $PCLog.'AD Enabled AD Account'       = $( if ($Private:pcObject.AccountIsDisabled) { 'No' } else { 'Yes' } )
+        $PCLog.'AD Description'              = $Private:pcObject.Description
+    }else {
+        $PCLog.'AD Computer Object Info Collected' = 'No'
+    }
+    $PCLog.GetEnumerator() | Sort-Object 'Name' | Ft -AutoSize -wrap
+    $PCLog.GetEnumerator() | Sort-Object 'Name' | Out-GridView -Title "$Private:pc Information"
+x
+}
+
 function alterName($pc){
 
     $alterNames = netdom computername $pc /enum
@@ -282,17 +419,19 @@ function cleanUp ($pc){
     if (CC($pc)){
 
         Write-progress "Removing Temp Folders from "  "in Progress:"
-		new-PSdrive IA Filesystem \\$pc\C$
-		remove-item IA:\"$"Recycle.Bin\* -recurse -force -verbose
-		Write-host "Cleaned up Recycle.Bin" -ForegroundColor Green
-		if (Test-Path IA:\Windows.old){
+        new-PSdrive IA Filesystem \\$pc\C$
+        remove-item IA:\"$"Recycle.Bin\* -recurse -force -verbose
+        Write-host "Cleaned up Recycle.Bin" -ForegroundColor Green
+        
+        if (Test-Path IA:\Windows.old){
             Remove-Item IA:\Windows.old\ -Recurse -Force -Verbose
-		}else{
-		    Write-host "no Windows.old Folder found" -ForegroundColor Green
-		}
+        }else{
+            Write-host "no Windows.old Folder found" -ForegroundColor Green
+        }
+        
         remove-item IA:\Windows\Temp\* -recurse -Force -Verbose
         write-host "Cleaned up C:\Windows\Temp" -ForegroundColor Green
-      	$UserFolders = get-childItem IA:\Users\ -Directory
+        $UserFolders = get-childItem IA:\Users\ -Directory
 
         foreach ($folder in $UserFolders){
             $path = "IA:\Users\"+$folder
@@ -307,7 +446,7 @@ function cleanUp ($pc){
 
 function remotePS($pc){
     if(CC($pc)){
-        start-process powershell.exe -ArgumentList "-noexit & Enter-PSSession $pc"
+        start-process pwsh -ArgumentList "-noexit && Enter-PSSession $pc"
     }
   x
 }
@@ -326,10 +465,10 @@ function dumpIt ($pc){
 
     for ([int]$i = 1; $i -le $files.length; $i++){
         Write-Host $i $files[$i-1].name
-    }    
+    }
 
     $fileName = Read-Host "What File do you want to send"
- 
+
     if (CC($pc)){
 
         $dest = "\\$pc\C$\Temp"
@@ -338,9 +477,9 @@ function dumpIt ($pc){
         checkDestination($logs)
         New-Item -ItemType Directory -Force -Path $dest/Logs
 
-	    Copy-Item $dump\$filename $dest
+        Copy-Item $dump\$filename $dest
         Write-Host $filename copied to $dest -ForegroundColor Green
-             
+
         Invoke-Command -ComputerName $pc -FilePath $dump/$filename
 
         robocopy.exe $dest\Logs $logs *.* /move
@@ -513,3 +652,6 @@ $line
 }
 
 mainMenu
+
+
+Sent with Proton Mail secure email.
