@@ -652,6 +652,3 @@ $line
 }
 
 mainMenu
-
-
-Sent with Proton Mail secure email.
