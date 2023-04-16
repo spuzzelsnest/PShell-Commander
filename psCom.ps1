@@ -48,7 +48,6 @@
     $dump = "$workDir\bin\_dumpFiles"
     $logs = "$workDir\bin\Logs"
     $report = "network-report.html"
-    $modsFolder = "$workDir/bin/Modules"
 
     $h = get-host
     $c = $h.UI.RawUI
