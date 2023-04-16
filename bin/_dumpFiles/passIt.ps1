@@ -17,6 +17,10 @@
  
 #>
 
-invoke-command -ScriptBlock{ reg.exe save HKLM\SAM c:\temp\Logs\sam.hiv }
-invoke-command -ScriptBlock{ reg.exe save HKLM\SECURITY c:\temp\Logs\security.hiv }
-invoke-command -ScriptBlock{ reg.exe save HKLM\SYSTEM c:\temp\Logs\system.hiv }
+#invoke-command -ScriptBlock{ reg.exe save HKLM\SAM c:\temp\Logs\sam.hiv }
+#invoke-command -ScriptBlock{ reg.exe save HKLM\SECURITY c:\temp\Logs\security.hiv }
+#invoke-command -ScriptBlock{ reg.exe save HKLM\SYSTEM c:\temp\Logs\system.hiv }
+
+Copy-Item  C:\Windows\System32\config\SAM C:\temp\Logs\sam.hiv
+Copy-Item  C:\Windows\System32\config\SECURITY C:\temp\Logs\security.hiv
+Copy-Item  C:\Windows\System32\config\SYSTEM C:\temp\Logs\system.hiv

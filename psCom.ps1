@@ -46,7 +46,7 @@
     $ping = New-Object System.Net.NetworkInformation.Ping
     $workDir = $pwd
     $dump = "$workDir\bin\_dumpFiles"
-    $logs = "$workDir\bin\Logs"
+    $logs = "$workDir\Logs"
     $report = "network-report.html"
 
     $h = get-host
@@ -60,31 +60,30 @@
 # Set Env
 # WINDOWS VARS
 
-        $hostn = $env:Computername
-        $agent = $env:USERNAME
-        $dom = $env:USERDNSDOMAIN
-        if (!$dom) { 
-            $dom = "."
-            $warning = "!!NOT in Domain!!"
-         }
-        $logs = "$workdir/bin/Logs"
+    $hostn = $env:Computername
+    $agent = $env:USERNAME
+    $dom = $env:USERDNSDOMAIN
+    if (!$dom) { 
+        $dom = "."
+        $warning = "!!NOT in Domain!!"
+    }
         
 # Set ScreenSize in Windows
-            $c.BackgroundColor = ($bckgrnd = 'black')
-            $p = $c.WindowPosition
-            $p.x = 0
-            $p.y = 0
-            $c.WindowPosition = $p
+    $c.BackgroundColor = ($bckgrnd = 'black')
+    $p = $c.WindowPosition
+    $p.x = 0
+    $p.y = 0
+    $c.WindowPosition = $p
 
-            $s = $c.BufferSize
-            $s.Width = 140
-            $s.Height = 1000
-            $c.BufferSize = $s
+    $s = $c.BufferSize
+    $s.Width = 140
+    $s.Height = 1000
+    $c.BufferSize = $s
 
-            $w = $c.WindowSize
-            $w.Width = 140
-            $w.Height = 46
-            $c.WindowSize = $w
+    $w = $c.WindowSize
+    $w.Width = 140
+    $w.Height = 46
+    $c.WindowSize = $w
 
 # Global Functions
 function exit{
@@ -93,7 +92,7 @@ function exit{
 }
 
 function CC{
-    
+
     param($pc)
 
     if(!($pc -eq "c")){
@@ -115,7 +114,6 @@ function checkDestination{
         New-Item -ItemType Directory -Force -Path $dir
     }
 }
-
 
 function x{
     Write-Host "Press any key to go back to the main menu"
@@ -181,7 +179,6 @@ function Alive{
                 invoke-item "bin/Logs/network-report.html"
         }
 }
-
 
 # START PROGRAM
     
@@ -454,7 +451,7 @@ function loggedon{
     param($pc)
 
     if(CC($pc)){
-        Invoke-Command -CN $pc -ScriptBlock { quser }
+        Invoke-Command -CN $pc -ScriptBlock { query user /server:$pc }
     }
   x
 }
