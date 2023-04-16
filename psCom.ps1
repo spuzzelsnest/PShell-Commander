@@ -505,7 +505,7 @@ function dumpIt{
 #Menu's
 function ADmenu{
     clear
-    $Tile = "AD Tools"
+    $Title = "AD Tools"
     $Menu = "
             (1)  AD-User Info`n
             (2)  AD-Computer Info`n
@@ -610,7 +610,7 @@ function ADVmenu{
         $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup","&2 Back")
         [int]$defchoice = -1
         $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
-    switch($subAV){ 
+    switch($subAV){
 
         0{
             clear
@@ -649,16 +649,13 @@ function mainMenu {
     $Menu = "`nWelcome $agent                                   PowerShell $psver
 
       Running from $hostn on $dom $warning
-$line
+    $line
 
        What do you want to do:
 
-                           (1)   AD-Tools
-                           
-                           (2)   Network Tools
-                                                      
-                           (3)   Advanced Tools
-                           
+                           (1)   AD-Tools`n
+                           (2)   Network Tools`n       
+                           (3)   Advanced Tools`n
                            (Q)   Exit`n`n"
     $mainMenu = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 ADTools", "&2 NTTools", "&3 ADVTools", "&Quit")
     [int]$defaultchoice = 3
