@@ -181,13 +181,13 @@ function Alive{
 }
 
 # START PROGRAM
-    
+
     cd $workDir
     $loadscreen = Get-Content bin/visuals/loadscreen | Out-String
     $loadedModules = Get-Module
 
     clear
-    
+
     write-host $loadscreen -ForegroundColor Magenta
 
     if ($PSVersionTable.PSVersion.Major -gt 2)
