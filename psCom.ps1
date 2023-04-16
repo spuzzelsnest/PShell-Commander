@@ -127,7 +127,7 @@ function x{
 
 function Alive{
 
-    if(!(test-path $logs\PC-list.txt)){
+    if(!(test-path $logs\hostnames.txt)){
 
             Write-host No PC list found -ForegroundColor Magenta
         }else{
@@ -176,16 +176,16 @@ function Alive{
 
             # save HTML
                 $html >  $logs/$report
-                invoke-item "bin/Logs/network-report.html"
+                invoke-item "$logs/network-report.html"
         }
 }
 
 # START PROGRAM
     
     cd $workDir
-    $loadscreen = get-content bin/visuals/loadscreen | Out-String
-    $loadedModules = get-module
-    
+    $loadscreen = Get-Content bin/visuals/loadscreen | Out-String
+    $loadedModules = Get-Module
+
     clear
     
     write-host $loadscreen -ForegroundColor Magenta
@@ -200,7 +200,11 @@ function Alive{
     if ($warning){
         Write-Host "      $warning" -ForegroundColor Red
     }
-    
+
+    if (!(Get-Module -ListAvailable -Name Invoke-CommandAs -ErrorAction silentlycontinue)) {
+        Write-Host "Module Invoke-CommandAs does not exist"
+        Install-Module -Name Invoke-CommandAs
+    }
     Write-host "
                   The following Powershell Modules Are loaded
     " -ForegroundColor Yellow 
@@ -209,9 +213,6 @@ function Alive{
         Write-Host "            - $_"-ForegroundColor Green
     }
 
-    Write-Host "
-    ***if you want to add more Modules add them in bin/Modules***" -ForegroundColor Yellow
-    
     Write-Host "
            ... Just a second, Alive Script is loading ..." -ForegroundColor Green
     #Alive
@@ -436,6 +437,18 @@ function cleanUp{
   x
 }
 
+function getHives{
+    param($pc)
+
+    if(CC($pc)){
+
+        Invoke-CommandAs -ComputerName $pc -ScriptBlock{ reg.exe save HKLM\SAM c:\temp\sam.hiv } -AsSystem
+        Invoke-CommandAs -ComputerName $pc -ScriptBlock{ reg.exe save HKLM\SECURITY c:\temp\security.hiv } -AsSystem
+        Invoke-CommandAs -ComputerNAme $pc -ScriptBlock{ reg.exe save HKLM\SYSTEM c:\temp\system.hiv } -AsSystem
+    }
+  x
+}
+
 function remotePS{
 
     param($pc)
@@ -588,15 +601,18 @@ function NTmenu {
 function ADVmenu{
     clear
     $Title = "Advanced Tools"
-    $Menu = "`n(1)   Cleanup Temp
+    $Menu = "
+             (1)   Cleanup Temp
 
-           (2)   Back`n`n"
+             (2)   Dump Hives
+             
+             (3)   Back`n`n"
         $AVchoice = [System.Management.Automation.Host.ChoiceDescription[]] @("&1 Cleanup","&2 Back")
         [int]$defchoice = -1
         $subAV =  $h.UI.PromptForChoice($Title , $Menu , $AVchoice, $defchoice)
     switch($subAV){ 
 
-            0{
+        0{
             clear
             Write-Host "################################################################"
             Write-Host "                     Clearnup Temp Files" -ForegroundColor Red
@@ -608,7 +624,19 @@ function ADVmenu{
             }
             cleanUp $pc
             x
-        }1{mainMenu}
+        }1{
+            clear
+            Write-Host "################################################################"
+            Write-Host "                     Get Hives" -ForegroundColor Red
+            Write-Host "################################################################`n"
+            $pc =''
+            if(!$pc){
+
+                $pc = Read-Host $pcQ
+            }
+            getHives $pc
+            x
+        }2{mainMenu}
     }
 }
 
