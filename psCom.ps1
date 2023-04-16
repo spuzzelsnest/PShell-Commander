@@ -87,15 +87,6 @@
             $w.Height = 46
             $c.WindowSize = $w
 
-# MODULES
-# Adding Extras
-#        $mods = get-ChildItem $modsFolder
-#        foreach ($mod in $mods){
-#            if( (Get-Module -Name $mod.name -ErrorAction SilentlyContinue) -eq $null){
-#                Import-Module -Name $mod -ErrorAction SilentlyContinue
-#            }
-#        }
-
 # Global Functions
 function exit{
     clear
