@@ -188,8 +188,8 @@ function Alive{
     cd $workDir
     $loadscreen = get-content bin/visuals/loadscreen | Out-String
     $loadedModules = get-module
-    # remove to clean startup
-    #clear
+    
+    clear
     
     write-host $loadscreen -ForegroundColor Magenta
 
@@ -444,7 +444,7 @@ function remotePS{
     param($pc)
 
     if(CC($pc)){
-        start-process pwsh -ArgumentList "-noexit && Enter-PSSession $pc"
+        start-process powershell.exe -ArgumentList "-noexit & Enter-PSSession $pc"
     }
   x
 }
