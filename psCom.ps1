@@ -92,7 +92,10 @@ function exit{
     $h.ExitNestedPrompt()
 }
 
-function CC ($pc){
+function CC{
+    
+    param($pc)
+
     if(!($pc -eq "c")){
         if(!($(New-Object System.Net.NetworkInformation.Ping).SendPingAsync($pc).result.status -eq 'Succes')){
             Write-host -NoNewline  "PC " $pc  " is NOT online!!! ... Press any key " `n
@@ -104,7 +107,7 @@ function CC ($pc){
     }else{x}
 }
 
-function checkDestination(){
+function checkDestination{
 
     param($dir)
 
@@ -178,7 +181,7 @@ function Alive{
                 invoke-item "bin/Logs/network-report.html"
         }
 }
-    
+
 
 # START PROGRAM
     
@@ -219,7 +222,9 @@ function Alive{
     start-sleep 5
 
 # Program
-function UserInfo ($Id){
+function UserInfo{
+
+    param ($id)
 
     if (!(Get-ADUser -Filter {SamAccountName -eq $Id} )){
         Write-Host "ID not found " -ForegroundColor Red
@@ -250,7 +255,9 @@ function UserInfo ($Id){
   x
 }
 
-function PCInfo($pc){
+function PCInfo{
+
+    param($pc)
 
     $Private:pc = $pc
     'Processing ' + $Private:pc + '...'
@@ -389,7 +396,9 @@ function PCInfo($pc){
 x
 }
 
-function alterName($pc){
+function alterName{
+
+    param($pc)
 
     $alterNames = netdom computername $pc /enum
     $alterNames | %{
@@ -398,8 +407,10 @@ function alterName($pc){
   x
 }
 
-function cleanUp ($pc){
-  
+function cleanUp{
+
+    param($pc)
+
     if (CC($pc)){
 
         Write-progress "Removing Temp Folders from "  "in Progress:"
@@ -428,21 +439,29 @@ function cleanUp ($pc){
   x
 }
 
-function remotePS($pc){
+function remotePS{
+
+    param($pc)
+
     if(CC($pc)){
         start-process pwsh -ArgumentList "-noexit && Enter-PSSession $pc"
     }
   x
 }
 
-function loggedon($pc){
+function loggedon{
+
+    param($pc)
+
     if(CC($pc)){
         Invoke-Command -CN $pc -ScriptBlock { quser }
     }
   x
 }
 
-function dumpIt ($pc){
+function dumpIt{
+
+    param($pc)
 
     Write-Host "You can choose from the following Files or press C to Cancel:`n*For now only Copy pasting the name or rewrite it in the box works*"
     $files = Get-ChildItem $dump | select Name
