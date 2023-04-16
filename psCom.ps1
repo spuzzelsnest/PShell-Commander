@@ -87,20 +87,14 @@
             $w.Height = 46
             $c.WindowSize = $w
 
-  # Exchange
-  # Installed in %ExchangeInstallPath%\bin
-            if( (Get-PSSnapin -Name Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue) -eq $null){
-                    Add-PsSnapin Microsoft.Exchange.Management.PowerShell.E2010 -ErrorAction SilentlyContinue
-            }
-
 # MODULES
 # Adding Extras
-        $mods = get-ChildItem $modsFolder
-        foreach ($mod in $mods){
-            if( (Get-Module -Name $mod.name -ErrorAction SilentlyContinue) -eq $null){
-                Import-Module -Name $mod -ErrorAction SilentlyContinue
-            }
-        }
+#        $mods = get-ChildItem $modsFolder
+#        foreach ($mod in $mods){
+#            if( (Get-Module -Name $mod.name -ErrorAction SilentlyContinue) -eq $null){
+#                Import-Module -Name $mod -ErrorAction SilentlyContinue
+#            }
+#        }
 
 # Global Functions
 function exit{
